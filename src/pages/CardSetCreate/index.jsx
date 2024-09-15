@@ -12,6 +12,7 @@ import {
 import TemplateEdit from "./TemplateEdit.jsx";
 import Preview from "./Preview.jsx";
 import CardContent from "./CardContent.jsx";
+import NewStyleModal from "./NewStyleModal.jsx";
 
 function CardSetCreate() {
   const [cardSetInfo, setCardSetInfo] = useState({
@@ -28,6 +29,17 @@ function CardSetCreate() {
     cardOrder: [],
   });
   const [invalidFields, setInvalidFields] = useState([]);
+  const [showNewStyleModal, setShowNewStyleModal] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState(null);
+
+  const handleStyleChange = (selectedOption) => {
+    if (selectedOption.value === "newStyle") {
+      setShowNewStyleModal(true); // 當選擇「新增樣式…」時顯示 Modal
+    } else {
+      setSelectedStyle(selectedOption); // 設置選擇的風格
+      setCardSetInfo({ ...cardSetInfo, styleId: selectedOption.value });
+    }
+  };
 
   return (
     <Wrapper>
@@ -126,7 +138,26 @@ function CardSetCreate() {
         <InputLabel htmlFor="label">標籤</InputLabel>
         <CreatableSelect id="label" isMulti options={labelOptions} />
         <InputLabel htmlFor="style">風格</InputLabel>
-        <CreatableSelect id="style" options={styleOptions} />
+        <CreatableSelect
+          id="style"
+          options={[
+            ...styleOptions,
+            { value: "newStyle", label: "新增樣式..." },
+          ]}
+          value={selectedStyle}
+          onChange={handleStyleChange}
+        />
+
+        {showNewStyleModal && (
+          <NewStyleModal
+            onClose={() => {
+              setShowNewStyleModal(false);
+              setSelectedStyle(null); // 重置選擇器為未選擇狀態
+              setCardSetInfo({ ...cardSetInfo, styleId: "" });
+            }}
+          />
+        )}
+
         <InputLabel>模板</InputLabel>
         <Select
           options={templateOptions}

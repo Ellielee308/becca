@@ -1,8 +1,6 @@
 export const labelOptions = [
-  { value: "English", label: "English" },
-  { value: "Chinese", label: "中文" },
-  { value: "Korean", label: "Korean" },
-  { value: "Japanese", label: "Japanese" },
+  { value: "韓語", label: "韓語" },
+  { value: "考試複習", label: "考試複習" },
 ];
 
 export const styleOptions = [
@@ -12,10 +10,10 @@ export const styleOptions = [
 ];
 
 export const languageOptions = [
-  { value: "English", label: "English" },
+  { value: "English", label: "英語" },
   { value: "Chinese", label: "中文" },
-  { value: "Korean", label: "Korean" },
-  { value: "Japanese", label: "Japanese" },
+  { value: "Korean", label: "韓語" },
+  { value: "Japanese", label: "日語" },
 ];
 
 export const templateOptions = [
