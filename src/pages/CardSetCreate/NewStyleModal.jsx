@@ -7,7 +7,7 @@ import borderRadiusIcon from "./borderRadius.png";
 import borderThicknessIcon from "./lineThickness.png";
 import borderColorIcon from "./borderColorIcon.png";
 import backgroundColorIcon from "./backgroundColor.png";
-import FlipIcon from "./flipIcon.png";
+import Card from "./Card";
 
 const borderStyleOptions = [
   { value: "none", label: "無" },
@@ -41,7 +41,8 @@ const fontOptions = [
 ];
 
 const animationOptions = [
-  { value: "flip", label: "翻轉" },
+  { value: "verticalFlip", label: "上下翻轉" },
+  { value: "horizontalFlip", label: "左右翻轉" },
   { value: "fade", label: "淡入淡出" },
   { value: "slide", label: "滑動" },
   { value: "zoom", label: "縮放" },
@@ -56,7 +57,7 @@ const NewStyleModal = ({ onClose }) => {
     borderRadius: "",
     backgroundColor: "#FFFFFF",
     fontFamily: "Arial",
-    animation: "flip",
+    animation: "verticalFlip",
   });
 
   const [colorPickerVisible, setColorPickerVisible] = useState({
@@ -213,18 +214,13 @@ const NewStyleModal = ({ onClose }) => {
               options={animationOptions}
               onChange={handleAnimationChange}
               styles={SelectFont}
-              //   value={borderStyleOptions.find(
-              //     (option) => option.value === style.borderStyle
-              //   )} // 設定選擇器的值
+              value={animationOptions.find(
+                (option) => option.value === style.animation
+              )}
               placeholder="動畫效果"
             />
           </StyleOptionsWrapper>
-          <CardPreviewWrapper currentStyle={style}>
-            <FlipIconImage src={FlipIcon} currentStyle={style} />
-            <Card currentStyle={style}>
-              <Text currentStyle={style}>Front Text</Text>
-            </Card>
-          </CardPreviewWrapper>
+          <Card currentStyle={style} />
           {borderWidthPickerVisible && (
             <PickerContainer
               top={pickerPosition.top}
@@ -414,46 +410,6 @@ const SelectFont = {
     zIndex: 1000, // 選單的 z-index，以防止被其他元素遮蓋
   }),
 };
-
-const CardPreviewWrapper = styled.div`
-  align-self: center;
-  display: flex;
-  flex-direction: column;
-  margin: 20px 0px;
-  width: 600px;
-`;
-
-const FlipIconImage = styled.img`
-  align-self: flex-end;
-  height: 24px;
-  width: auto;
-  cursor: pointer;
-  margin-bottom: ${(props) =>
-    props.currentStyle.borderWidth
-      ? `calc(${props.currentStyle.borderWidth} + 8px)`
-      : "8px"};
-`;
-
-const Card = styled.div`
-  height: 600px;
-  height: 400px;
-  outline-style: ${(props) => props.currentStyle.borderStyle};
-  outline-color: ${(props) => props.currentStyle.borderColor};
-  outline-width: ${(props) => props.currentStyle.borderWidth};
-  background-color: ${(props) => props.currentStyle.backgroundColor};
-  border-radius: ${(props) => props.currentStyle.borderRadius};
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1),
-    /* 淺陰影 */ 0 6px 20px rgba(0, 0, 0, 0.15); /* 深陰影 */
-`;
-
-const Text = styled.p`
-  font-size: 60px;
-  font-family: ${(props) => props.currentStyle.fontFamily};
-`;
-
 const PickerContainer = styled.div`
   position: fixed; /* 懸浮在其他元素上 */
   top: ${({ top }) => top}px;
