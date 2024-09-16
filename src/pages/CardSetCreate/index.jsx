@@ -137,7 +137,7 @@ function CardSetCreate() {
         </RadioWrapper>
         <InputLabel htmlFor="label">標籤</InputLabel>
         <CreatableSelect id="label" isMulti options={labelOptions} />
-        <InputLabel htmlFor="style">風格</InputLabel>
+        <InputLabel htmlFor="style">樣式</InputLabel>
         <CreatableSelect
           id="style"
           options={[

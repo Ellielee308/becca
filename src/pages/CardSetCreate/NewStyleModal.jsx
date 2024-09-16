@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import Select from "react-select";
+import { TwitterPicker } from "react-color";
+
 import borderRadiusIcon from "./borderRadius.png";
 import borderThicknessIcon from "./lineThickness.png";
 import borderColorIcon from "./borderColorIcon.png";
@@ -15,6 +17,15 @@ const borderStyleOptions = [
   { value: "double", label: "雙實線" },
 ];
 
+const borderWidthOptions = [
+  { value: "4px", label: "4px" },
+  { value: "8px", label: "8px" },
+  { value: "12px", label: "12px" },
+  { value: "16px", label: "16px" },
+  { value: "24px", label: "24px" },
+  { value: "32px", label: "32px" },
+];
+
 const fontOptions = [
   { value: "Arial", label: "Arial" },
   { value: "Oswald", label: "Oswald" },
@@ -26,6 +37,7 @@ const fontOptions = [
   { value: "Open Sans", label: "Open Sans" },
   { value: "Raleway", label: "Raleway" },
   { value: "Poppins", label: "Poppins" },
+  { value: "Noto Sans TC", label: "思源黑體" },
 ];
 
 const animationOptions = [
@@ -38,31 +50,26 @@ const animationOptions = [
 const NewStyleModal = ({ onClose }) => {
   const [style, setStyle] = useState({
     styleName: "",
-    borderStyle: "",
-    borderColor: "#EDAFB8",
-    borderWidth: "20px",
-    borderRadius: "8px",
-    backgroundColor: "#f0f8ff",
+    borderStyle: "none",
+    borderColor: "",
+    borderWidth: "",
+    borderRadius: "",
+    backgroundColor: "#FFFFFF",
     fontFamily: "Arial",
     animation: "flip",
   });
 
-  // export const defaultCardStyle = {
-  //   styleId: "style123", //自動生成
-  //   userId: "MRvw8pLirv7B0y4zZlnB",
-  //   styleName: "預設模板",
-  //   borderStyle: "solid",
-  //   borderColor: "#EDAFB8",
-  //   borderWidth: "20px",
-  //   borderRadius: "8px",
-  //   backgroundColor: "#FFFAF8",
-  //   fontFamily: "Arial",
-  //   animation: "flip",
-  //   createdAt: "2024-09-03T12:34:56Z",
-  // };
+  const [colorPickerVisible, setColorPickerVisible] = useState({
+    borderColor: false,
+    backgroundColor: false,
+  });
+
+  const [borderWidthPickerVisible, setBorderWidthPickerVisible] =
+    useState(false);
+
+  const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
-    // 當 Modal 打開時，頁面不能滑動
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "auto";
@@ -72,9 +79,43 @@ const NewStyleModal = ({ onClose }) => {
   const handleBorderStyleChange = (selectedOption) => {
     setStyle({ ...style, borderStyle: selectedOption.value });
   };
-  const handleColorChange = (color) => {
-    setStyle({ ...style, borderColor: color.hex });
+
+  // 顏色選擇處理函數
+  const handleColorChange = (color, target) => {
+    setStyle({ ...style, [target]: color.hex });
+    setColorPickerVisible({ ...colorPickerVisible, [target]: false });
   };
+
+  const handleRadiusChange = () => {
+    setStyle({
+      ...style,
+      borderRadius: style.borderRadius === "25px" ? "" : "25px", // 切換選取狀態
+    });
+  };
+
+  const handleOpenBorderWidthMenu = (e) => {
+    if (style.borderStyle === "none") return;
+    e.stopPropagation();
+    const rect = e.target.getBoundingClientRect();
+    setPickerPosition({ top: rect.bottom + 5, left: rect.left - 30 });
+    setBorderWidthPickerVisible((prevState) => !prevState);
+  };
+
+  const handleColorIconClick = (event, target) => {
+    event.stopPropagation();
+    const rect = event.target.getBoundingClientRect();
+    setPickerPosition({ top: rect.bottom + 15, left: rect.left - 10 });
+    setColorPickerVisible((prev) => ({
+      ...prev,
+      [target]: !prev[target],
+    }));
+  };
+
+  const handleBorderWidthChange = (selectedOption) => {
+    if (style.borderStyle === "none") return;
+    setStyle({ ...style, borderWidth: selectedOption.value });
+  };
+
   const handleFontChange = (selectedOption) => {
     setStyle({ ...style, fontFamily: selectedOption.value });
   };
@@ -82,9 +123,37 @@ const NewStyleModal = ({ onClose }) => {
     setStyle({ ...style, animation: selectedOption.value });
   };
 
+  const closeAllPickers = () => {
+    setBorderWidthPickerVisible(false);
+    setColorPickerVisible({
+      borderColor: false,
+      backgroundColor: false,
+    });
+  };
+
+  const defaultBackgroundColors = [
+    "#FFFFFF",
+    "#f0f8ff",
+    "#FAF0E6",
+    "#FAF0E6", // Linen
+    "#FFF5EE", // Seashell
+    "#FFF8DC", // Cornsilk
+    "#F5FFFA", // MintCream
+    "#F0FFF0", // Honeydew
+    "#FFFAF0", // FloralWhite
+    "#F0FFFF", // Azure
+    "#E6E6FA", // Lavender
+    "#FFFACD", // LemonChiffon
+    "#FFEFD5", // PapayaWhip
+    "#E0FFFF", // LightCyan
+    "#FFEBEE", // LightPink
+    "#FFFDE7", // LightYellow
+    "#E8F5E9", // LightGreen
+  ];
+
   return (
-    <ModalWrapper>
-      <ModalContent onClick={(e) => e.stopPropagation()}>
+    <ModalWrapper onClick={closeAllPickers}>
+      <ModalContent onClick={closeAllPickers}>
         <Heading>新增樣式</Heading>
         <CloseIcon onClick={onClose}>×</CloseIcon>
         <Form>
@@ -101,16 +170,33 @@ const NewStyleModal = ({ onClose }) => {
               placeholder="邊框樣式"
             />
             <ColorGroup>
-              <IconWrapper>
+              <RadiusIconWrapper
+                isSelected={style.borderRadius !== ""}
+                onClick={handleRadiusChange}
+              >
                 <IconImage src={borderRadiusIcon} />
-              </IconWrapper>
-              <IconWrapper>
+              </RadiusIconWrapper>
+              <BorderStyleIconWrapper
+                onClick={handleOpenBorderWidthMenu}
+                isDisabled={style.borderStyle === "none"}
+              >
                 <IconImage src={borderThicknessIcon} />
-              </IconWrapper>
-              <IconWrapper>
+              </BorderStyleIconWrapper>
+              <BorderStyleIconWrapper
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleColorIconClick(e, "borderColor");
+                }}
+                isDisabled={style.borderStyle === "none"}
+              >
                 <IconImage src={borderColorIcon} />
-              </IconWrapper>
-              <IconWrapper>
+              </BorderStyleIconWrapper>
+              <IconWrapper
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleColorIconClick(e, "backgroundColor");
+                }}
+              >
                 <IconImage src={backgroundColorIcon} />
               </IconWrapper>
             </ColorGroup>
@@ -118,9 +204,9 @@ const NewStyleModal = ({ onClose }) => {
               options={fontOptions}
               onChange={handleFontChange}
               styles={SelectFont}
-              //   value={borderStyleOptions.find(
-              //     (option) => option.value === style.borderStyle
-              //   )} // 設定選擇器的值
+              value={fontOptions.find(
+                (option) => option.value === style.fontFamily
+              )}
               placeholder="字體"
             />
             <Select
@@ -134,13 +220,50 @@ const NewStyleModal = ({ onClose }) => {
             />
           </StyleOptionsWrapper>
           <CardPreviewWrapper currentStyle={style}>
-            <FlipIconImage src={FlipIcon} />
-            <BorderStyle currentStyle={style}>
-              <Card currentStyle={style}>
-                <Text currentStyle={style}>Front Text</Text>
-              </Card>
-            </BorderStyle>
+            <FlipIconImage src={FlipIcon} currentStyle={style} />
+            <Card currentStyle={style}>
+              <Text currentStyle={style}>Front Text</Text>
+            </Card>
           </CardPreviewWrapper>
+          {borderWidthPickerVisible && (
+            <PickerContainer
+              top={pickerPosition.top}
+              left={pickerPosition.left}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Select
+                options={borderWidthOptions}
+                onChange={handleBorderWidthChange}
+              />
+            </PickerContainer>
+          )}
+          {/* TwitterPicker 懸浮容器 */}
+          {style.borderStyle !== "none" && colorPickerVisible.borderColor && (
+            <PickerContainer
+              top={pickerPosition.top}
+              left={pickerPosition.left}
+            >
+              <TwitterPicker
+                color={style.borderColor}
+                onChange={(color) => handleColorChange(color, "borderColor")}
+              />
+            </PickerContainer>
+          )}
+          {colorPickerVisible.backgroundColor && (
+            <PickerContainer
+              top={pickerPosition.top}
+              left={pickerPosition.left}
+            >
+              <TwitterPicker
+                color={style.backgroundColor}
+                onChange={(color) =>
+                  handleColorChange(color, "backgroundColor")
+                }
+                colors={defaultBackgroundColors}
+              />
+            </PickerContainer>
+          )}
+          <SaveButton type="submit" value="儲存樣式" />
         </Form>
       </ModalContent>
     </ModalWrapper>
@@ -168,7 +291,7 @@ const ModalContent = styled.div`
   border-radius: 8px;
   width: 80%;
   max-width: 800px;
-  height: 750px;
+  height: 850px;
   position: relative;
 `;
 
@@ -247,7 +370,30 @@ const IconWrapper = styled.div`
   align-items: center;
   width: 36px;
   height: 36px;
-  /* border: 1px solid #ffc2c2; */
+  cursor: pointer;
+  position: relative;
+`;
+
+const BorderStyleIconWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  cursor: ${(props) => (props.isDisabled ? "not-allowed" : "pointer")};
+  position: relative;
+`;
+
+const RadiusIconWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  border: ${(props) => (props.isSelected ? "1px solid #c1c0c0" : "none")};
+  border-radius: ${(props) => (props.isSelected ? "5px" : "none")};
+  cursor: pointer;
+  position: relative;
 `;
 
 const IconImage = styled.img`
@@ -282,25 +428,44 @@ const FlipIconImage = styled.img`
   height: 24px;
   width: auto;
   cursor: pointer;
-`;
-
-const BorderStyle = styled.div`
-  width: 600px;
-  height: 400px;
-  background-color: ${(props) => props.currentStyle.borderColor};
-  padding: ${(props) => props.currentStyle.borderWidth};
+  margin-bottom: ${(props) =>
+    props.currentStyle.borderWidth
+      ? `calc(${props.currentStyle.borderWidth} + 8px)`
+      : "8px"};
 `;
 
 const Card = styled.div`
-  height: 100%;
+  height: 600px;
+  height: 400px;
+  outline-style: ${(props) => props.currentStyle.borderStyle};
+  outline-color: ${(props) => props.currentStyle.borderColor};
+  outline-width: ${(props) => props.currentStyle.borderWidth};
   background-color: ${(props) => props.currentStyle.backgroundColor};
   border-radius: ${(props) => props.currentStyle.borderRadius};
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1),
+    /* 淺陰影 */ 0 6px 20px rgba(0, 0, 0, 0.15); /* 深陰影 */
 `;
 
 const Text = styled.p`
   font-size: 60px;
   font-family: ${(props) => props.currentStyle.fontFamily};
+`;
+
+const PickerContainer = styled.div`
+  position: fixed; /* 懸浮在其他元素上 */
+  top: ${({ top }) => top}px;
+  left: ${({ left }) => left}px;
+  z-index: 1000; /* 確保在最上層 */
+`;
+
+const SaveButton = styled.input`
+  margin-top: 30px;
+  width: 100px;
+  height: 40px;
+  font-size: 16px;
+  align-self: center;
+  font-size: "Noto Sans TC", sans-serif;
 `;
