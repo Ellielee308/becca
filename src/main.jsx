@@ -10,23 +10,26 @@ import UserCardsets from "./pages/UserCardsets";
 import CardSetDetail from "./pages/CardSetDetail";
 import CardSetCreate from "./pages/CardSetCreate";
 import CardSetEdit from "./pages/CardSetEdit";
+import { UserProvider } from "./context/userContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route index element={<Home />} />
-          <Route path="user/me/*" element={<Layout />}>
-            <Route path="profile" element={<UserProfile />} />
-            <Route path="analytics" element={<UserAnalytics />} />
-            <Route path="cardsets" element={<UserCardsets />} />
+    <UserProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />}>
+            <Route index element={<Home />} />
+            <Route path="user/me/*" element={<Layout />}>
+              <Route path="profile" element={<UserProfile />} />
+              <Route path="analytics" element={<UserAnalytics />} />
+              <Route path="cardsets" element={<UserCardsets />} />
+            </Route>
+            <Route path="cardset/:cardsetId" element={<CardSetDetail />} />
+            <Route path="cardset/new" element={<CardSetCreate />} />
+            <Route path="cardset/:cardsetId/edit" element={<CardSetEdit />} />
           </Route>
-          <Route path="cardset/:cardsetId" element={<CardSetDetail />} />
-          <Route path="cardset/new" element={<CardSetCreate />} />
-          <Route path="cardset/:cardsetId/edit" element={<CardSetEdit />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </UserProvider>
   </StrictMode>
 );

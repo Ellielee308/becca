@@ -8,7 +8,7 @@ import borderThicknessIcon from "./lineThickness.png";
 import borderColorIcon from "./borderColorIcon.png";
 import backgroundColorIcon from "./backgroundColor.png";
 import Card from "./Card";
-import saveCardStyle from "../../utils/api.js";
+import { saveCardStyle } from "../../utils/api.js";
 
 const borderStyleOptions = [
   { value: "none", label: "無" },
@@ -67,7 +67,7 @@ const defaultBackgroundColors = [
   "#E8F5E9", // LightGreen
 ];
 
-const NewStyleModal = ({ onClose }) => {
+const NewStyleModal = ({ onClose, onStyleAdded }) => {
   const [style, setStyle] = useState({
     styleId: "",
     userId: "MRvw8pLirv7B0y4zZlnB",
@@ -175,6 +175,7 @@ const NewStyleModal = ({ onClose }) => {
       try {
         await saveCardStyle(style);
         alert("儲存樣式成功！");
+        onStyleAdded(style);
         onClose();
       } catch (error) {
         console.error("儲存樣式失敗：", error);

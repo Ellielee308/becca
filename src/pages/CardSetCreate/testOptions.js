@@ -1,14 +1,3 @@
-export const labelOptions = [
-  { value: "韓語", label: "韓語" },
-  { value: "考試複習", label: "考試複習" },
-];
-
-export const styleOptions = [
-  { value: "Blue", label: "Blue" },
-  { value: "Red", label: "Red" },
-  { value: "Yellow", label: "Yellow" },
-];
-
 export const languageOptions = [
   { value: "English", label: "英語" },
   { value: "Chinese", label: "中文" },

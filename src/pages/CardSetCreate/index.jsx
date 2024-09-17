@@ -1,43 +1,102 @@
 import styled from "styled-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useUser } from "../../context/UserContext.jsx";
 import CreatableSelect from "react-select/creatable";
 import Select from "react-select";
-import {
-  labelOptions,
-  styleOptions,
-  languageOptions,
-  templateOptions,
-  defaultCardStyle,
-} from "./testOptions.js";
+import { languageOptions, templateOptions } from "./testOptions.js";
 import TemplateEdit from "./TemplateEdit.jsx";
 import Preview from "./Preview.jsx";
 import CardContent from "./CardContent.jsx";
 import NewStyleModal from "./NewStyleModal.jsx";
+import { getUserCardStyles, addNewLabel } from "../../utils/api.js";
 
 function CardSetCreate() {
+  const { user, updateUser } = useUser();
+  const [labelOptions, setLabelOptions] = useState([]);
+  const [allStyles, setAllStyles] = useState([]);
+  const [styleOptions, setStyleOptions] = useState([]);
+  const [showNewStyleModal, setShowNewStyleModal] = useState(false);
+  const [selectedStyleOption, setSelectedStyleOption] = useState(null);
+  const [selectedStyle, setSelectedStyle] = useState({});
+  const [invalidFields, setInvalidFields] = useState([]);
   const [cardSetInfo, setCardSetInfo] = useState({
     cardSetId: "",
-    userId: "MRvw8pLirv7B0y4zZlnB",
+    userId: user ? user.userId : "",
     title: "",
     description: "",
     purpose: "",
     visibility: "",
-    label: [],
+    labels: [],
     styleId: "",
     fieldTemplateId: "",
     createdAt: "",
     cardOrder: [],
   });
-  const [invalidFields, setInvalidFields] = useState([]);
-  const [showNewStyleModal, setShowNewStyleModal] = useState(false);
-  const [selectedStyle, setSelectedStyle] = useState(null);
+
+  useEffect(() => {
+    console.log("目前的用戶資料：", user);
+    if (user && user.labels) {
+      const labelOptions = user.labels.map((label) => ({
+        value: label,
+        label: label,
+      }));
+      setLabelOptions(labelOptions);
+    }
+    if (user) {
+      const fetchUserCardStyles = async () => {
+        try {
+          const userCardStyles = await getUserCardStyles(user.userId); // 等待異步結果
+          console.log("用戶的卡片樣式：", userCardStyles);
+          setAllStyles(userCardStyles);
+
+          const cardStyleOptions = userCardStyles.map((userCardStyle) => ({
+            value: userCardStyle.styleId,
+            label: userCardStyle.styleName,
+          }));
+          setStyleOptions(cardStyleOptions);
+        } catch (error) {
+          console.error("獲取卡片樣式失敗：", error);
+        }
+      };
+
+      fetchUserCardStyles();
+    }
+  }, [user]);
 
   const handleStyleChange = (selectedOption) => {
     if (selectedOption.value === "newStyle") {
       setShowNewStyleModal(true); // 當選擇「新增樣式…」時顯示 Modal
     } else {
-      setSelectedStyle(selectedOption); // 設置選擇的風格
+      setSelectedStyleOption(selectedOption);
+      const selectedStyleObject = allStyles.find(
+        (style) => style.styleId === selectedOption.value
+      );
+      setSelectedStyle(selectedStyleObject);
       setCardSetInfo({ ...cardSetInfo, styleId: selectedOption.value });
+    }
+  };
+
+  const handleStyleAdded = (newStyle) => {
+    setAllStyles((prevStyles) => [...prevStyles, newStyle]);
+    setStyleOptions((prevOptions) => [
+      ...prevOptions,
+      { value: newStyle.styleId, label: newStyle.styleName },
+    ]);
+  };
+
+  const handleCreateLabel = async (newLabel) => {
+    try {
+      await addNewLabel(newLabel, user.userId);
+      console.log("標籤已新增至資料庫：", newLabel);
+      const newOption = { value: newLabel, label: newLabel };
+      setLabelOptions((prevOptions) => [...prevOptions, newOption]);
+      setCardSetInfo((prevInfo) => ({
+        ...prevInfo,
+        labels: [...prevInfo.labels, newLabel],
+      }));
+      updateUser(user.userId);
+    } catch (error) {
+      console.error("新增標籤失敗：", error);
     }
   };
 
@@ -135,16 +194,32 @@ function CardSetCreate() {
           />
           <InputLabel htmlFor="private">私人</InputLabel>
         </RadioWrapper>
-        <InputLabel htmlFor="label">標籤</InputLabel>
-        <CreatableSelect id="label" isMulti options={labelOptions} />
-        <InputLabel htmlFor="style">樣式</InputLabel>
+        <InputLabel htmlFor="label">標籤 (可複選) </InputLabel>
         <CreatableSelect
+          id="label"
+          isMulti
+          options={labelOptions}
+          value={labelOptions.filter((option) =>
+            cardSetInfo.labels.includes(option.value)
+          )}
+          onChange={(selectedOptions) => {
+            setCardSetInfo({
+              ...cardSetInfo,
+              labels: selectedOptions
+                ? selectedOptions.map((opt) => opt.value)
+                : [],
+            });
+          }}
+          onCreateOption={handleCreateLabel} // 當創建新標籤時調用的處理程序
+        />
+        <InputLabel htmlFor="style">樣式</InputLabel>
+        <Select
           id="style"
           options={[
             ...styleOptions,
             { value: "newStyle", label: "新增樣式..." },
           ]}
-          value={selectedStyle}
+          value={selectedStyleOption}
           onChange={handleStyleChange}
         />
         <InputLabel>模板</InputLabel>
@@ -160,7 +235,7 @@ function CardSetCreate() {
         />
         <TemplateEdit />
         <InputLabel>預覽</InputLabel>
-        <Preview currentStyle={defaultCardStyle} />
+        {selectedStyle.styleId && <Preview currentStyle={selectedStyle} />}
         <InputLabel>字卡內容</InputLabel>
         <CardContent />
         <Submit type="submit" value="儲存" />
@@ -169,9 +244,10 @@ function CardSetCreate() {
         <NewStyleModal
           onClose={() => {
             setShowNewStyleModal(false);
-            setSelectedStyle(null); // 重置選擇器為未選擇狀態
+            setSelectedStyleOption(null); // 重置選擇器為未選擇狀態
             setCardSetInfo({ ...cardSetInfo, styleId: "" });
           }}
+          onStyleAdded={handleStyleAdded}
         />
       )}
     </Wrapper>
