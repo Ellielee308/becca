@@ -8,6 +8,7 @@ import borderThicknessIcon from "./lineThickness.png";
 import borderColorIcon from "./borderColorIcon.png";
 import backgroundColorIcon from "./backgroundColor.png";
 import Card from "./Card";
+import saveCardStyle from "../../utils/api.js";
 
 const borderStyleOptions = [
   { value: "none", label: "無" },
@@ -18,12 +19,12 @@ const borderStyleOptions = [
 ];
 
 const borderWidthOptions = [
+  { value: "2px", label: "2px" },
   { value: "4px", label: "4px" },
   { value: "8px", label: "8px" },
   { value: "12px", label: "12px" },
   { value: "16px", label: "16px" },
   { value: "24px", label: "24px" },
-  { value: "32px", label: "32px" },
 ];
 
 const fontOptions = [
@@ -44,12 +45,32 @@ const animationOptions = [
   { value: "verticalFlip", label: "上下翻轉" },
   { value: "horizontalFlip", label: "左右翻轉" },
   { value: "fade", label: "淡入淡出" },
-  { value: "slide", label: "滑動" },
-  { value: "zoom", label: "縮放" },
+];
+
+const defaultBackgroundColors = [
+  "#FFFFFF",
+  "#f0f8ff",
+  "#FAF0E6",
+  "#FAF0E6", // Linen
+  "#FFF5EE", // Seashell
+  "#FFF8DC", // Cornsilk
+  "#F5FFFA", // MintCream
+  "#F0FFF0", // Honeydew
+  "#FFFAF0", // FloralWhite
+  "#F0FFFF", // Azure
+  "#E6E6FA", // Lavender
+  "#FFFACD", // LemonChiffon
+  "#FFEFD5", // PapayaWhip
+  "#E0FFFF", // LightCyan
+  "#FFEBEE", // LightPink
+  "#FFFDE7", // LightYellow
+  "#E8F5E9", // LightGreen
 ];
 
 const NewStyleModal = ({ onClose }) => {
   const [style, setStyle] = useState({
+    styleId: "",
+    userId: "MRvw8pLirv7B0y4zZlnB",
     styleName: "",
     borderStyle: "none",
     borderColor: "",
@@ -58,7 +79,10 @@ const NewStyleModal = ({ onClose }) => {
     backgroundColor: "#FFFFFF",
     fontFamily: "Arial",
     animation: "verticalFlip",
+    createdAt: "",
   });
+
+  const [invalidStyleName, setInvalidStyleName] = useState(false);
 
   const [colorPickerVisible, setColorPickerVisible] = useState({
     borderColor: false,
@@ -78,7 +102,17 @@ const NewStyleModal = ({ onClose }) => {
   }, []);
 
   const handleBorderStyleChange = (selectedOption) => {
-    setStyle({ ...style, borderStyle: selectedOption.value });
+    const newBorderStyle = selectedOption.value;
+    setStyle({
+      ...style,
+      borderStyle: newBorderStyle,
+      borderWidth:
+        newBorderStyle !== "none"
+          ? style.borderWidth === ""
+            ? "2px"
+            : style.borderWidth
+          : "",
+    });
   };
 
   // 顏色選擇處理函數
@@ -132,34 +166,37 @@ const NewStyleModal = ({ onClose }) => {
     });
   };
 
-  const defaultBackgroundColors = [
-    "#FFFFFF",
-    "#f0f8ff",
-    "#FAF0E6",
-    "#FAF0E6", // Linen
-    "#FFF5EE", // Seashell
-    "#FFF8DC", // Cornsilk
-    "#F5FFFA", // MintCream
-    "#F0FFF0", // Honeydew
-    "#FFFAF0", // FloralWhite
-    "#F0FFFF", // Azure
-    "#E6E6FA", // Lavender
-    "#FFFACD", // LemonChiffon
-    "#FFEFD5", // PapayaWhip
-    "#E0FFFF", // LightCyan
-    "#FFEBEE", // LightPink
-    "#FFFDE7", // LightYellow
-    "#E8F5E9", // LightGreen
-  ];
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (style.styleName === "") {
+      setInvalidStyleName(true);
+      return;
+    } else {
+      try {
+        await saveCardStyle(style);
+        alert("儲存樣式成功！");
+        onClose();
+      } catch (error) {
+        console.error("儲存樣式失敗：", error);
+        alert("儲存樣式失敗，請再試一次。");
+      }
+    }
+  };
 
   return (
     <ModalWrapper onClick={closeAllPickers}>
       <ModalContent onClick={closeAllPickers}>
         <Heading>新增樣式</Heading>
         <CloseIcon onClick={onClose}>×</CloseIcon>
-        <Form>
+        <Form onSubmit={handleSubmit}>
           <Label htmlFor="styleName">樣式名稱</Label>
-          <StyleNameInput id="styleName" />
+          <StyleNameInput
+            id="styleName"
+            onChange={(e) => setStyle({ ...style, styleName: e.target.value })}
+          />
+          {invalidStyleName && (
+            <InvalidFieldNotice>請填入樣式名稱</InvalidFieldNotice>
+          )}
           <StyleOptionsWrapper>
             <Select
               options={borderStyleOptions}
@@ -230,6 +267,9 @@ const NewStyleModal = ({ onClose }) => {
               <Select
                 options={borderWidthOptions}
                 onChange={handleBorderWidthChange}
+                value={borderWidthOptions.find(
+                  (option) => option.value === style.borderWidth
+                )} // 設定選擇器的值
               />
             </PickerContainer>
           )}
@@ -315,6 +355,12 @@ const Label = styled.label`
   font-size: 16px;
 `;
 
+const InvalidFieldNotice = styled.p`
+  font-size: 12px;
+  color: red;
+  margin-top: 5px;
+`;
+
 const StyleNameInput = styled.input`
   margin-top: 8px;
   height: 28px;
@@ -396,7 +442,6 @@ const IconImage = styled.img`
   width: 24px;
   height: 24px;
 `;
-
 const SelectFont = {
   control: (baseStyles, state) => ({
     ...baseStyles,
@@ -404,6 +449,11 @@ const SelectFont = {
   }),
   option: (provided, state) => ({
     ...provided,
+    fontFamily: state.data.value,
+  }),
+  singleValue: (provided, state) => ({
+    ...provided,
+    fontFamily: state.data.value,
   }),
   menu: (provided) => ({
     ...provided,

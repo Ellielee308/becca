@@ -147,17 +147,6 @@ function CardSetCreate() {
           value={selectedStyle}
           onChange={handleStyleChange}
         />
-
-        {showNewStyleModal && (
-          <NewStyleModal
-            onClose={() => {
-              setShowNewStyleModal(false);
-              setSelectedStyle(null); // 重置選擇器為未選擇狀態
-              setCardSetInfo({ ...cardSetInfo, styleId: "" });
-            }}
-          />
-        )}
-
         <InputLabel>模板</InputLabel>
         <Select
           options={templateOptions}
@@ -176,6 +165,15 @@ function CardSetCreate() {
         <CardContent />
         <Submit type="submit" value="儲存" />
       </Form>
+      {showNewStyleModal && (
+        <NewStyleModal
+          onClose={() => {
+            setShowNewStyleModal(false);
+            setSelectedStyle(null); // 重置選擇器為未選擇狀態
+            setCardSetInfo({ ...cardSetInfo, styleId: "" });
+          }}
+        />
+      )}
     </Wrapper>
   );
 }
