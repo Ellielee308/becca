@@ -305,7 +305,7 @@ function CardSetCreate() {
           value={selectedTemplateOption}
           onChange={handleTemplateChange}
         />
-        <TemplateEdit />
+        <TemplateEdit currentTemplate={selectedTemplate} />
         <InputLabel>預覽</InputLabel>
         {selectedStyle.styleName && (
           <Preview
@@ -314,7 +314,7 @@ function CardSetCreate() {
           />
         )}
         <InputLabel>字卡內容</InputLabel>
-        <CardContent />
+        <CardContent currentTemplate={selectedTemplate} />
         <Submit type="submit" value="儲存" />
       </Form>
       {showNewStyleModal && (

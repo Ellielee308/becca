@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { useState } from "react";
-import { defaultCardFieldWithImage } from "./testOptions";
-import imageIcon from "./photo.png";
+import imageIcon from "./images/photo.png";
 
 export default function Preview({ currentStyle, currentTemplate }) {
   const [isFlipped, setIsFlipped] = useState(false);

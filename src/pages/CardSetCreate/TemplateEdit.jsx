@@ -1,18 +1,63 @@
 import styled from "styled-components";
+import imageIcon from "./images/photo.png";
 
-export default function TemplateEdit() {
+export default function TemplateEdit({ currentTemplate }) {
   return (
     <Wrapper>
-      <Heading>Example</Heading>
+      <Heading>模板欄位</Heading>
       <SideWrapper>
         <Side>
           <SideHeading>正面</SideHeading>
-          <TextInput placeholder="單字" disabled />
+          {currentTemplate.templateName ? (
+            currentTemplate.frontFields.map((frontField, index) => {
+              if (frontField.type === "text") {
+                return (
+                  <TextInput
+                    key={index} // 加入唯一的 key 屬性
+                    placeholder={frontField.name} // 使用花括號
+                    disabled
+                  />
+                );
+              } else if (frontField.type === "image") {
+                return (
+                  <ImagePreviewWrapper key={index}>
+                    <ImageFieldName>{frontField.name}</ImageFieldName>
+                    <ImagePreview src={imageIcon} alt={frontField.name} />
+                  </ImagePreviewWrapper>
+                );
+              }
+              return null; // 處理其他類型，防止沒有 return 的情況
+            })
+          ) : (
+            <TextInput placeholder="單字" disabled />
+          )}
         </Side>
         <SideSplit />
         <Side>
           <SideHeading>背面</SideHeading>
-          <TextInput placeholder="字義" disabled />
+          {currentTemplate.templateName ? (
+            currentTemplate.backFields.map((backField, index) => {
+              if (backField.type === "text") {
+                return (
+                  <TextInput
+                    key={index} // 加入唯一的 key 屬性
+                    placeholder={backField.name} // 使用花括號
+                    disabled
+                  />
+                );
+              } else if (backField.type === "image") {
+                return (
+                  <ImagePreviewWrapper key={index}>
+                    <ImageFieldName>{backField.name}</ImageFieldName>
+                    <ImagePreview src={imageIcon} alt={backField.name} />
+                  </ImagePreviewWrapper>
+                );
+              }
+              return null; // 處理其他類型，防止沒有 return 的情況
+            })
+          ) : (
+            <TextInput placeholder="字義" disabled />
+          )}
         </Side>
       </SideWrapper>
     </Wrapper>
@@ -44,6 +89,7 @@ const Side = styled.div`
   padding: 0px 30px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
   flex: 1;
 `;
 
@@ -60,4 +106,21 @@ const SideHeading = styled.p`
 const TextInput = styled.input`
   height: 30px;
   border: solid 1px #c1c0c0;
+`;
+
+const ImagePreviewWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const ImageFieldName = styled.p`
+  font-size: 14px;
+  color: #636262;
+`;
+
+const ImagePreview = styled.img`
+  height: 40px;
+  width: auto;
+  margin: 0 auto;
 `;

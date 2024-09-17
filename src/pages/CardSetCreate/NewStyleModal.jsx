@@ -1,12 +1,12 @@
 import styled from "styled-components";
-import { useEffect, useState } from "react";
 import Select from "react-select";
+import { useEffect, useState } from "react";
 import { TwitterPicker } from "react-color";
 
-import borderRadiusIcon from "./borderRadius.png";
-import borderThicknessIcon from "./lineThickness.png";
-import borderColorIcon from "./borderColorIcon.png";
-import backgroundColorIcon from "./backgroundColor.png";
+import borderRadiusIcon from "./images/borderRadius.png";
+import borderThicknessIcon from "./images/lineThickness.png";
+import borderColorIcon from "./images/borderColorIcon.png";
+import backgroundColorIcon from "./images/backgroundColor.png";
 import Card from "./Card";
 import { saveCardStyle } from "../../utils/api.js";
 
