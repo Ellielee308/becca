@@ -1,7 +1,9 @@
 import styled from "styled-components";
 import { useState } from "react";
+import { defaultCardFieldWithImage } from "./testOptions";
+import imageIcon from "./photo.png";
 
-export default function Preview({ currentStyle }) {
+export default function Preview({ currentStyle, currentTemplate }) {
   const [isFlipped, setIsFlipped] = useState(false);
 
   const handleFlip = () => {
@@ -11,17 +13,42 @@ export default function Preview({ currentStyle }) {
     <Wrapper onClick={handleFlip}>
       <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
         <FrontCard isFlipped={isFlipped} currentStyle={currentStyle}>
-          <h1>Front</h1>
-          <p>點擊翻面</p>
+          {currentTemplate.frontFields.map((field, index) => (
+            <FieldContainer
+              key={index}
+              style={field.style}
+              position={field.position}
+            >
+              {renderFieldContent(field)}
+            </FieldContainer>
+          ))}
         </FrontCard>
         <BackCard isFlipped={isFlipped} currentStyle={currentStyle}>
-          <h1>Back</h1>
-          <p>點擊翻面</p>
+          {currentTemplate.backFields.map((field, index) => (
+            <FieldContainer
+              key={index}
+              style={field.style}
+              position={field.position}
+            >
+              {renderFieldContent(field)}
+            </FieldContainer>
+          ))}
         </BackCard>
       </FlipCard>
     </Wrapper>
   );
 }
+
+const renderFieldContent = (field) => {
+  switch (field.type) {
+    case "text":
+      return field.name; // 渲染文字內容
+    case "image":
+      return <Image src={imageIcon} alt={field.name} style={field.style} />;
+    default:
+      return null; // 如果類型未定義，不渲染任何內容
+  }
+};
 
 const Wrapper = styled.div`
   align-self: center;
@@ -133,4 +160,21 @@ const BackCard = styled.div`
       ? "opacity 0.5s ease-in-out"
       : "none"};
   z-index: ${(props) => (props.isFlipped ? 3000 : 0)};
+`;
+
+const FieldContainer = styled.div`
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  ${(props) => props.style && { ...props.style }}; /* 使用插入的樣式 */
+  left: ${(props) => props.position?.x || "0"}px;
+  top: ${(props) => props.position?.y || "0"}px;
+`;
+
+// 用於顯示圖片的樣式
+const Image = styled.img`
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: ${(props) => props.style?.objectFit || "cover"};
 `;

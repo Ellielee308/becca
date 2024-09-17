@@ -3,12 +3,16 @@ import { useEffect, useState } from "react";
 import { useUser } from "../../context/UserContext.jsx";
 import CreatableSelect from "react-select/creatable";
 import Select from "react-select";
-import { languageOptions, templateOptions } from "./testOptions.js";
+import { languageOptions } from "./testOptions.js";
 import TemplateEdit from "./TemplateEdit.jsx";
 import Preview from "./Preview.jsx";
 import CardContent from "./CardContent.jsx";
 import NewStyleModal from "./NewStyleModal.jsx";
-import { getUserCardStyles, addNewLabel } from "../../utils/api.js";
+import {
+  getUserCardStyles,
+  addNewLabel,
+  getUserCardTemplates,
+} from "../../utils/api.js";
 
 function CardSetCreate() {
   const { user, updateUser } = useUser();
@@ -18,6 +22,10 @@ function CardSetCreate() {
   const [showNewStyleModal, setShowNewStyleModal] = useState(false);
   const [selectedStyleOption, setSelectedStyleOption] = useState(null);
   const [selectedStyle, setSelectedStyle] = useState({});
+  const [allTemplates, setAllTemplates] = useState([]);
+  const [templateOptions, setTemplateOptions] = useState([]);
+  const [selectedTemplateOption, setSelectedTemplateOption] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState({});
   const [invalidFields, setInvalidFields] = useState([]);
   const [cardSetInfo, setCardSetInfo] = useState({
     cardSetId: "",
@@ -58,8 +66,67 @@ function CardSetCreate() {
           console.error("獲取卡片樣式失敗：", error);
         }
       };
-
       fetchUserCardStyles();
+      const fetchUserCardTemplates = async () => {
+        try {
+          const userCardTemplates = await getUserCardTemplates(user.userId);
+          console.log("用戶的卡片模板(含預設)：", userCardTemplates);
+          setAllTemplates(userCardTemplates);
+
+          // 定義模板的排序順序
+          const templateOrder = [
+            "XWQvUaViTDuaBkbOu4Xp", // 預設模板
+            "8bhVw68E1aFe0Q57Y9WZ", // 正面附例句
+            "OmCVCwZgqjJ3Ntny8jWI", // 背面附圖片
+          ];
+
+          const cardTemplateOptions = userCardTemplates.map(
+            (userCardTemplate) => ({
+              value: userCardTemplate.fieldTemplateId,
+              label: userCardTemplate.templateName,
+            })
+          );
+
+          // 根據定義的順序排序選項
+          cardTemplateOptions.sort((a, b) => {
+            const orderA = templateOrder.indexOf(a.value);
+            const orderB = templateOrder.indexOf(b.value);
+
+            // 如果都在排序順序中，則按順序排
+            if (orderA !== -1 && orderB !== -1) {
+              return orderA - orderB;
+            }
+            // 如果只有一個在排序順序中，則讓它排在前面
+            if (orderA !== -1) return -1;
+            if (orderB !== -1) return 1;
+            // 如果都不在排序順序中，保持原有順序
+            return 0;
+          });
+
+          setTemplateOptions(cardTemplateOptions);
+          const defaultTemplate = cardTemplateOptions.find(
+            (option) => option.value === "XWQvUaViTDuaBkbOu4Xp" //預設模板
+          );
+
+          // 設置預設模板為選中的模板
+          if (defaultTemplate) {
+            setSelectedTemplateOption(defaultTemplate);
+            setSelectedTemplate(
+              userCardTemplates.find(
+                (template) =>
+                  template.fieldTemplateId === "XWQvUaViTDuaBkbOu4Xp"
+              )
+            );
+            setCardSetInfo((prevInfo) => ({
+              ...prevInfo,
+              fieldTemplateId: "XWQvUaViTDuaBkbOu4Xp",
+            }));
+          }
+        } catch (error) {
+          console.error("獲取卡片模板失敗：", error);
+        }
+      };
+      fetchUserCardTemplates();
     }
   }, [user]);
 
@@ -75,6 +142,7 @@ function CardSetCreate() {
       setCardSetInfo({ ...cardSetInfo, styleId: selectedOption.value });
     }
   };
+  //TODO:儲存的時候還是要存id
 
   const handleStyleAdded = (newStyle) => {
     setAllStyles((prevStyles) => [...prevStyles, newStyle]);
@@ -98,6 +166,15 @@ function CardSetCreate() {
     } catch (error) {
       console.error("新增標籤失敗：", error);
     }
+  };
+
+  const handleTemplateChange = (selectedOption) => {
+    setSelectedTemplateOption(selectedOption);
+    const selectedTemplateObject = allTemplates.find(
+      (template) => template.templateName === selectedOption.label
+    );
+    setSelectedTemplate(selectedTemplateObject);
+    setCardSetInfo({ ...cardSetInfo, fieldTemplateId: selectedOption.value });
   };
 
   return (
@@ -225,17 +302,17 @@ function CardSetCreate() {
         <InputLabel>模板</InputLabel>
         <Select
           options={templateOptions}
-          defaultValue={templateOptions[0]}
-          onChange={(selectedOption) =>
-            setCardSetInfo({
-              ...cardSetInfo,
-              fieldTemplateId: selectedOption.value,
-            })
-          }
+          value={selectedTemplateOption}
+          onChange={handleTemplateChange}
         />
         <TemplateEdit />
         <InputLabel>預覽</InputLabel>
-        {selectedStyle.styleName && <Preview currentStyle={selectedStyle} />}
+        {selectedStyle.styleName && (
+          <Preview
+            currentStyle={selectedStyle}
+            currentTemplate={selectedTemplate}
+          />
+        )}
         <InputLabel>字卡內容</InputLabel>
         <CardContent />
         <Submit type="submit" value="儲存" />

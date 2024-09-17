@@ -69,3 +69,23 @@ export async function addNewLabel(newLabel, userId) {
     console.error("無法更新標籤：", error);
   }
 }
+
+export async function getUserCardTemplates(userId) {
+  const cardFields = [];
+  const cardFieldsRef = collection(db, "cardFields");
+
+  try {
+    // 查詢指定 userId 的模板（包括預設的 userId: "default"）
+    const q = query(cardFieldsRef, where("userId", "in", [userId, "default"]));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+      cardFields.push(doc.data());
+    });
+
+    return cardFields;
+  } catch (error) {
+    console.error("獲取卡片模板失敗：", error);
+    return [];
+  }
+}
