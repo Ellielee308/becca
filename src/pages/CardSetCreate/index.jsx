@@ -69,7 +69,7 @@ function CardSetCreate() {
     } else {
       setSelectedStyleOption(selectedOption);
       const selectedStyleObject = allStyles.find(
-        (style) => style.styleId === selectedOption.value
+        (style) => style.styleName === selectedOption.label
       );
       setSelectedStyle(selectedStyleObject);
       setCardSetInfo({ ...cardSetInfo, styleId: selectedOption.value });
@@ -235,7 +235,7 @@ function CardSetCreate() {
         />
         <TemplateEdit />
         <InputLabel>預覽</InputLabel>
-        {selectedStyle.styleId && <Preview currentStyle={selectedStyle} />}
+        {selectedStyle.styleName && <Preview currentStyle={selectedStyle} />}
         <InputLabel>字卡內容</InputLabel>
         <CardContent />
         <Submit type="submit" value="儲存" />
