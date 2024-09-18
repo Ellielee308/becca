@@ -2,6 +2,7 @@ import styled from "styled-components";
 import Select from "react-select";
 import { useEffect, useState } from "react";
 import { TwitterPicker } from "react-color";
+import imageIcon from "./images/photo.png";
 
 const NewTemplateModal = ({ currentStyle, onClose }) => {
   const [invalidTemplateName, setInvalidTemplateName] = useState(false);
@@ -14,7 +15,7 @@ const NewTemplateModal = ({ currentStyle, onClose }) => {
         name: "Front Text",
         type: "text",
         required: true, //驗證時是否為必填項
-        position: { x: 50, y: 100 },
+        position: { x: 150, y: 100 },
         style: {
           width: "300px", //容器寬度
           height: "200px", //容器高度
@@ -30,7 +31,7 @@ const NewTemplateModal = ({ currentStyle, onClose }) => {
         name: "Back Text",
         type: "text",
         required: true, //驗證時是否為必填項
-        position: { x: 50, y: 100 },
+        position: { x: 150, y: 100 },
         style: {
           width: "300px", //容器寬度
           height: "200px", //容器高度
@@ -45,12 +46,6 @@ const NewTemplateModal = ({ currentStyle, onClose }) => {
   });
 
   const [isFlipped, setIsFlipped] = useState(false);
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
   const handleFlip = () => {
     setIsFlipped((prevState) => !prevState);
   };
@@ -83,7 +78,26 @@ const NewTemplateModal = ({ currentStyle, onClose }) => {
                 {newTemplateData.frontFields.map((frontField, index) => (
                   <>
                     <p key={`no-${index}`}>{index + 1}</p>
-                    <p key={`name-${index}`}>{frontField.name}</p>
+                    <FieldNameInput
+                      type="text"
+                      value={frontField.name}
+                      key={`name-${index}`}
+                      onChange={(e) => {
+                        // 更新 frontFields 的對應索引的 name
+                        const updatedFrontFields =
+                          newTemplateData.frontFields.map((field, fieldIndex) =>
+                            fieldIndex === index
+                              ? { ...field, name: e.target.value }
+                              : field
+                          );
+
+                        // 更新 newTemplateData 狀態
+                        setNewTemplateData({
+                          ...newTemplateData,
+                          frontFields: updatedFrontFields,
+                        });
+                      }}
+                    />
                     <p key={`type-${index}`}>
                       {frontField.type === "text" ? "文字" : "圖片"}
                     </p>
@@ -105,7 +119,26 @@ const NewTemplateModal = ({ currentStyle, onClose }) => {
                 {newTemplateData.backFields.map((backField, index) => (
                   <>
                     <p key={`no-${index}`}>{index + 1}</p>
-                    <p key={`name-${index}`}>{backField.name}</p>
+                    <FieldNameInput
+                      type="text"
+                      value={backField.name}
+                      key={`name-${index}`}
+                      onChange={(e) => {
+                        // 更新 backField 的對應索引的 name
+                        const updatedBackFields =
+                          newTemplateData.backFields.map((field, fieldIndex) =>
+                            fieldIndex === index
+                              ? { ...field, name: e.target.value }
+                              : field
+                          );
+
+                        // 更新 newTemplateData 狀態
+                        setNewTemplateData({
+                          ...newTemplateData,
+                          backFields: updatedBackFields,
+                        });
+                      }}
+                    />
                     <p key={`type-${index}`}>
                       {backField.type === "text" ? "文字" : "圖片"}
                     </p>
@@ -118,16 +151,31 @@ const NewTemplateModal = ({ currentStyle, onClose }) => {
             </SideField>
           </SideFieldList>
           <Label>預覽</Label>
+          <FlipButton onClick={handleFlip}>翻轉</FlipButton>
           <CardWrapper>
             <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
-              <FrontCard
-                isFlipped={isFlipped}
-                currentStyle={currentStyle}
-              ></FrontCard>
-              <BackCard
-                isFlipped={isFlipped}
-                currentStyle={currentStyle}
-              ></BackCard>
+              <FrontCard isFlipped={isFlipped} currentStyle={currentStyle}>
+                {newTemplateData.frontFields.map((field, index) => (
+                  <FieldContainer
+                    key={index}
+                    style={field.style}
+                    position={field.position}
+                  >
+                    {renderFieldContent(field)}
+                  </FieldContainer>
+                ))}
+              </FrontCard>
+              <BackCard isFlipped={isFlipped} currentStyle={currentStyle}>
+                {newTemplateData.backFields.map((field, index) => (
+                  <FieldContainer
+                    key={index}
+                    style={field.style}
+                    position={field.position}
+                  >
+                    {renderFieldContent(field)}
+                  </FieldContainer>
+                ))}
+              </BackCard>
             </FlipCard>
           </CardWrapper>
         </EditAreaWrapper>
@@ -138,6 +186,17 @@ const NewTemplateModal = ({ currentStyle, onClose }) => {
 };
 
 export default NewTemplateModal;
+
+const renderFieldContent = (field) => {
+  switch (field.type) {
+    case "text":
+      return field.name; // 渲染文字內容
+    case "image":
+      return <Image src={imageIcon} alt={field.name} style={field.style} />;
+    default:
+      return null; // 如果類型未定義，不渲染任何內容
+  }
+};
 
 const Label = styled.label`
   font-size: 16px;
@@ -180,8 +239,9 @@ const ModalContent = styled.div`
   border-radius: 8px;
   width: 80%;
   max-width: 800px;
-  height: 900px;
+  height: 90%;
   position: relative;
+  overflow-y: auto;
 `;
 
 const Heading = styled.h3`
@@ -202,7 +262,6 @@ const CloseIcon = styled.p`
 const EditAreaWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 `;
 
 const CardWrapper = styled.div`
@@ -344,12 +403,29 @@ const SideFieldListSplit = styled.div`
   margin-right: 5px;
 `;
 
+const FlipButton = styled.div`
+  background-color: rgb(221, 216, 216);
+  margin-top: 15px;
+  width: 60px;
+  height: 25px;
+  border-radius: 4px;
+  line-height: 25px;
+  text-align: center;
+  cursor: pointer;
+  align-self: flex-end;
+`;
+
 const SaveButton = styled.div`
   background-color: #ddd8d8;
-  width: fit-content;
+  width: 120px;
   height: 25px;
   line-height: 25px;
+  border-radius: 4px;
   text-align: center;
   margin: 0 auto;
   cursor: pointer;
+`;
+
+const FieldNameInput = styled.input`
+  width: 95%;
 `;

@@ -328,8 +328,9 @@ const ModalContent = styled.div`
   border-radius: 8px;
   width: 80%;
   max-width: 800px;
-  height: 850px;
+  height: 90%;
   position: relative;
+  overflow-y: auto;
 `;
 
 const Heading = styled.h3`
