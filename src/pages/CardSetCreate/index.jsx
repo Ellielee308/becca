@@ -8,6 +8,7 @@ import TemplateEdit from "./TemplateEdit.jsx";
 import Preview from "./Preview.jsx";
 import CardContent from "./CardContent.jsx";
 import NewStyleModal from "./NewStyleModal.jsx";
+import NewTemplateModal from "./NewTemplateModal.jsx";
 import {
   getUserCardStyles,
   addNewLabel,
@@ -26,6 +27,7 @@ function CardSetCreate() {
   const [templateOptions, setTemplateOptions] = useState([]);
   const [selectedTemplateOption, setSelectedTemplateOption] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState({});
+  const [showNewTemplateModal, setShowNewTemplateModal] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]);
   const [cardSetInfo, setCardSetInfo] = useState({
     cardSetId: "",
@@ -169,12 +171,21 @@ function CardSetCreate() {
   };
 
   const handleTemplateChange = (selectedOption) => {
-    setSelectedTemplateOption(selectedOption);
-    const selectedTemplateObject = allTemplates.find(
-      (template) => template.templateName === selectedOption.label
-    );
-    setSelectedTemplate(selectedTemplateObject);
-    setCardSetInfo({ ...cardSetInfo, fieldTemplateId: selectedOption.value });
+    if (selectedOption.value === "newTemplate") {
+      if (!selectedStyle.styleName) {
+        alert("請先選擇樣式！");
+        return;
+      } else {
+        setShowNewTemplateModal(true); // 當選擇「新增樣式…」時顯示 Modal}
+      }
+    } else {
+      setSelectedTemplateOption(selectedOption);
+      const selectedTemplateObject = allTemplates.find(
+        (template) => template.templateName === selectedOption.label
+      );
+      setSelectedTemplate(selectedTemplateObject);
+      setCardSetInfo({ ...cardSetInfo, fieldTemplateId: selectedOption.value });
+    }
   };
 
   return (
@@ -289,9 +300,8 @@ function CardSetCreate() {
           }}
           onCreateOption={handleCreateLabel} // 當創建新標籤時調用的處理程序
         />
-        <InputLabel htmlFor="style">樣式</InputLabel>
+        <InputLabel>樣式</InputLabel>
         <Select
-          id="style"
           options={[
             ...styleOptions,
             { value: "newStyle", label: "新增樣式..." },
@@ -301,7 +311,10 @@ function CardSetCreate() {
         />
         <InputLabel>模板</InputLabel>
         <Select
-          options={templateOptions}
+          options={[
+            ...templateOptions,
+            { value: "newTemplate", label: "新增模板..." },
+          ]}
           value={selectedTemplateOption}
           onChange={handleTemplateChange}
         />
@@ -322,9 +335,33 @@ function CardSetCreate() {
           onClose={() => {
             setShowNewStyleModal(false);
             setSelectedStyleOption(null); // 重置選擇器為未選擇狀態
+            setSelectedStyle({});
             setCardSetInfo({ ...cardSetInfo, styleId: "" });
           }}
           onStyleAdded={handleStyleAdded}
+        />
+      )}
+      {showNewTemplateModal && (
+        <NewTemplateModal
+          currentStyle={selectedStyle}
+          onClose={() => {
+            setShowNewTemplateModal(false);
+            const defaultTemplate = templateOptions.find(
+              (option) => option.value === "XWQvUaViTDuaBkbOu4Xp" //預設模板
+            );
+
+            // 設置預設模板為選中的模板
+            if (defaultTemplate) {
+              setSelectedTemplateOption(defaultTemplate);
+              setSelectedTemplate(
+                allTemplates.find(
+                  (template) =>
+                    template.fieldTemplateId === "XWQvUaViTDuaBkbOu4Xp"
+                )
+              );
+            }
+            setCardSetInfo({ ...cardSetInfo, fieldTemplateId: "" });
+          }}
         />
       )}
     </Wrapper>

@@ -41,9 +41,9 @@ export default function CardContent({ currentTemplate }) {
           <TitleBar>
             <Heading>{cardIndex + 1}</Heading>
             <ButtonGroupWrapper>
-              <ButtonIconContainer>
+              {/* <ButtonIconContainer>
                 <DragIcon />
-              </ButtonIconContainer>
+              </ButtonIconContainer> */}
               <ButtonIconContainer onClick={() => handleDeleteCard(cardIndex)}>
                 <TrashIcon />
               </ButtonIconContainer>
@@ -62,7 +62,7 @@ export default function CardContent({ currentTemplate }) {
                     return (
                       <ImageUploadWrapper key={index}>
                         <ImageFieldName>{frontField.name}</ImageFieldName>
-                        <ImageInput type="file" />
+                        <ImageInput type="file" accept="image/*" />
                       </ImageUploadWrapper>
                     );
                   }
@@ -85,7 +85,7 @@ export default function CardContent({ currentTemplate }) {
                     return (
                       <ImageUploadWrapper key={index}>
                         <ImageFieldName>{backField.name}</ImageFieldName>
-                        <ImageInput type="file" />
+                        <ImageInput type="file" accept="image/*" />
                       </ImageUploadWrapper>
                     );
                   }
