@@ -4,7 +4,7 @@ import { useUser } from "../../context/UserContext.jsx";
 import CreatableSelect from "react-select/creatable";
 import Select from "react-select";
 import { languageOptions } from "./testOptions.js";
-import TemplateEdit from "./TemplateEdit.jsx";
+import TemplatePreview from "./TemplatePreview.jsx";
 import Preview from "./Preview.jsx";
 import CardContent from "./CardContent.jsx";
 import NewStyleModal from "./NewStyleModal.jsx";
@@ -199,26 +199,65 @@ function CardSetCreate() {
     ]);
   };
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    let newInvalidFields = [];
+
+    if (cardSetInfo.title === "") {
+      newInvalidFields.push("title");
+    }
+    if (cardSetInfo.purpose === "") {
+      newInvalidFields.push("purpose");
+    }
+    if (cardSetInfo.visibility === "") {
+      newInvalidFields.push("visibility");
+    }
+    if (cardSetInfo.styleId === "") {
+      newInvalidFields.push("styleId");
+    }
+    if (cardSetInfo.fieldTemplateId === "") {
+      newInvalidFields.push("fieldTemplateId");
+    }
+    if (cardSetInfo.purpose === "languageLearning") {
+      if (!cardSetInfo.learningLanguage)
+        newInvalidFields.push("learningLanguage");
+      if (!cardSetInfo.interfaceLanguage)
+        newInvalidFields.push("interfaceLanguage");
+    }
+
+    setInvalidFields(newInvalidFields);
+    if (newInvalidFields.length > 0) return;
+
+    // 在此執行其他操作
+  };
+
   return (
     <Wrapper>
       <Heading>新增卡牌組</Heading>
-      <Form>
-        <InputLabel htmlFor="title">標題</InputLabel>
+      <Form onSubmit={handleSubmit}>
+        <InputLabel>
+          標題<RequiredNotice>*</RequiredNotice>
+        </InputLabel>
         <Input
           type="text"
-          id="title"
           onChange={(e) =>
             setCardSetInfo({ ...cardSetInfo, title: e.target.value })
           }
+          isInvalid={invalidFields.includes("title")}
         />
-        <InputLabel htmlFor="description">說明</InputLabel>
+        <InputLabel htmlFor="description">簡介</InputLabel>
         <Textarea
           id="description"
           onChange={(e) =>
             setCardSetInfo({ ...cardSetInfo, description: e.target.value })
           }
         />
-        <InputLabel>目的</InputLabel>
+        <InputLabel>
+          目的
+          <RequiredNotice>
+            {`*${invalidFields.includes("purpose") ? " 必選項" : ""}`}
+          </RequiredNotice>
+        </InputLabel>
         <RadioWrapper>
           <InputRadio
             type="radio"
@@ -238,15 +277,21 @@ function CardSetCreate() {
             value="others"
             onChange={(e) => {
               if (e.target.checked)
-                setCardSetInfo({ ...cardSetInfo, purpose: "others" });
+                setCardSetInfo({
+                  ...cardSetInfo,
+                  purpose: "others",
+                  learningLanguage: null,
+                  interfaceLanguage: null,
+                });
             }}
           />
           <InputLabel htmlFor="others">其他</InputLabel>
         </RadioWrapper>
-        {/* TODO: 另外處理切換成「其他」，語言要清空 */}
         {cardSetInfo.purpose === "languageLearning" && (
           <>
-            <InputLabel htmlFor="label">你想要學習的語言是什麼？</InputLabel>
+            <InputLabel htmlFor="label">
+              你想要學習的語言是什麼？<RequiredNotice>*</RequiredNotice>
+            </InputLabel>
             <Select
               options={languageOptions}
               onChange={(selectedOption) =>
@@ -255,8 +300,11 @@ function CardSetCreate() {
                   learningLanguage: selectedOption.value,
                 })
               }
+              styles={selectStyles(invalidFields.includes("learningLanguage"))}
             />
-            <InputLabel htmlFor="label">你想要以什麼語言學習呢？</InputLabel>
+            <InputLabel htmlFor="label">
+              你想要以什麼語言學習呢？<RequiredNotice>*</RequiredNotice>
+            </InputLabel>
             <Select
               options={languageOptions}
               onChange={(selectedOption) =>
@@ -265,10 +313,16 @@ function CardSetCreate() {
                   interfaceLanguage: selectedOption.value,
                 })
               }
+              styles={selectStyles(invalidFields.includes("interfaceLanguage"))}
             />
           </>
         )}
-        <InputLabel>隱私</InputLabel>
+        <InputLabel>
+          隱私
+          <RequiredNotice>
+            {`*${invalidFields.includes("visibility") ? " 必選項" : ""}`}
+          </RequiredNotice>
+        </InputLabel>
         <RadioWrapper>
           <InputRadio
             type="radio"
@@ -279,6 +333,7 @@ function CardSetCreate() {
               if (e.target.checked)
                 setCardSetInfo({ ...cardSetInfo, visibility: "public" });
             }}
+            isInvalid={invalidFields.includes("visibility")}
           />
           <InputLabel htmlFor="public">公開</InputLabel>
           <InputRadio
@@ -290,6 +345,7 @@ function CardSetCreate() {
               if (e.target.checked)
                 setCardSetInfo({ ...cardSetInfo, visibility: "private" });
             }}
+            isInvalid={invalidFields.includes("visibility")}
           />
           <InputLabel htmlFor="private">私人</InputLabel>
         </RadioWrapper>
@@ -311,7 +367,9 @@ function CardSetCreate() {
           }}
           onCreateOption={handleCreateLabel} // 當創建新標籤時調用的處理程序
         />
-        <InputLabel>樣式</InputLabel>
+        <InputLabel>
+          樣式<RequiredNotice>*</RequiredNotice>
+        </InputLabel>
         <Select
           options={[
             ...styleOptions,
@@ -319,8 +377,11 @@ function CardSetCreate() {
           ]}
           value={selectedStyleOption}
           onChange={handleStyleChange}
+          styles={selectStyles(invalidFields.includes("styleId"))}
         />
-        <InputLabel>模板</InputLabel>
+        <InputLabel>
+          模板<RequiredNotice>*</RequiredNotice>
+        </InputLabel>
         <Select
           options={[
             ...templateOptions,
@@ -328,8 +389,9 @@ function CardSetCreate() {
           ]}
           value={selectedTemplateOption}
           onChange={handleTemplateChange}
+          styles={selectStyles(invalidFields.includes("fieldTemplateId"))}
         />
-        <TemplateEdit currentTemplate={selectedTemplate} />
+        <TemplatePreview currentTemplate={selectedTemplate} />
         <InputLabel>預覽</InputLabel>
         {selectedStyle.styleName && (
           <Preview
@@ -337,7 +399,9 @@ function CardSetCreate() {
             currentTemplate={selectedTemplate}
           />
         )}
-        <InputLabel>字卡內容</InputLabel>
+        <InputLabel>
+          字卡內容<RequiredNotice>*</RequiredNotice>
+        </InputLabel>
         <CardContent currentTemplate={selectedTemplate} />
         <Submit type="submit" value="儲存" />
       </Form>
@@ -410,10 +474,16 @@ const InputLabel = styled.label`
   }
 `;
 
+const RequiredNotice = styled.span`
+  margin-left: 5px;
+  color: red;
+`;
+
 const Input = styled.input`
   height: 36px;
   padding: 0px 5px;
-  border: solid 1px #c1c0c0;
+  border: ${(props) =>
+    props.isInvalid ? "solid 1px red" : "solid 1px #c1c0c0"};
   border-radius: 4px;
   font-size: 18px;
   &:focus {
@@ -452,3 +522,17 @@ const Submit = styled.input`
   line-height: 16px;
   font-family: "Noto Sans TC", sans-serif;
 `;
+
+const selectStyles = (isInvalid) => ({
+  control: (provided, state) => ({
+    ...provided,
+    borderColor: isInvalid ? "red" : provided.borderColor,
+    "&:hover": {
+      borderColor: isInvalid
+        ? "red"
+        : state.isFocused
+        ? provided.borderColor
+        : provided.borderColor,
+    },
+  }),
+});

@@ -2,7 +2,7 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 import imageIcon from "./images/photo.png";
 
-export default function TemplateEdit({ currentTemplate }) {
+export default function TemplatePreview({ currentTemplate }) {
   return (
     <Wrapper>
       <Heading>模板欄位</Heading>
@@ -126,7 +126,7 @@ const ImagePreview = styled.img`
   margin: 0 auto;
 `;
 
-TemplateEdit.propTypes = {
+TemplatePreview.propTypes = {
   currentTemplate: PropTypes.shape({
     templateName: PropTypes.string.isRequired,
     frontFields: PropTypes.arrayOf(

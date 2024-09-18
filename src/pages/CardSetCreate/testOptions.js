@@ -1,8 +1,8 @@
 export const languageOptions = [
-  { value: "English", label: "英語" },
-  { value: "Chinese", label: "中文" },
-  { value: "Korean", label: "韓語" },
-  { value: "Japanese", label: "日語" },
+  { value: "english", label: "英語" },
+  { value: "chinese", label: "中文" },
+  { value: "korean", label: "韓語" },
+  { value: "japanese", label: "日語" },
   { value: "others", label: "其他" },
 ];
 

@@ -1,14 +1,35 @@
 import styled from "styled-components";
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import Select from "react-select";
 import { Rnd } from "react-rnd";
 import imageIcon from "./images/photo.png";
-import { TrashIcon } from "./icon";
+import {
+  TrashIcon,
+  BoldIcon,
+  ItalicIcon,
+  TextAlignRightIcon,
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+} from "./icon";
 import { saveCardTemplate } from "../../utils/api";
+
+const fontSizeOptions = [
+  { value: "8px", label: "8" },
+  { value: "12px", label: "12" },
+  { value: "16px", label: "16" },
+  { value: "20px", label: "20" },
+  { value: "24px", label: "24" },
+  { value: "28px", label: "28" },
+  { value: "36px", label: "36" },
+  { value: "48px", label: "48" },
+  { value: "72px", label: "72" },
+];
 
 const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
   const [invalidTemplateName, setInvalidTemplateName] = useState(false);
   const [isAddFieldModalOpen, setIsAddFieldModalOpen] = useState(false);
+  const [selectedField, setSelectedField] = useState(null);
   const [newTemplateData, setNewTemplateData] = useState({
     fieldTemplateId: "", //自動生成
     userId: "MRvw8pLirv7B0y4zZlnB", //測試ID
@@ -23,7 +44,8 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
           width: "200px", //容器寬度
           height: "100px", //容器高度
           fontSize: "24px",
-          fontWeight: "bold",
+          fontWeight: "normal",
+          fontStyle: "normal",
           color: "#333333",
           textAlign: "center",
         },
@@ -39,7 +61,8 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
           width: "200px", //容器寬度
           height: "100px", //容器高度
           fontSize: "24px",
-          fontWeight: "bold",
+          fontWeight: "normal",
+          fontStyle: "normal",
           color: "#333333",
           textAlign: "center",
         },
@@ -51,6 +74,7 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const handleFlip = () => {
     setIsFlipped((prevState) => !prevState);
+    setSelectedField(null);
   };
 
   // 通用更新
@@ -94,6 +118,9 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
 
   // 處理欄位刪除
   const handleDeleteField = (side, index) => {
+    if (side === selectedField.side && index === selectedField.index) {
+      setSelectedField(null);
+    }
     const updatedFields = newTemplateData[side].filter((_, i) => i !== index);
 
     setNewTemplateData((prevData) => ({
@@ -101,12 +128,13 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
       [side]: updatedFields,
     }));
   };
+
   const handleSubmit = async () => {
     if (
       newTemplateData.frontFields.length < 1 ||
       newTemplateData.backFields.length < 1
     ) {
-      alert("一面至少要有一個欄位！");
+      alert("正反面至少都需要有一個欄位！");
       return;
     }
     if (newTemplateData.templateName.trim() === "") {
@@ -114,6 +142,21 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
       return;
     }
     setInvalidTemplateName(false); // 重置錯誤狀態
+    // 檢查正面欄位名稱是否為空
+    for (let i = 0; i < newTemplateData.frontFields.length; i++) {
+      if (newTemplateData.frontFields[i].name.trim() === "") {
+        alert("正面欄位名稱為必填！");
+        return;
+      }
+    }
+
+    // 檢查背面欄位名稱是否為空
+    for (let i = 0; i < newTemplateData.backFields.length; i++) {
+      if (newTemplateData.backFields[i].name.trim() === "") {
+        alert("背面欄位名稱為必填！");
+        return;
+      }
+    }
 
     try {
       const newTemplateId = await saveCardTemplate(newTemplateData); // 獲取保存的模板 ID
@@ -126,13 +169,17 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
     }
   };
 
+  const handleFieldClick = (side, index) => {
+    setSelectedField({ side, index }); // 設定選中的欄位
+  };
+
   return (
     <ModalWrapper>
       <ModalContent>
         <Heading>新增模板</Heading>
         <CloseIcon onClick={onClose}>×</CloseIcon>
         <EditAreaWrapper>
-          <Label>樣式名稱</Label>
+          <Label>模板名稱</Label>
           <TemplateNameInput
             onChange={(e) =>
               setNewTemplateData({
@@ -214,6 +261,20 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
           </AddFieldButton>
           <Label>預覽</Label>
           <FlipButton onClick={handleFlip}>翻轉</FlipButton>
+          {selectedField ? (
+            <TextStyleEditor
+              field={newTemplateData[selectedField.side][selectedField.index]}
+              onUpdate={(updatedField) =>
+                handleFieldUpdate(
+                  selectedField.side,
+                  selectedField.index,
+                  updatedField
+                )
+              }
+            />
+          ) : (
+            <TextStyleEditorFiller />
+          )}
           <CardWrapper>
             <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
               <FrontCard isFlipped={isFlipped} currentStyle={currentStyle}>
@@ -225,19 +286,29 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
                       height: field.style.height,
                     }}
                     position={{ x: field.position.x, y: field.position.y }}
-                    onDragStop={(e, d) =>
-                      handleFieldDrag("frontFields", index, { x: d.x, y: d.y })
-                    }
-                    onResizeStop={(e, direction, ref, delta, position) =>
+                    onClick={() => handleFieldClick("frontFields", index)} // 追蹤點擊事件
+                    onDragStop={(e, d) => {
+                      handleFieldDrag("frontFields", index, { x: d.x, y: d.y });
+                      handleFieldClick("frontFields", index); // 拖曳後選取
+                    }}
+                    onResizeStop={(e, direction, ref, delta, position) => {
                       handleFieldResize("frontFields", index, {
                         width: ref.style.width,
                         height: ref.style.height,
                         ...position,
-                      })
-                    }
+                      });
+                      handleFieldClick("frontFields", index); // 調整大小後選取
+                    }}
                     bounds="parent"
                   >
-                    <FieldContainer style={field.style}>
+                    <FieldContainer
+                      style={field.style}
+                      isSelected={
+                        selectedField &&
+                        selectedField.side === "frontFields" &&
+                        selectedField.index === index
+                      }
+                    >
                       {renderFieldContent(field)}
                     </FieldContainer>
                   </Rnd>
@@ -252,19 +323,29 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
                       height: field.style.height,
                     }}
                     position={{ x: field.position.x, y: field.position.y }}
-                    onDragStop={(e, d) =>
-                      handleFieldDrag("backFields", index, { x: d.x, y: d.y })
-                    }
-                    onResizeStop={(e, direction, ref, delta, position) =>
+                    onClick={() => handleFieldClick("backFields", index)} // 追蹤點擊事件
+                    onDragStop={(e, d) => {
+                      handleFieldDrag("backFields", index, { x: d.x, y: d.y });
+                      handleFieldClick("backFields", index); // 拖曳後選取
+                    }}
+                    onResizeStop={(e, direction, ref, delta, position) => {
                       handleFieldResize("backFields", index, {
                         width: ref.style.width,
                         height: ref.style.height,
                         ...position,
-                      })
-                    }
+                      });
+                      handleFieldClick("backFields", index); // 調整大小後選取
+                    }}
                     bounds="parent"
                   >
-                    <FieldContainer style={field.style}>
+                    <FieldContainer
+                      style={field.style}
+                      isSelected={
+                        selectedField &&
+                        selectedField.side === "backFields" &&
+                        selectedField.index === index
+                      }
+                    >
                       {renderFieldContent(field)}
                     </FieldContainer>
                   </Rnd>
@@ -273,7 +354,7 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
             </FlipCard>
           </CardWrapper>
         </EditAreaWrapper>
-        <SaveButton onClick={handleSubmit}>儲存樣式</SaveButton>
+        <SaveButton onClick={handleSubmit}>儲存模板</SaveButton>
         {isAddFieldModalOpen && (
           <AddFieldModal
             onClose={() => setIsAddFieldModalOpen(false)}
@@ -483,7 +564,7 @@ const FieldContainer = styled.div`
   display: flex;
   justify-content: ${(props) => props.style.textAlign || "center"};
   align-items: center;
-  border: 2px dotted #000000;
+  border: ${(props) => (props.isSelected ? "2px dotted black" : "none")};
   cursor: move;
   ${(props) =>
     props.style &&
@@ -592,12 +673,133 @@ const ImageName = styled.p`
   pointer-events: none; // 讓名稱不影響圖片的點擊操作
 `;
 
-const Image = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: ${(props) => props.style?.objectFit || "cover"};
-  display: block;
+const TextStyleEditorFiller = styled.div`
+  height: 46px;
 `;
+
+const TextStyleEditor = ({ field, onUpdate }) => {
+  const handleStyleChange = (newStyle) => {
+    onUpdate({ style: { ...field.style, ...newStyle } });
+  };
+  return (
+    <TextStyleWrapper>
+      <Select
+        options={fontSizeOptions}
+        styles={fontSizeDropDownStyle}
+        value={fontSizeOptions.find(
+          (option) => option.value === field.style.fontSize
+        )}
+        onChange={(option) => handleStyleChange({ fontSize: option.value })}
+      ></Select>
+      <TextStyleIconContainer
+        isSelected={field.style.fontWeight === "bold"}
+        onClick={() =>
+          handleStyleChange({
+            fontWeight: field.style.fontWeight === "bold" ? "normal" : "bold",
+          })
+        }
+      >
+        <BoldIcon />
+      </TextStyleIconContainer>
+      <TextStyleIconContainer
+        isSelected={field.style.fontStyle === "italic"}
+        onClick={() =>
+          handleStyleChange({
+            fontStyle: field.style.fontStyle === "italic" ? "normal" : "italic",
+          })
+        }
+      >
+        <ItalicIcon />
+      </TextStyleIconContainer>
+      <ColorInput
+        type="color"
+        value={field.style.color}
+        onChange={(e) => handleStyleChange({ color: e.target.value })}
+      />
+      <TextStyleIconContainer
+        isSelected={field.style.textAlign === "left"}
+        onClick={() => handleStyleChange({ textAlign: "left" })}
+      >
+        <TextAlignLeftIcon />
+      </TextStyleIconContainer>
+      <TextStyleIconContainer
+        isSelected={field.style.textAlign === "center"}
+        onClick={() => handleStyleChange({ textAlign: "center" })}
+      >
+        <TextAlignCenterIcon />
+      </TextStyleIconContainer>
+      <TextStyleIconContainer
+        isSelected={field.style.textAlign === "right"}
+        onClick={() => handleStyleChange({ textAlign: "right" })}
+      >
+        <TextAlignRightIcon />
+      </TextStyleIconContainer>
+    </TextStyleWrapper>
+  );
+};
+
+TextStyleEditor.propTypes = {
+  field: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    type: PropTypes.oneOf(["text", "image"]).isRequired,
+    required: PropTypes.bool.isRequired,
+    position: PropTypes.shape({
+      x: PropTypes.number.isRequired,
+      y: PropTypes.number.isRequired,
+    }).isRequired,
+    style: PropTypes.shape({
+      width: PropTypes.string.isRequired,
+      height: PropTypes.string.isRequired,
+      fontSize: PropTypes.string.isRequired,
+      fontWeight: PropTypes.oneOf(["normal", "bold"]).isRequired,
+      fontStyle: PropTypes.oneOf(["normal", "italic"]).isRequired,
+      color: PropTypes.string.isRequired,
+      textAlign: PropTypes.oneOf(["left", "center", "right"]).isRequired,
+    }).isRequired,
+  }).isRequired,
+  onUpdate: PropTypes.func.isRequired,
+};
+
+const TextStyleWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 auto;
+  border-radius: 4px;
+  padding: 4px;
+  background-color: rgba(0, 0, 0, 0.3); // 半透明的黑色背景
+  width: fit-content;
+`;
+
+const TextStyleIconContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  border: ${(props) => (props.isSelected ? "2px solid #1b1a1a" : "none")};
+  background-color: ${(props) =>
+    props.isSelected ? "#c7c6c6" : "transparent"};
+  border-radius: ${(props) => (props.isSelected ? "5px" : "none")};
+  cursor: pointer;
+  position: relative;
+`;
+
+const ColorInput = styled.input`
+  width: 28px;
+  height: 28px;
+`;
+
+const fontSizeDropDownStyle = {
+  dropdownIndicator: (provided) => ({
+    ...provided,
+    padding: 4, // 調整箭頭的間距
+    svg: {
+      width: 12, // 修改箭頭圖標的寬度
+      height: 12, // 修改箭頭圖標的高度
+    },
+  }),
+};
 
 // AddNewFieldModal
 const AddFieldModal = ({ onClose, onSave }) => {
@@ -618,7 +820,8 @@ const AddFieldModal = ({ onClose, onSave }) => {
               width: "200px",
               height: "100px",
               fontSize: "24px",
-              fontWeight: "bold",
+              fontWeight: "normal",
+              fontStyle: "normal",
               color: "#333333",
               textAlign: "center",
             }
@@ -628,6 +831,10 @@ const AddFieldModal = ({ onClose, onSave }) => {
               objectFit: "cover",
             },
     };
+    if (fieldName === "") {
+      alert("欄位名稱為必填！");
+      return;
+    }
 
     onSave(newField, fieldSide);
     onClose();
