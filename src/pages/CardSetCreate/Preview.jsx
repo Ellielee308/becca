@@ -164,9 +164,18 @@ const BackCard = styled.div`
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
-  justify-content: center;
+  justify-content: ${(props) => props.style.textAlign || "center"};
   align-items: center;
-  ${(props) => props.style && { ...props.style }}; /* 使用插入的樣式 */
+  ${(props) =>
+    props.style &&
+    `
+    width: ${props.style.width};
+    height: ${props.style.height};
+    font-size: ${props.style.fontSize};
+    font-weight: ${props.style.fontWeight};
+    color: ${props.style.color};
+    background-color: ${props.style.backgroundColor};
+  `};
   left: ${(props) => props.position?.x || "0"}px;
   top: ${(props) => props.position?.y || "0"}px;
 `;

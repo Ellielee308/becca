@@ -188,6 +188,17 @@ function CardSetCreate() {
     }
   };
 
+  const handleTemplateAdded = (newTemplate, fieldTemplateId) => {
+    // 更新所有模板列表
+    setAllTemplates((prevTemplates) => [...prevTemplates, newTemplate]);
+
+    // 更新選項列表
+    setTemplateOptions((prevOptions) => [
+      ...prevOptions,
+      { value: fieldTemplateId, label: newTemplate.templateName },
+    ]);
+  };
+
   return (
     <Wrapper>
       <Heading>新增卡牌組</Heading>
@@ -362,6 +373,7 @@ function CardSetCreate() {
             }
             setCardSetInfo({ ...cardSetInfo, fieldTemplateId: "" });
           }}
+          onTemplateAdded={handleTemplateAdded}
         />
       )}
     </Wrapper>

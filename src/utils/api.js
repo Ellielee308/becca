@@ -89,3 +89,21 @@ export async function getUserCardTemplates(userId) {
     return [];
   }
 }
+
+export async function saveCardTemplate(data) {
+  try {
+    const docRef = await addDoc(collection(db, "cardFields"), {
+      ...data,
+      createdAt: serverTimestamp(),
+    });
+
+    await updateDoc(docRef, {
+      fieldTemplateId: docRef.id,
+    });
+
+    console.log("成功儲存新模板並寫入 fieldTemplateId：", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("儲存樣式失敗：", error.message);
+  }
+}
