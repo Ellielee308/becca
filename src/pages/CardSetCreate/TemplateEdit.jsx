@@ -65,50 +65,6 @@ export default function TemplateEdit({ currentTemplate }) {
   );
 }
 
-TemplateEdit.propTypes = {
-  currentTemplate: PropTypes.shape({
-    templateName: PropTypes.string.isRequired,
-    frontFields: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        type: PropTypes.oneOf(["text", "image"]).isRequired,
-        required: PropTypes.bool.isRequired,
-        position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
-        }).isRequired,
-        style: PropTypes.shape({
-          width: PropTypes.string.isRequired,
-          height: PropTypes.string.isRequired,
-          fontSize: PropTypes.string,
-          fontWeight: PropTypes.string,
-          color: PropTypes.string,
-          textAlign: PropTypes.string,
-        }).isRequired,
-      })
-    ).isRequired,
-    backFields: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        type: PropTypes.oneOf(["text", "image"]).isRequired,
-        required: PropTypes.bool.isRequired,
-        position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
-        }).isRequired,
-        style: PropTypes.shape({
-          width: PropTypes.string.isRequired,
-          height: PropTypes.string.isRequired,
-          fontSize: PropTypes.string,
-          fontWeight: PropTypes.string,
-          color: PropTypes.string,
-          textAlign: PropTypes.string,
-        }).isRequired,
-      })
-    ).isRequired,
-  }).isRequired,
-};
-
 const Wrapper = styled.div`
   align-self: center;
   margin: 20px 0px;
@@ -169,3 +125,47 @@ const ImagePreview = styled.img`
   width: auto;
   margin: 0 auto;
 `;
+
+TemplateEdit.propTypes = {
+  currentTemplate: PropTypes.shape({
+    templateName: PropTypes.string.isRequired,
+    frontFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(["text", "image"]).isRequired,
+        required: PropTypes.bool.isRequired,
+        position: PropTypes.shape({
+          x: PropTypes.number.isRequired,
+          y: PropTypes.number.isRequired,
+        }).isRequired,
+        style: PropTypes.shape({
+          width: PropTypes.string.isRequired,
+          height: PropTypes.string.isRequired,
+          fontSize: PropTypes.string,
+          fontWeight: PropTypes.string,
+          color: PropTypes.string,
+          textAlign: PropTypes.string,
+        }).isRequired,
+      })
+    ).isRequired,
+    backFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(["text", "image"]).isRequired,
+        required: PropTypes.bool.isRequired,
+        position: PropTypes.shape({
+          x: PropTypes.number.isRequired,
+          y: PropTypes.number.isRequired,
+        }).isRequired,
+        style: PropTypes.shape({
+          width: PropTypes.string.isRequired,
+          height: PropTypes.string.isRequired,
+          fontSize: PropTypes.string,
+          fontWeight: PropTypes.string,
+          color: PropTypes.string,
+          textAlign: PropTypes.string,
+        }).isRequired,
+      })
+    ).isRequired,
+  }).isRequired,
+};

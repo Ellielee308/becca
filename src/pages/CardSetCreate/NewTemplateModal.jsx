@@ -298,7 +298,17 @@ const renderFieldContent = (field) => {
     case "text":
       return field.name; // 渲染文字內容
     case "image":
-      return <Image src={imageIcon} alt={field.name} style={field.style} />;
+      return (
+        <ImageWrapper>
+          <ImageExample
+            src={imageIcon}
+            alt={field.name}
+            style={field.style}
+            draggable={false}
+          />
+          <ImageName>{field.name}</ImageName>
+        </ImageWrapper>
+      );
     default:
       return null; // 如果類型未定義，不渲染任何內容
   }
@@ -488,7 +498,7 @@ const FieldContainer = styled.div`
 `;
 
 // 用於顯示圖片的樣式
-const Image = styled.img`
+const ImageExample = styled.img`
   max-width: 100%;
   max-height: 100%;
   object-fit: ${(props) => props.style?.objectFit || "cover"};
@@ -558,6 +568,35 @@ const AddFieldButton = styled.div`
 
 const TrashIconContainer = styled.div`
   cursor: pointer;
+`;
+
+// 用於顯示圖片的樣式
+const ImageWrapper = styled.div`
+  position: relative;
+  display: inline-block; // 讓 ImageWrapper 的大小與圖片保持一致
+`;
+
+const ImageName = styled.p`
+  position: absolute;
+  top: 50%; // 垂直居中
+  left: 50%; // 水平居中
+  transform: translate(-50%, -50%); // 將元素的中心點移動到其容器的中心
+  margin: 0;
+  padding: 8px 16px; // 內邊距讓文字不緊貼邊框
+  background-color: rgba(0, 0, 0, 0.5); // 半透明的黑色背景
+  color: white; // 文字顏色為白色
+  border-radius: 4px; // 圓角邊框
+  font-size: 14px; // 文字大小
+  text-align: center;
+  width: fit-content; // 讓內容決定寬度
+  pointer-events: none; // 讓名稱不影響圖片的點擊操作
+`;
+
+const Image = styled.img`
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: ${(props) => props.style?.objectFit || "cover"};
+  display: block;
 `;
 
 // AddNewFieldModal
