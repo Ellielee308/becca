@@ -146,11 +146,11 @@ function CardSetCreate() {
   };
   //TODO:儲存的時候還是要存id
 
-  const handleStyleAdded = (newStyle) => {
+  const handleStyleAdded = (newStyle, styleId) => {
     setAllStyles((prevStyles) => [...prevStyles, newStyle]);
     setStyleOptions((prevOptions) => [
       ...prevOptions,
-      { value: newStyle.styleId, label: newStyle.styleName },
+      { value: styleId, label: newStyle.styleName },
     ]);
   };
 

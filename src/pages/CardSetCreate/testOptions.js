@@ -3,6 +3,7 @@ export const languageOptions = [
   { value: "Chinese", label: "中文" },
   { value: "Korean", label: "韓語" },
   { value: "Japanese", label: "日語" },
+  { value: "others", label: "其他" },
 ];
 
 export const templateOptions = [

@@ -172,10 +172,11 @@ const NewStyleModal = ({ onClose, onStyleAdded }) => {
       setInvalidStyleName(true);
       return;
     } else {
+      setInvalidStyleName(false);
       try {
-        await saveCardStyle(style);
+        const newStyleId = await saveCardStyle(style);
         alert("儲存樣式成功！");
-        onStyleAdded(style);
+        onStyleAdded(style, newStyleId);
         onClose();
       } catch (error) {
         console.error("儲存樣式失敗：", error);
