@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useState } from "react";
+import PropTypes from "prop-types";
 import { Rnd } from "react-rnd";
 import imageIcon from "./images/photo.png";
 import { TrashIcon } from "./icon";
@@ -285,6 +286,12 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
 };
 
 export default NewTemplateModal;
+
+NewTemplateModal.propTypes = {
+  currentStyle: PropTypes.object,
+  onClose: PropTypes.func,
+  onTemplateAdded: PropTypes.func,
+};
 
 const renderFieldContent = (field) => {
   switch (field.type) {
@@ -624,6 +631,11 @@ const AddFieldModal = ({ onClose, onSave }) => {
       <SaveButton onClick={handleSave}>儲存欄位</SaveButton>
     </AddFieldModalContent>
   );
+};
+
+AddFieldModal.propTypes = {
+  onClose: PropTypes.func,
+  onSave: PropTypes.func,
 };
 
 const AddFieldModalContent = styled.div`

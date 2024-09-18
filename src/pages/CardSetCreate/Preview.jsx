@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import PropTypes from "prop-types";
 import { useState } from "react";
 import imageIcon from "./images/photo.png";
 
@@ -37,6 +38,63 @@ export default function Preview({ currentStyle, currentTemplate }) {
     </Wrapper>
   );
 }
+
+Preview.propTypes = {
+  currentTemplate: PropTypes.shape({
+    templateName: PropTypes.string.isRequired,
+    frontFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(["text", "image"]).isRequired,
+        required: PropTypes.bool.isRequired,
+        position: PropTypes.shape({
+          x: PropTypes.number.isRequired,
+          y: PropTypes.number.isRequired,
+        }).isRequired,
+        style: PropTypes.shape({
+          width: PropTypes.string.isRequired,
+          height: PropTypes.string.isRequired,
+          fontSize: PropTypes.string,
+          fontWeight: PropTypes.string,
+          color: PropTypes.string,
+          textAlign: PropTypes.string,
+        }).isRequired,
+      })
+    ).isRequired,
+    backFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(["text", "image"]).isRequired,
+        required: PropTypes.bool.isRequired,
+        position: PropTypes.shape({
+          x: PropTypes.number.isRequired,
+          y: PropTypes.number.isRequired,
+        }).isRequired,
+        style: PropTypes.shape({
+          width: PropTypes.string.isRequired,
+          height: PropTypes.string.isRequired,
+          fontSize: PropTypes.string,
+          fontWeight: PropTypes.string,
+          color: PropTypes.string,
+          textAlign: PropTypes.string,
+        }).isRequired,
+      })
+    ).isRequired,
+  }).isRequired,
+  currentStyle: PropTypes.shape({
+    styleId: PropTypes.string,
+    userId: PropTypes.string.isRequired,
+    styleName: PropTypes.string.isRequired,
+    borderStyle: PropTypes.oneOf(["none", "solid", "dashed", "dotted"]),
+    borderColor: PropTypes.string,
+    borderWidth: PropTypes.string,
+    borderRadius: PropTypes.string,
+    backgroundColor: PropTypes.string.isRequired,
+    fontFamily: PropTypes.string.isRequired,
+    animation: PropTypes.oneOf(["verticalFlip", "horizontalFlip", "fade"])
+      .isRequired,
+  }).isRequired,
+};
 
 const renderFieldContent = (field) => {
   switch (field.type) {

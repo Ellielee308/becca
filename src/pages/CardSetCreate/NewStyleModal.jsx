@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import PropTypes from "prop-types";
 import Select from "react-select";
 import { useEffect, useState } from "react";
 import { TwitterPicker } from "react-color";
@@ -309,6 +310,10 @@ const NewStyleModal = ({ onClose, onStyleAdded }) => {
 };
 
 export default NewStyleModal;
+NewStyleModal.propTypes = {
+  onClose: PropTypes.func,
+  onStyleAdded: PropTypes.func,
+};
 
 const ModalWrapper = styled.div`
   position: fixed;
@@ -396,11 +401,11 @@ const ColorGroup = styled.div`
 `;
 
 const SelectBorderStyles = {
-  control: (baseStyles, state) => ({
+  control: (baseStyles) => ({
     ...baseStyles,
     width: "135px",
   }),
-  option: (provided, state) => ({
+  option: (provided) => ({
     ...provided,
   }),
   menu: (provided) => ({
@@ -446,7 +451,7 @@ const IconImage = styled.img`
   height: 24px;
 `;
 const SelectFont = {
-  control: (baseStyles, state) => ({
+  control: (baseStyles) => ({
     ...baseStyles,
     width: "180px",
   }),

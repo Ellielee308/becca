@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import PropTypes from "prop-types";
 import { useState } from "react";
 
 const Card = ({ currentStyle }) => {
@@ -24,6 +25,10 @@ const Card = ({ currentStyle }) => {
 };
 
 export default Card;
+
+Card.propTypes = {
+  currentStyle: PropTypes.object,
+};
 
 const Wrapper = styled.div`
   align-self: center;
