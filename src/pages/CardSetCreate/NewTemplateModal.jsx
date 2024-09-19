@@ -118,7 +118,8 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
 
   // 處理欄位刪除
   const handleDeleteField = (side, index) => {
-    if (side === selectedField.side && index === selectedField.index) {
+    // 檢查是否刪除的是目前選中的欄位
+    if (side === selectedField?.side && index === selectedField?.index) {
       setSelectedField(null);
     }
     const updatedFields = newTemplateData[side].filter((_, i) => i !== index);
@@ -169,8 +170,8 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
     }
   };
 
-  const handleFieldClick = (side, index) => {
-    setSelectedField({ side, index }); // 設定選中的欄位
+  const handleFieldClick = (side, index, fieldType) => {
+    setSelectedField({ side, index, fieldType }); // 設定選中的欄位
   };
 
   return (
@@ -261,7 +262,7 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
           </AddFieldButton>
           <Label>預覽</Label>
           <FlipButton onClick={handleFlip}>翻轉</FlipButton>
-          {selectedField ? (
+          {selectedField && selectedField.fieldType !== "image" ? (
             <TextStyleEditor
               field={newTemplateData[selectedField.side][selectedField.index]}
               onUpdate={(updatedField) =>
@@ -273,7 +274,9 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
               }
             />
           ) : (
-            <TextStyleEditorFiller />
+            <TextStyleEditorPlaceholder>
+              點選文字進一步編輯
+            </TextStyleEditorPlaceholder>
           )}
           <CardWrapper>
             <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
@@ -286,10 +289,12 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
                       height: field.style.height,
                     }}
                     position={{ x: field.position.x, y: field.position.y }}
-                    onClick={() => handleFieldClick("frontFields", index)} // 追蹤點擊事件
+                    onClick={() =>
+                      handleFieldClick("frontFields", index, field.type)
+                    } // 追蹤點擊事件
                     onDragStop={(e, d) => {
                       handleFieldDrag("frontFields", index, { x: d.x, y: d.y });
-                      handleFieldClick("frontFields", index); // 拖曳後選取
+                      handleFieldClick("frontFields", index, field.type); // 拖曳後選取
                     }}
                     onResizeStop={(e, direction, ref, delta, position) => {
                       handleFieldResize("frontFields", index, {
@@ -297,7 +302,7 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
                         height: ref.style.height,
                         ...position,
                       });
-                      handleFieldClick("frontFields", index); // 調整大小後選取
+                      handleFieldClick("frontFields", index, field.type); // 調整大小後選取
                     }}
                     bounds="parent"
                   >
@@ -323,10 +328,12 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
                       height: field.style.height,
                     }}
                     position={{ x: field.position.x, y: field.position.y }}
-                    onClick={() => handleFieldClick("backFields", index)} // 追蹤點擊事件
+                    onClick={() =>
+                      handleFieldClick("backFields", index, field.type)
+                    } // 追蹤點擊事件
                     onDragStop={(e, d) => {
                       handleFieldDrag("backFields", index, { x: d.x, y: d.y });
-                      handleFieldClick("backFields", index); // 拖曳後選取
+                      handleFieldClick("backFields", index, field.type); // 拖曳後選取
                     }}
                     onResizeStop={(e, direction, ref, delta, position) => {
                       handleFieldResize("backFields", index, {
@@ -334,7 +341,7 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
                         height: ref.style.height,
                         ...position,
                       });
-                      handleFieldClick("backFields", index); // 調整大小後選取
+                      handleFieldClick("backFields", index, field.type); // 調整大小後選取
                     }}
                     bounds="parent"
                   >
@@ -659,22 +666,25 @@ const ImageWrapper = styled.div`
 
 const ImageName = styled.p`
   position: absolute;
-  top: 50%; // 垂直居中
-  left: 50%; // 水平居中
-  transform: translate(-50%, -50%); // 將元素的中心點移動到其容器的中心
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   margin: 0;
-  padding: 8px 16px; // 內邊距讓文字不緊貼邊框
-  background-color: rgba(0, 0, 0, 0.5); // 半透明的黑色背景
-  color: white; // 文字顏色為白色
-  border-radius: 4px; // 圓角邊框
-  font-size: 14px; // 文字大小
+  padding: 8px 16px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
   text-align: center;
-  width: fit-content; // 讓內容決定寬度
-  pointer-events: none; // 讓名稱不影響圖片的點擊操作
+  width: fit-content;
+  pointer-events: none;
 `;
 
-const TextStyleEditorFiller = styled.div`
+const TextStyleEditorPlaceholder = styled.div`
   height: 46px;
+  color: gray;
+  text-align: center;
+  line-height: 46px;
 `;
 
 const TextStyleEditor = ({ field, onUpdate }) => {

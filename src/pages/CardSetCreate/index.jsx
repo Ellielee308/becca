@@ -13,6 +13,7 @@ import {
   getUserCardStyles,
   addNewLabel,
   getUserCardTemplates,
+  uploadCardSetWithCards,
 } from "../../utils/api.js";
 
 function CardSetCreate() {
@@ -29,7 +30,7 @@ function CardSetCreate() {
   const [selectedTemplate, setSelectedTemplate] = useState({});
   const [showNewTemplateModal, setShowNewTemplateModal] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]);
-  const [cardSetInfo, setCardSetInfo] = useState({
+  const [cardSetData, setCardSetData] = useState({
     cardSetId: "",
     userId: user ? user.userId : "",
     title: "",
@@ -42,6 +43,29 @@ function CardSetCreate() {
     createdAt: "",
     cardOrder: [],
   });
+  const [cardContent, setCardContent] = useState([]);
+
+  useEffect(() => {
+    if (
+      selectedTemplate &&
+      selectedTemplate.frontFields &&
+      selectedTemplate.backFields
+    ) {
+      const newCardContent = Array(3) // 假設要產生3張卡片
+        .fill(null)
+        .map(() => ({
+          frontFields: selectedTemplate.frontFields.map((field) => ({
+            name: field.name,
+            value: "", // 初始化為空值
+          })),
+          backFields: selectedTemplate.backFields.map((field) => ({
+            name: field.name,
+            value: "", // 初始化為空值
+          })),
+        }));
+      setCardContent(newCardContent);
+    }
+  }, [selectedTemplate]);
 
   useEffect(() => {
     console.log("目前的用戶資料：", user);
@@ -119,7 +143,7 @@ function CardSetCreate() {
                   template.fieldTemplateId === "XWQvUaViTDuaBkbOu4Xp"
               )
             );
-            setCardSetInfo((prevInfo) => ({
+            setCardSetData((prevInfo) => ({
               ...prevInfo,
               fieldTemplateId: "XWQvUaViTDuaBkbOu4Xp",
             }));
@@ -141,10 +165,9 @@ function CardSetCreate() {
         (style) => style.styleName === selectedOption.label
       );
       setSelectedStyle(selectedStyleObject);
-      setCardSetInfo({ ...cardSetInfo, styleId: selectedOption.value });
+      setCardSetData({ ...cardSetData, styleId: selectedOption.value });
     }
   };
-  //TODO:儲存的時候還是要存id
 
   const handleStyleAdded = (newStyle, styleId) => {
     setAllStyles((prevStyles) => [...prevStyles, newStyle]);
@@ -160,7 +183,7 @@ function CardSetCreate() {
       console.log("標籤已新增至資料庫：", newLabel);
       const newOption = { value: newLabel, label: newLabel };
       setLabelOptions((prevOptions) => [...prevOptions, newOption]);
-      setCardSetInfo((prevInfo) => ({
+      setCardSetData((prevInfo) => ({
         ...prevInfo,
         labels: [...prevInfo.labels, newLabel],
       }));
@@ -184,51 +207,90 @@ function CardSetCreate() {
         (template) => template.templateName === selectedOption.label
       );
       setSelectedTemplate(selectedTemplateObject);
-      setCardSetInfo({ ...cardSetInfo, fieldTemplateId: selectedOption.value });
+      setCardSetData({ ...cardSetData, fieldTemplateId: selectedOption.value });
     }
   };
 
   const handleTemplateAdded = (newTemplate, fieldTemplateId) => {
-    // 更新所有模板列表
     setAllTemplates((prevTemplates) => [...prevTemplates, newTemplate]);
-
-    // 更新選項列表
     setTemplateOptions((prevOptions) => [
       ...prevOptions,
       { value: fieldTemplateId, label: newTemplate.templateName },
     ]);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     let newInvalidFields = [];
 
-    if (cardSetInfo.title === "") {
+    if (cardSetData.title === "") {
       newInvalidFields.push("title");
     }
-    if (cardSetInfo.purpose === "") {
+    if (cardSetData.purpose === "") {
       newInvalidFields.push("purpose");
     }
-    if (cardSetInfo.visibility === "") {
+    if (cardSetData.visibility === "") {
       newInvalidFields.push("visibility");
     }
-    if (cardSetInfo.styleId === "") {
+    if (cardSetData.styleId === "") {
       newInvalidFields.push("styleId");
     }
-    if (cardSetInfo.fieldTemplateId === "") {
+    if (cardSetData.fieldTemplateId === "") {
       newInvalidFields.push("fieldTemplateId");
     }
-    if (cardSetInfo.purpose === "languageLearning") {
-      if (!cardSetInfo.learningLanguage)
+    if (cardSetData.purpose === "languageLearning") {
+      if (!cardSetData.learningLanguage)
         newInvalidFields.push("learningLanguage");
-      if (!cardSetInfo.interfaceLanguage)
+      if (!cardSetData.interfaceLanguage)
         newInvalidFields.push("interfaceLanguage");
     }
 
     setInvalidFields(newInvalidFields);
     if (newInvalidFields.length > 0) return;
-
-    // 在此執行其他操作
+    //檢查卡牌組是否至少有一張
+    if (cardContent.length < 1) {
+      alert("字卡至少需要一張！");
+      return;
+    }
+    // 檢驗正面是否必填格都有填
+    for (let i = 0; i < selectedTemplate.frontFields.length; i++) {
+      if (selectedTemplate.frontFields[i].required === true) {
+        for (let y = 0; y < cardContent.length; y++) {
+          // 檢查前端卡片的對應欄位是否有值
+          if (
+            !cardContent[y].frontFields[i] ||
+            cardContent[y].frontFields[i].value.trim() === ""
+          ) {
+            alert("卡片有必填項未填！");
+            return;
+          }
+        }
+      }
+    }
+    // 檢驗背面是否必填格都有填
+    for (let i = 0; i < selectedTemplate.backFields.length; i++) {
+      if (selectedTemplate.backFields[i].required === true) {
+        for (let y = 0; y < cardContent.length; y++) {
+          // 檢查背面卡片的對應欄位是否有值
+          if (
+            !cardContent[y].backFields[i] ||
+            cardContent[y].backFields[i].value.trim() === ""
+          ) {
+            alert("卡片有必填項未填！");
+            return;
+          }
+        }
+      }
+    }
+    //真正的提交邏輯
+    try {
+      await uploadCardSetWithCards(cardSetData, cardContent, user.userId);
+      alert("卡牌組提交成功！");
+      window.location.reload();
+    } catch (error) {
+      console.error("儲存過程出現錯誤：", error);
+      alert("儲存失敗，請重試。");
+    }
   };
 
   return (
@@ -241,7 +303,7 @@ function CardSetCreate() {
         <Input
           type="text"
           onChange={(e) =>
-            setCardSetInfo({ ...cardSetInfo, title: e.target.value })
+            setCardSetData({ ...cardSetData, title: e.target.value })
           }
           isInvalid={invalidFields.includes("title")}
         />
@@ -249,7 +311,7 @@ function CardSetCreate() {
         <Textarea
           id="description"
           onChange={(e) =>
-            setCardSetInfo({ ...cardSetInfo, description: e.target.value })
+            setCardSetData({ ...cardSetData, description: e.target.value })
           }
         />
         <InputLabel>
@@ -266,7 +328,7 @@ function CardSetCreate() {
             value="languageLearning"
             onChange={(e) => {
               if (e.target.checked)
-                setCardSetInfo({ ...cardSetInfo, purpose: "languageLearning" });
+                setCardSetData({ ...cardSetData, purpose: "languageLearning" });
             }}
           />
           <InputLabel htmlFor="languageLearning">語言學習</InputLabel>
@@ -277,8 +339,8 @@ function CardSetCreate() {
             value="others"
             onChange={(e) => {
               if (e.target.checked)
-                setCardSetInfo({
-                  ...cardSetInfo,
+                setCardSetData({
+                  ...cardSetData,
                   purpose: "others",
                   learningLanguage: null,
                   interfaceLanguage: null,
@@ -287,7 +349,7 @@ function CardSetCreate() {
           />
           <InputLabel htmlFor="others">其他</InputLabel>
         </RadioWrapper>
-        {cardSetInfo.purpose === "languageLearning" && (
+        {cardSetData.purpose === "languageLearning" && (
           <>
             <InputLabel htmlFor="label">
               你想要學習的語言是什麼？<RequiredNotice>*</RequiredNotice>
@@ -295,8 +357,8 @@ function CardSetCreate() {
             <Select
               options={languageOptions}
               onChange={(selectedOption) =>
-                setCardSetInfo({
-                  ...cardSetInfo,
+                setCardSetData({
+                  ...cardSetData,
                   learningLanguage: selectedOption.value,
                 })
               }
@@ -308,8 +370,8 @@ function CardSetCreate() {
             <Select
               options={languageOptions}
               onChange={(selectedOption) =>
-                setCardSetInfo({
-                  ...cardSetInfo,
+                setCardSetData({
+                  ...cardSetData,
                   interfaceLanguage: selectedOption.value,
                 })
               }
@@ -331,7 +393,7 @@ function CardSetCreate() {
             value="public"
             onChange={(e) => {
               if (e.target.checked)
-                setCardSetInfo({ ...cardSetInfo, visibility: "public" });
+                setCardSetData({ ...cardSetData, visibility: "public" });
             }}
             isInvalid={invalidFields.includes("visibility")}
           />
@@ -343,7 +405,7 @@ function CardSetCreate() {
             value="private"
             onChange={(e) => {
               if (e.target.checked)
-                setCardSetInfo({ ...cardSetInfo, visibility: "private" });
+                setCardSetData({ ...cardSetData, visibility: "private" });
             }}
             isInvalid={invalidFields.includes("visibility")}
           />
@@ -355,11 +417,11 @@ function CardSetCreate() {
           isMulti
           options={labelOptions}
           value={labelOptions.filter((option) =>
-            cardSetInfo.labels.includes(option.value)
+            cardSetData.labels.includes(option.value)
           )}
           onChange={(selectedOptions) => {
-            setCardSetInfo({
-              ...cardSetInfo,
+            setCardSetData({
+              ...cardSetData,
               labels: selectedOptions
                 ? selectedOptions.map((opt) => opt.value)
                 : [],
@@ -400,9 +462,13 @@ function CardSetCreate() {
           />
         )}
         <InputLabel>
-          字卡內容<RequiredNotice>*</RequiredNotice>
+          字卡內容 (至少需要一張字卡)<RequiredNotice>*</RequiredNotice>
         </InputLabel>
-        <CardContent currentTemplate={selectedTemplate} />
+        <CardContent
+          currentTemplate={selectedTemplate}
+          cardContent={cardContent}
+          setCardContent={setCardContent}
+        />
         <Submit type="submit" value="儲存" />
       </Form>
       {showNewStyleModal && (
@@ -411,7 +477,7 @@ function CardSetCreate() {
             setShowNewStyleModal(false);
             setSelectedStyleOption(null); // 重置選擇器為未選擇狀態
             setSelectedStyle({});
-            setCardSetInfo({ ...cardSetInfo, styleId: "" });
+            setCardSetData({ ...cardSetData, styleId: "" });
           }}
           onStyleAdded={handleStyleAdded}
         />
@@ -422,7 +488,7 @@ function CardSetCreate() {
           onClose={() => {
             setShowNewTemplateModal(false);
             const defaultTemplate = templateOptions.find(
-              (option) => option.value === "XWQvUaViTDuaBkbOu4Xp" //預設模板
+              (option) => option.value === "XWQvUaViTDuaBkbOu4Xp"
             );
 
             // 設置預設模板為選中的模板
@@ -435,7 +501,7 @@ function CardSetCreate() {
                 )
               );
             }
-            setCardSetInfo({ ...cardSetInfo, fieldTemplateId: "" });
+            setCardSetData({ ...cardSetData, fieldTemplateId: "" });
           }}
           onTemplateAdded={handleTemplateAdded}
         />
@@ -492,6 +558,7 @@ const Input = styled.input`
 `;
 
 const Textarea = styled.textarea`
+  font-family: "Noto Sans TC", sans-serif;
   height: 130px;
   padding: 5px;
   border-radius: 4px;

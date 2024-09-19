@@ -5,7 +5,9 @@ import imageIcon from "./images/photo.png";
 export default function TemplatePreview({ currentTemplate }) {
   return (
     <Wrapper>
-      <Heading>模板欄位</Heading>
+      <Heading>
+        模板欄位<RequiredNotice> (紅字標記欄位為必填項) </RequiredNotice>
+      </Heading>
       <SideWrapper>
         <Side>
           <SideHeading>正面</SideHeading>
@@ -13,21 +15,21 @@ export default function TemplatePreview({ currentTemplate }) {
             currentTemplate.frontFields.map((frontField, index) => {
               if (frontField.type === "text") {
                 return (
-                  <TextInput
-                    key={index} // 加入唯一的 key 屬性
-                    placeholder={frontField.name} // 使用花括號
-                    disabled
-                  />
+                  <TextWrapper key={index} isRequired={frontField.required}>
+                    {frontField.name}
+                  </TextWrapper>
                 );
               } else if (frontField.type === "image") {
                 return (
                   <ImagePreviewWrapper key={index}>
-                    <ImageFieldName>{frontField.name}</ImageFieldName>
+                    <ImageFieldName isRequired={frontField.required}>
+                      {frontField.name}
+                    </ImageFieldName>
                     <ImagePreview src={imageIcon} alt={frontField.name} />
                   </ImagePreviewWrapper>
                 );
               }
-              return null; // 處理其他類型，防止沒有 return 的情況
+              return null;
             })
           ) : (
             <TextInput placeholder="單字" disabled />
@@ -40,21 +42,21 @@ export default function TemplatePreview({ currentTemplate }) {
             currentTemplate.backFields.map((backField, index) => {
               if (backField.type === "text") {
                 return (
-                  <TextInput
-                    key={index} // 加入唯一的 key 屬性
-                    placeholder={backField.name} // 使用花括號
-                    disabled
-                  />
+                  <TextWrapper key={index} isRequired={backField.required}>
+                    {backField.name}
+                  </TextWrapper>
                 );
               } else if (backField.type === "image") {
                 return (
                   <ImagePreviewWrapper key={index}>
-                    <ImageFieldName>{backField.name}</ImageFieldName>
+                    <ImageFieldName isRequired={backField.required}>
+                      {backField.name}
+                    </ImageFieldName>
                     <ImagePreview src={imageIcon} alt={backField.name} />
                   </ImagePreviewWrapper>
                 );
               }
-              return null; // 處理其他類型，防止沒有 return 的情況
+              return null;
             })
           ) : (
             <TextInput placeholder="字義" disabled />
@@ -78,6 +80,10 @@ const Heading = styled.p`
   font-size: 24px;
   margin-bottom: 45px;
   margin-left: 30px;
+`;
+
+const RequiredNotice = styled.span`
+  font-size: 12px;
 `;
 
 const SideWrapper = styled.div`
@@ -109,15 +115,24 @@ const TextInput = styled.input`
   border: solid 1px #c1c0c0;
 `;
 
+const TextWrapper = styled.div`
+  min-height: 30px; /* 最小高度 */
+  border: 1px solid #c1c0c0;
+  font-size: 14px;
+  line-height: 30px;
+  color: ${(props) => (props.isRequired ? "red" : "rgb(84, 84, 84)")};
+  background-color: rgba(239, 239, 239, 0.3);
+  user-select: none;
+`;
+
 const ImagePreviewWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
 `;
-
 const ImageFieldName = styled.p`
   font-size: 14px;
-  color: #636262;
+  color: ${(props) => (props.isRequired ? "red" : "#636262")};
 `;
 
 const ImagePreview = styled.img`

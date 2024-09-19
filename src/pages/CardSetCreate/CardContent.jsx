@@ -1,30 +1,27 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
-import { useState } from "react";
 import { DragIcon, TrashIcon, PlusIcon } from "./icon";
+import { uploadImageToStorage } from "../../utils/api";
 
-export default function CardContent({ currentTemplate }) {
-  const [cardContent, setCardContent] = useState([
-    {
-      frontFields: [],
-      backFields: [],
-    },
-    {
-      frontFields: [],
-      backFields: [],
-    },
-    {
-      frontFields: [],
-      backFields: [],
-    },
-  ]);
-
+export default function CardContent({
+  currentTemplate,
+  cardContent,
+  setCardContent,
+}) {
   const handleAddNewCard = () => {
-    const newCardContent = JSON.parse(JSON.stringify(cardContent));
+    const newCardContent = [...cardContent];
+
     const newCard = {
-      frontFields: [],
-      backFields: [],
+      frontFields: currentTemplate.frontFields.map((field) => ({
+        name: field.name,
+        value: "",
+      })),
+      backFields: currentTemplate.backFields.map((field) => ({
+        name: field.name,
+        value: "",
+      })),
     };
+
     newCardContent.push(newCard);
     setCardContent(newCardContent);
   };
@@ -33,6 +30,29 @@ export default function CardContent({ currentTemplate }) {
     const newCardContent = JSON.parse(JSON.stringify(cardContent));
     newCardContent.splice(index, 1);
     setCardContent(newCardContent);
+  };
+
+  const handleTextChange = (side, cardIndex, fieldIndex, value) => {
+    const newCardContent = [...cardContent];
+    newCardContent[cardIndex][side][fieldIndex].value = value;
+    setCardContent(newCardContent);
+  };
+
+  const handleFileUpload = async (e, side, cardIndex, fieldIndex) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      // 將圖片上傳到 Firebase Storage 並獲取圖片 URL
+      const imageUrl = await uploadImageToStorage(file);
+
+      // 更新 cardContent 狀態
+      const newCardContent = [...cardContent];
+      newCardContent[cardIndex][side][fieldIndex].value = imageUrl; // 將圖片 URL 存入對應欄位
+      setCardContent(newCardContent);
+    } catch (error) {
+      console.error("圖片上傳失敗：", error);
+    }
   };
 
   return (
@@ -57,13 +77,34 @@ export default function CardContent({ currentTemplate }) {
                 currentTemplate.frontFields.map((frontField, index) => {
                   if (frontField.type === "text") {
                     return (
-                      <TextInput key={index} placeholder={frontField.name} />
+                      <TextInput
+                        key={index}
+                        placeholder={frontField.name}
+                        value={card.frontFields[index]?.value || ""}
+                        onChange={(e) =>
+                          handleTextChange(
+                            "frontFields",
+                            cardIndex,
+                            index,
+                            e.target.value
+                          )
+                        }
+                      />
                     );
                   } else if (frontField.type === "image") {
                     return (
                       <ImageUploadWrapper key={index}>
                         <ImageFieldName>{frontField.name}</ImageFieldName>
-                        <ImageInput type="file" accept="image/*" />
+                        <ImageInput
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleFileUpload(e, "frontFields", cardIndex, index)
+                          }
+                        />
+                        {card.frontFields[index]?.value && (
+                          <ImagePreview src={card.frontFields[index].value} />
+                        )}
                       </ImageUploadWrapper>
                     );
                   }
@@ -80,13 +121,34 @@ export default function CardContent({ currentTemplate }) {
                 currentTemplate.backFields.map((backField, index) => {
                   if (backField.type === "text") {
                     return (
-                      <TextInput key={index} placeholder={backField.name} />
+                      <TextInput
+                        key={index}
+                        placeholder={backField.name}
+                        value={card.backFields[index]?.value || ""}
+                        onChange={(e) =>
+                          handleTextChange(
+                            "backFields",
+                            cardIndex,
+                            index,
+                            e.target.value
+                          )
+                        }
+                      />
                     );
                   } else if (backField.type === "image") {
                     return (
                       <ImageUploadWrapper key={index}>
                         <ImageFieldName>{backField.name}</ImageFieldName>
-                        <ImageInput type="file" accept="image/*" />
+                        <ImageInput
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleFileUpload(e, "backFields", cardIndex, index)
+                          }
+                        />
+                        {card.backFields[index]?.value && (
+                          <ImagePreview src={card.backFields[index].value} />
+                        )}
                       </ImageUploadWrapper>
                     );
                   }
@@ -153,6 +215,8 @@ CardContent.propTypes = {
       })
     ).isRequired,
   }).isRequired,
+  cardContent: PropTypes.array,
+  setCardContent: PropTypes.func,
 };
 
 const Wrapper = styled.div`
@@ -266,4 +330,10 @@ const ImageInput = styled.input`
 
 const ButtonIconContainer = styled.div`
   cursor: pointer;
+`;
+
+const ImagePreview = styled.img`
+  height: 60px;
+  width: auto;
+  object-fit: cover;
 `;

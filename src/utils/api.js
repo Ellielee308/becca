@@ -1,4 +1,4 @@
-import { db } from "./firebaseConfig";
+import { db, storage } from "./firebaseConfig";
 import {
   collection,
   addDoc,
@@ -11,6 +11,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export async function getUserDocument(userId) {
   try {
@@ -105,5 +106,104 @@ export async function saveCardTemplate(data) {
     return docRef.id;
   } catch (error) {
     console.error("儲存樣式失敗：", error.message);
+  }
+}
+
+export async function uploadImageToStorage(file) {
+  const storageRef = ref(storage, `images/${file.name}-${Date.now()}`);
+  try {
+    // 將圖片上傳至 Firebase Storage
+    const snapshot = await uploadBytes(storageRef, file);
+
+    console.log("圖片已上傳", snapshot);
+
+    // 獲取上傳圖片的下載 URL
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    console.log("圖片下載 URL:", downloadURL);
+
+    // 返回下載 URL
+    return downloadURL;
+  } catch (error) {
+    console.error("圖片上傳失敗:", error);
+    throw new Error("圖片上傳失敗");
+  }
+}
+
+export async function saveCardSet(data) {
+  try {
+    const docRef = await addDoc(collection(db, "cardSets"), {
+      ...data,
+      createdAt: serverTimestamp(),
+    });
+    console.log("成功儲存牌組：", docRef.id);
+    await updateDoc(doc(db, "cardSets", docRef.id), { cardSetId: docRef.id });
+    return docRef.id;
+  } catch (error) {
+    console.error("儲存牌組失敗 ", error);
+    return null;
+  }
+}
+
+export async function updateCardSetCardOrder(cardSetId, orderArray) {
+  try {
+    await updateDoc(doc(db, "cardSets", cardSetId), { cardOrder: orderArray });
+    console.log("卡牌順序更新成功");
+    return true; // 返回 true 表示成功
+  } catch (error) {
+    console.error("更新卡牌順序失敗：", error);
+    return null; // 返回 null 表示失敗
+  }
+}
+
+export async function saveCard(data, cardSetId) {
+  try {
+    const docRef = await addDoc(collection(db, "cards"), {
+      ...data,
+      createdAt: serverTimestamp(),
+      cardSetId: cardSetId,
+    });
+    console.log("成功儲存卡片：", docRef.id);
+    await updateDoc(doc(db, "cards", docRef.id), { cardId: docRef.id });
+    return docRef.id;
+  } catch (error) {
+    console.error("儲存牌組失敗 ", error);
+    return null;
+  }
+}
+export async function uploadCardSetWithCards(cardSetData, cardContent, userId) {
+  try {
+    // 1. 儲存卡牌組資料並獲得 cardSetId
+    const cardSetId = await saveCardSet(cardSetData);
+    if (!cardSetId) {
+      throw new Error("卡牌組儲存失敗");
+    }
+
+    // 2. 逐張卡片儲存，並獲取每張卡片的 cardId
+    const cardIds = [];
+    for (const card of cardContent) {
+      const cardData = {
+        userId: userId,
+        frontFields: card.frontFields,
+        backFields: card.backFields,
+      };
+      const cardId = await saveCard(cardData, cardSetId); // 儲存每張卡片
+      if (!cardId) {
+        throw new Error("卡片儲存失敗");
+      }
+      cardIds.push(cardId); // 儲存卡片ID到陣列中
+    }
+
+    // 3. 更新卡牌組的 cardOrder 來保存卡牌順序
+    const updateResult = await updateCardSetCardOrder(cardSetId, cardIds);
+    if (!updateResult) {
+      throw new Error("更新卡牌組順序失敗");
+    }
+
+    console.log("卡牌組和卡片儲存成功，卡牌組ID：", cardSetId);
+    return cardSetId;
+  } catch (error) {
+    console.error("上傳卡牌組和卡片失敗：", error.message);
+    return null;
   }
 }
