@@ -14,9 +14,15 @@ import {
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export async function getUserDocument(userId) {
+  if (!userId) {
+    console.error("用戶 ID 無效");
+    return null; // 檢查 userId 是否有效
+  }
+
   try {
     const docRef = doc(db, "users", userId);
     const docSnap = await getDoc(docRef);
+
     if (docSnap.exists()) {
       console.log("成功讀取會員資料：", docRef.id);
       return docSnap.data();
@@ -205,5 +211,61 @@ export async function uploadCardSetWithCards(cardSetData, cardContent, userId) {
   } catch (error) {
     console.error("上傳卡牌組和卡片失敗：", error.message);
     return null;
+  }
+}
+
+export async function getCardSet(cardSetId) {
+  if (!cardSetId) return null;
+  try {
+    const cardSetRef = doc(db, "cardSets", cardSetId);
+    const cardSetSnap = await getDoc(cardSetRef);
+    const cardSetData = cardSetSnap.data();
+    console.log("成功獲取卡牌組資料：", cardSetData);
+    return cardSetData;
+  } catch (error) {
+    console.error("獲取卡牌組資料資料失敗：", error);
+    return null;
+  }
+}
+
+export async function getStyle(styleId) {
+  if (!styleId) return null;
+  try {
+    const cardStyleRef = doc(db, "cardStyles", styleId);
+    const cardStyleSnap = await getDoc(cardStyleRef);
+    const cardStyleData = cardStyleSnap.data();
+    console.log("成功獲取卡牌組資料：", cardStyleData);
+    return cardStyleData;
+  } catch (error) {
+    console.error("獲取卡牌組資料資料失敗：", error);
+    return null;
+  }
+}
+
+export async function getTemplate(fieldTemplateId) {
+  if (!fieldTemplateId) return null;
+  try {
+    const cardTemplateRef = doc(db, "cardFields", fieldTemplateId);
+    const cardTemplateSnap = await getDoc(cardTemplateRef);
+    const cardTemplateData = cardTemplateSnap.data();
+    console.log("成功獲取卡牌組資料：", cardTemplateData);
+    return cardTemplateData;
+  } catch (error) {
+    console.error("獲取卡牌組資料資料失敗：", error);
+    return null;
+  }
+}
+
+export async function getCardsOfCardSet(cardSetId) {
+  if (!cardSetId) return null;
+  try {
+    const cardsRef = collection(db, "cards");
+    const q = query(cardsRef, where("cardSetId", "==", cardSetId));
+    const querySnapshot = await getDocs(q);
+    const cards = querySnapshot.docs.map((doc) => doc.data());
+    console.log("成功獲取卡牌組卡牌:", cards);
+    return cards;
+  } catch (error) {
+    console.error("獲取卡牌組卡牌失敗：", error);
   }
 }

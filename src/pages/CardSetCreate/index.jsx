@@ -32,7 +32,7 @@ function CardSetCreate() {
   const [invalidFields, setInvalidFields] = useState([]);
   const [cardSetData, setCardSetData] = useState({
     cardSetId: "",
-    userId: user ? user.userId : "",
+    userId: "",
     title: "",
     description: "",
     purpose: "",
@@ -69,6 +69,7 @@ function CardSetCreate() {
 
   useEffect(() => {
     console.log("目前的用戶資料：", user);
+
     if (user && user.labels) {
       const labelOptions = user.labels.map((label) => ({
         value: label,
@@ -145,6 +146,7 @@ function CardSetCreate() {
             );
             setCardSetData((prevInfo) => ({
               ...prevInfo,
+              userId: user.userId,
               fieldTemplateId: "XWQvUaViTDuaBkbOu4Xp",
             }));
           }
@@ -513,10 +515,11 @@ function CardSetCreate() {
 export default CardSetCreate;
 
 const Wrapper = styled.div`
-  margin: 60px auto;
+  margin: 80px auto;
   padding: 30px 20px;
   max-width: 1160px;
-  border: 1px solid black;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 `;
 
 const Heading = styled.h2`

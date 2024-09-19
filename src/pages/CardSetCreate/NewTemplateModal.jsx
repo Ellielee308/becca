@@ -838,7 +838,7 @@ const AddFieldModal = ({ onClose, onSave }) => {
           : {
               width: "200px",
               height: "200px",
-              objectFit: "cover",
+              objectFit: "contain",
             },
     };
     if (fieldName === "") {

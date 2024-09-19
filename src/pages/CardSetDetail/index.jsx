@@ -1,9 +1,802 @@
+import styled from "styled-components";
+import { useParams } from "react-router-dom";
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
+import {
+  getCardSet,
+  getStyle,
+  getTemplate,
+  getCardsOfCardSet,
+  getUserDocument,
+} from "../../utils/api";
+
 function CardSetDetail() {
+  const { cardSetId } = useParams();
+  const [cardSetData, setCardSetData] = useState(null);
+  const [template, setTemplate] = useState(null);
+  const [style, setStyle] = useState(null);
+  const [cards, setCards] = useState([]);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [ownerData, setOwnerData] = useState();
+  useEffect(() => {
+    const fetchCardSetData = async () => {
+      try {
+        const fetchedCardSetData = await getCardSet(cardSetId);
+        if (!fetchedCardSetData) throw new Error("Card set not found");
+
+        setCardSetData(fetchedCardSetData);
+
+        const cardStyle = await getStyle(fetchedCardSetData.styleId);
+        setStyle(cardStyle);
+
+        const cardTemplate = await getTemplate(
+          fetchedCardSetData.fieldTemplateId
+        );
+        setTemplate(cardTemplate);
+
+        const unorderedCards = await getCardsOfCardSet(cardSetId);
+
+        // 根據 cardSetData.cardOrder 陣列中的順序重排卡片
+        const orderedCards = fetchedCardSetData.cardOrder
+          .map((cardId) =>
+            unorderedCards.find((card) => card.cardId === cardId)
+          )
+          .filter(Boolean); // 過濾掉可能未找到的卡片
+
+        setCards(orderedCards);
+
+        // 確認 userId 是否有效
+        if (fetchedCardSetData.userId) {
+          const ownerData = await getUserDocument(fetchedCardSetData.userId);
+          setOwnerData(ownerData);
+        } else {
+          console.error("無效的 userId");
+        }
+      } catch (error) {
+        console.error("獲取卡牌組資料失敗：", error);
+      }
+    };
+
+    fetchCardSetData();
+  }, [cardSetId]);
+
+  const handleNextCard = () => {
+    setCurrentCardIndex((prevIndex) =>
+      prevIndex < cards.length - 1 ? prevIndex + 1 : prevIndex
+    );
+  };
+
+  const handlePreviousCard = () => {
+    setCurrentCardIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : prevIndex
+    );
+  };
+
+  if (!cardSetData || !cards || !ownerData) {
+    return <div>Loading...</div>; // 也可以根據需求顯示其他內容
+  }
   return (
-    <>
-      <div>CardSet</div>
-    </>
+    <Wrapper>
+      <Title>{cardSetData.title}</Title>
+      <CardContainer>
+        <ArrowIconContainer
+          disabled={currentCardIndex === 0}
+          onClick={handlePreviousCard}
+        >
+          <LeftArrowIcon />
+        </ArrowIconContainer>
+        {cardSetId && style && template && cards && (
+          <CardContent
+            currentStyle={style}
+            currentTemplate={template}
+            currentCard={cards[currentCardIndex]}
+          />
+        )}
+        <ArrowIconContainer
+          disabled={currentCardIndex === cards.length - 1}
+          onClick={handleNextCard}
+        >
+          <RightArrowIcon />
+        </ArrowIconContainer>
+      </CardContainer>
+      <CardSetDetailsWrapper>
+        <CardNumberWrapper>{`${currentCardIndex + 1} / ${
+          cards.length
+        }`}</CardNumberWrapper>
+        <ProgressBar>
+          <Progress
+            width={`${((currentCardIndex + 1) / cards.length) * 100}%`}
+          />
+        </ProgressBar>
+        <ActionWrapper>
+          <LabelWrapper>
+            <LabelIconContainer>
+              <LabelIcon />
+            </LabelIconContainer>
+            <LabelNameContainer>
+              <LabelNameContainer>
+                {cardSetData.labels.map((label, index) => (
+                  <LabelName key={index}>
+                    {label}
+                    {index < cardSetData.labels.length - 1 && ", "}
+                  </LabelName>
+                ))}
+              </LabelNameContainer>
+            </LabelNameContainer>
+          </LabelWrapper>
+        </ActionWrapper>
+        <InformationWrapper>
+          <ProfilePictureWrapper>
+            {cardSetData && ownerData && ownerData.profilePicture && (
+              <ProfilePicture src={ownerData.profilePicture} />
+            )}
+          </ProfilePictureWrapper>
+          <Description>{cardSetData.description}</Description>
+        </InformationWrapper>
+        <hr />
+        <SectionTitleWrapper>
+          <TimerIcon />
+          <SectionTitle>測驗</SectionTitle>
+        </SectionTitleWrapper>
+        <GameOptionsWrapper>
+          <GameOptionButton>配對題</GameOptionButton>
+          <GameOptionButton>選擇題</GameOptionButton>
+        </GameOptionsWrapper>
+        <hr />
+        <SectionTitleWrapper>
+          <ListIcon />
+          <SectionTitle>{`所有字卡  (${cards.length})`}</SectionTitle>
+        </SectionTitleWrapper>
+        <ListSection>
+          {cards.map((card, index) => (
+            <CardWrapper key={card.cardId}>
+              <SerialNumber>{index + 1}</SerialNumber>
+              <CardContentWrapper>
+                <Side>
+                  <SideHeading>正面</SideHeading>
+                  {template.frontFields.map((frontField, index) => {
+                    if (frontField.type === "text") {
+                      return (
+                        <TextWrapper key={index}>
+                          {card.frontFields[index].value}
+                        </TextWrapper>
+                      );
+                    } else if (frontField.type === "image") {
+                      return (
+                        <ImagePreview
+                          key={index}
+                          src={card.frontFields[index].value}
+                          alt={frontField.name}
+                        />
+                      );
+                    }
+                  })}
+                </Side>
+                <SideSplit />
+                <Side>
+                  <SideHeading>背面</SideHeading>
+                  {template.backFields.map((backField, index) => {
+                    if (backField.type === "text") {
+                      return (
+                        <TextWrapper key={index}>
+                          {card.backFields[index].value}
+                        </TextWrapper>
+                      );
+                    } else if (backField.type === "image") {
+                      return (
+                        <ImagePreview
+                          key={index}
+                          src={card.backFields[index].value}
+                          alt={backField.name}
+                        />
+                      );
+                    }
+                  })}
+                </Side>
+              </CardContentWrapper>
+            </CardWrapper>
+          ))}
+        </ListSection>
+      </CardSetDetailsWrapper>
+    </Wrapper>
   );
 }
 
 export default CardSetDetail;
+
+const Wrapper = styled.div`
+  margin: 80px auto;
+  padding: 30px 20px;
+  max-width: 1160px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+`;
+
+const Title = styled.div`
+  width: 60%;
+  margin: 32px auto;
+  font-size: 32px;
+  user-select: none;
+`;
+
+const CardContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+`;
+
+const ArrowIconContainer = styled.div`
+  flex-basis: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${(props) => (props.disabled ? "#d8d6d6" : "black")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+`;
+
+const CardSetDetailsWrapper = styled.div`
+  width: 60%;
+  margin: 20px auto; /* 上下邊距 */
+`;
+
+const CardNumberWrapper = styled.div`
+  width: fit-content;
+  font-size: 18px;
+  margin: 0 auto;
+  color: gray;
+  user-select: none;
+`;
+
+const ProgressBar = styled.div`
+  height: 10px;
+  background-color: #e0e0e0; /* 背景顏色 */
+  border-radius: 5px;
+  margin: 20px auto; /* 上下邊距 */
+`;
+
+const Progress = styled.div`
+  height: 100%;
+  width: ${(props) => props.width}; /* 根據進度設置寬度 */
+  background-color: #76c7c0; /* 完成顏色 */
+  border-radius: 5px;
+  transition: width 0.3s ease; /* 動畫效果 */
+`;
+
+const ActionWrapper = styled.div`
+  margin: 20px auto; /* 上下邊距 */
+  justify-content: space-between;
+`;
+
+const LabelWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const LabelIconContainer = styled.div`
+  width: 24px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+`;
+
+const LabelNameContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const LabelName = styled.span`
+  white-space: pre;
+  color: gray;
+  font-size: 14px;
+`;
+
+const InformationWrapper = styled.div`
+  margin: 20px auto; /* 上下邊距 */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const Description = styled.div`
+  font-size: 14px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  white-space: pre-wrap;
+`;
+
+const ProfilePictureWrapper = styled.div`
+  margin-right: 20px;
+  height: 80px;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ProfilePicture = styled.img`
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+const SectionTitleWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 20px auto; /* 上下邊距 */
+`;
+const SectionTitle = styled.h3`
+  margin-left: 16px;
+`;
+
+const GameOptionsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  margin: 20px auto; /* 上下邊距 */
+`;
+
+const GameOptionButton = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30%;
+  height: 80px;
+  background-color: #5a9bd4; /* 背景顏色 */
+  color: white; /* 字體顏色 */
+  border-radius: 8px; /* 邊角圓滑 */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #4f88bb;
+  }
+
+  &:active {
+    transform: scale(0.98); /* 點擊時輕微縮小 */
+  }
+`;
+
+const ListSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+`;
+
+const CardWrapper = styled.div`
+  padding: 20px 30px;
+  width: 100%;
+  min-height: 180px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const SerialNumber = styled.p`
+  font-size: 18px;
+  margin-bottom: 8px;
+`;
+
+const CardContentWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const Side = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+`;
+
+const SideSplit = styled.div`
+  height: 120px;
+  border-left: 1px solid #c9c5c5;
+  align-self: center;
+  margin: 0px 30px;
+`;
+
+const SideHeading = styled.p`
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #696767;
+`;
+
+const TextWrapper = styled.div`
+  font-size: 16px;
+  line-height: 30px;
+  border-bottom: 1px solid #c0c5c5;
+`;
+
+const ImagePreview = styled.img`
+  height: 80px;
+  width: auto;
+  margin: 0 auto;
+`;
+
+function CardContent({ currentStyle, currentTemplate, currentCard }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  const handleFlip = () => {
+    setIsFlipped((prevState) => !prevState);
+  };
+  useEffect(() => {
+    setIsFlipped(false);
+  }, [currentCard]);
+
+  return (
+    <CardViewWrapper onClick={handleFlip}>
+      <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
+        <FrontCard
+          isFlipped={isFlipped}
+          currentStyle={currentStyle}
+          currentCard={currentCard}
+        >
+          {currentCard &&
+            currentTemplate.frontFields.map((field, index) => {
+              const currentFrontField = currentCard.frontFields[index];
+              return (
+                <FieldContainer
+                  key={index}
+                  style={field.style}
+                  position={field.position}
+                >
+                  {renderFieldContent(
+                    field,
+                    currentFrontField ? currentFrontField.value : ""
+                  )}
+                </FieldContainer>
+              );
+            })}
+        </FrontCard>
+        <BackCard isFlipped={isFlipped} currentStyle={currentStyle}>
+          {currentCard &&
+            currentTemplate.backFields.map((field, index) => {
+              const currentBackField = currentCard.backFields[index];
+              return (
+                <FieldContainer
+                  key={index}
+                  style={field.style}
+                  position={field.position}
+                >
+                  {renderFieldContent(
+                    field,
+                    currentBackField ? currentBackField.value : ""
+                  )}
+                </FieldContainer>
+              );
+            })}
+        </BackCard>
+      </FlipCard>
+    </CardViewWrapper>
+  );
+}
+
+const renderFieldContent = (field, value) => {
+  switch (field.type) {
+    case "text":
+      return value; // 渲染文字內容
+    case "image":
+      return (
+        <ImageWrapper>
+          <Image src={value} alt={field.name} style={field.style} />
+        </ImageWrapper>
+      );
+    default:
+      return null; // 如果類型未定義，不渲染任何內容
+  }
+};
+
+const CardViewWrapper = styled.div`
+  align-self: center;
+  display: block;
+  margin: 52px 0px;
+  width: 600px;
+  height: 400px;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  cursor: pointer;
+`;
+
+const FlipCard = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: ${(props) => {
+    switch (props.currentStyle.animation) {
+      case "fade":
+        return "opacity 0.5s ease-in-out";
+      default:
+        return "all 0.5s ease-in-out";
+    }
+  }};
+  transform: ${(props) => {
+    switch (props.currentStyle.animation) {
+      case "horizontalFlip":
+        return props.isFlipped ? "rotateY(180deg)" : "rotateY(0)";
+      case "fade":
+        return "none";
+      default: // "vertical"
+        return props.isFlipped ? "rotateX(180deg)" : "rotateX(0)";
+    }
+  }};
+  border-radius: ${(props) => props.currentStyle.borderRadius};
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15);
+  &:hover {
+    transform: ${(props) => {
+      switch (props.currentStyle.animation) {
+        case "horizontalFlip":
+          return props.isFlipped ? "rotateY(175deg)" : "rotateY(2deg)";
+        case "fade":
+          return "none";
+        default: // "vertical"
+          return props.isFlipped ? "rotateX(175deg)" : "rotateX(2deg)";
+      }
+    }};
+    box-shadow: 0 20px 20px rgba(50, 60, 60, 0.2);
+  }
+`;
+
+const FrontCard = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  outline-style: ${(props) => props.currentStyle.borderStyle};
+  outline-color: ${(props) => props.currentStyle.borderColor};
+  outline-width: ${(props) => props.currentStyle.borderWidth};
+  background-color: ${(props) => props.currentStyle.backgroundColor};
+  border-radius: ${(props) => props.currentStyle.borderRadius};
+  backface-visibility: hidden;
+  font-family: ${(props) => props.currentStyle.fontFamily};
+  font-size: 32px;
+  opacity: ${(props) =>
+    props.currentStyle.animation === "fade" && props.isFlipped ? 0 : 1};
+  transition: ${(props) =>
+    props.currentStyle.animation === "fade"
+      ? "opacity 0.5s ease-in-out"
+      : "none"};
+`;
+
+const BackCard = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  outline-style: ${(props) => props.currentStyle.borderStyle};
+  outline-color: ${(props) => props.currentStyle.borderColor};
+  outline-width: ${(props) => props.currentStyle.borderWidth};
+  background-color: ${(props) => props.currentStyle.backgroundColor};
+  border-radius: ${(props) => props.currentStyle.borderRadius};
+  backface-visibility: hidden;
+  font-family: ${(props) => props.currentStyle.fontFamily};
+  transform: ${(props) => {
+    switch (props.currentStyle.animation) {
+      case "horizontalFlip":
+        return "rotateY(180deg)";
+      case "fade":
+        return "none";
+      default: // "vertical"
+        return "rotateX(180deg)";
+    }
+  }};
+  font-size: 32px;
+  opacity: ${(props) =>
+    props.currentStyle.animation === "fade" ? (props.isFlipped ? 1 : 0) : 1};
+  transition: ${(props) =>
+    props.currentStyle.animation === "fade"
+      ? "opacity 0.5s ease-in-out"
+      : "none"};
+  z-index: ${(props) => (props.isFlipped ? 3000 : 0)};
+`;
+
+const FieldContainer = styled.div`
+  position: absolute;
+  display: flex;
+  justify-content: ${(props) => props.style.textAlign || "center"};
+  align-items: center;
+  ${(props) =>
+    props.style &&
+    `
+    width: ${props.style.width};
+    height: ${props.style.height};
+    font-size: ${props.style.fontSize};
+    font-weight: ${props.style.fontWeight};
+    color: ${props.style.color};
+    background-color: ${props.style.backgroundColor};
+  `};
+  left: ${(props) => props.position?.x || "0"}px;
+  top: ${(props) => props.position?.y || "0"}px;
+  user-select: none;
+`;
+
+// 用於顯示圖片的樣式
+const ImageWrapper = styled.div`
+  position: relative;
+  display: inline-block; // 讓 ImageWrapper 的大小與圖片保持一致
+`;
+
+const Image = styled.img`
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: ${(props) => props.style?.objectFit || "cover"};
+  display: block;
+`;
+
+CardContent.propTypes = {
+  currentTemplate: PropTypes.shape({
+    templateName: PropTypes.string.isRequired,
+    frontFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(["text", "image"]).isRequired,
+        required: PropTypes.bool.isRequired,
+        position: PropTypes.shape({
+          x: PropTypes.number.isRequired,
+          y: PropTypes.number.isRequired,
+        }).isRequired,
+        style: PropTypes.shape({
+          width: PropTypes.string.isRequired,
+          height: PropTypes.string.isRequired,
+          fontSize: PropTypes.string,
+          fontWeight: PropTypes.string,
+          color: PropTypes.string,
+          textAlign: PropTypes.string,
+        }).isRequired,
+      })
+    ).isRequired,
+    backFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(["text", "image"]).isRequired,
+        required: PropTypes.bool.isRequired,
+        position: PropTypes.shape({
+          x: PropTypes.number.isRequired,
+          y: PropTypes.number.isRequired,
+        }).isRequired,
+        style: PropTypes.shape({
+          width: PropTypes.string.isRequired,
+          height: PropTypes.string.isRequired,
+          fontSize: PropTypes.string,
+          fontWeight: PropTypes.string,
+          color: PropTypes.string,
+          textAlign: PropTypes.string,
+        }).isRequired,
+      })
+    ).isRequired,
+  }).isRequired,
+  currentStyle: PropTypes.shape({
+    styleId: PropTypes.string,
+    userId: PropTypes.string.isRequired,
+    styleName: PropTypes.string.isRequired,
+    borderStyle: PropTypes.oneOf(["none", "solid", "dashed", "dotted"]),
+    borderColor: PropTypes.string,
+    borderWidth: PropTypes.string,
+    borderRadius: PropTypes.string,
+    backgroundColor: PropTypes.string.isRequired,
+    fontFamily: PropTypes.string.isRequired,
+    animation: PropTypes.oneOf(["verticalFlip", "horizontalFlip", "fade"])
+      .isRequired,
+  }).isRequired,
+  currentCard: PropTypes.shape({
+    cardId: PropTypes.string.isRequired,
+    cardSetId: PropTypes.string.isRequired,
+    userId: PropTypes.string.isRequired,
+    frontFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        value: PropTypes.string.isRequired,
+      })
+    ).isRequired,
+    backFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        value: PropTypes.string.isRequired,
+      })
+    ).isRequired,
+    createdAt: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
+const LeftArrowIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="32"
+    height="32"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 19.5 8.25 12l7.5-7.5"
+    />
+  </svg>
+);
+
+const RightArrowIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="32"
+    height="32"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m8.25 4.5 7.5 7.5-7.5 7.5"
+    />
+  </svg>
+);
+
+const LabelIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width="18"
+    height="18"
+  >
+    <path
+      fillRule="evenodd"
+      d="M5.25 2.25a3 3 0 0 0-3 3v4.318a3 3 0 0 0 .879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 0 0 5.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 0 0-2.122-.879H5.25ZM6.375 7.5a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
+
+const TimerIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="24"
+    height="24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"
+    />
+  </svg>
+);
+
+const ListIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="24"
+    height="24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+    />
+  </svg>
+);

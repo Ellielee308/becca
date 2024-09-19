@@ -24,7 +24,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="analytics" element={<UserAnalytics />} />
               <Route path="cardsets" element={<UserCardsets />} />
             </Route>
-            <Route path="cardset/:cardsetId" element={<CardSetDetail />} />
+            <Route path="cardset/:cardSetId" element={<CardSetDetail />} />
             <Route path="cardset/new" element={<CardSetCreate />} />
             <Route path="cardset/:cardsetId/edit" element={<CardSetEdit />} />
           </Route>
