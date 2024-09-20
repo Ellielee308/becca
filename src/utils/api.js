@@ -288,3 +288,46 @@ export async function getUserAllCardSets(userId) {
     return null;
   }
 }
+
+export async function createQuiz(data) {
+  if (
+    !data ||
+    typeof data !== "object" ||
+    !data.userId ||
+    !data.cardSetId ||
+    !data.quizType
+  ) {
+    console.error("無效的測驗資料！請確保 userId, cardSetId, quizType 存在。");
+    return null;
+  }
+  const quizzesRef = collection(db, "quizzes");
+  try {
+    const docRef = await addDoc(quizzesRef, {
+      ...data,
+      createdAt: serverTimestamp(),
+    });
+    await updateDoc(doc(db, "quizzes", docRef.id), { quizId: docRef.id });
+    console.log("測驗成功創建，ID: ", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("創建測驗失敗：", error);
+    return null;
+  }
+}
+
+export async function getQuiz(quizId) {
+  if (!quizId) {
+    console.error("無效的測驗資料！請確保 quizId 存在。");
+    return null;
+  }
+  try {
+    const quizRef = doc(db, "quizzes", quizId);
+    const quizSnap = await getDoc(quizRef);
+    const quizData = quizSnap.data();
+    console.log("成功獲取測驗資料：", quizData);
+    return quizData;
+  } catch (error) {
+    console.error("獲取測驗資料失敗：", error);
+    return null;
+  }
+}

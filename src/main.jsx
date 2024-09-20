@@ -10,6 +10,7 @@ import UserCardSets from "./pages/UserCardSets";
 import CardSetDetail from "./pages/CardSetDetail";
 import CardSetCreate from "./pages/CardSetCreate";
 import CardSetEdit from "./pages/CardSetEdit";
+import Quiz from "./pages/Quiz";
 import { UserProvider } from "./context/UserContext";
 
 createRoot(document.getElementById("root")).render(
@@ -27,6 +28,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="cardset/:cardSetId" element={<CardSetDetail />} />
             <Route path="cardset/new" element={<CardSetCreate />} />
             <Route path="cardset/:cardsetId/edit" element={<CardSetEdit />} />
+            <Route path="quiz/:quizId" element={<Quiz />} />
           </Route>
         </Routes>
       </BrowserRouter>

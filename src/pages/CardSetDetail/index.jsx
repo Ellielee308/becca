@@ -9,6 +9,7 @@ import {
   getCardsOfCardSet,
   getUserDocument,
 } from "../../utils/api";
+import CreateQuizModal from "./CreateQuizModal";
 
 function CardSetDetail() {
   const { cardSetId } = useParams();
@@ -18,6 +19,7 @@ function CardSetDetail() {
   const [cards, setCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [ownerData, setOwnerData] = useState();
+  const [showCreateQuizModal, setShowCreateQuizModal] = useState(null);
   useEffect(() => {
     const fetchCardSetData = async () => {
       try {
@@ -77,6 +79,14 @@ function CardSetDetail() {
   }
   return (
     <Wrapper>
+      {showCreateQuizModal && (
+        <CreateQuizModal
+          onClose={() => setShowCreateQuizModal(null)}
+          quizType={showCreateQuizModal}
+          cardSetId={cardSetId}
+          totalCardsNumber={cards.length}
+        />
+      )}
       <Title>{cardSetData.title}</Title>
       <CardContainer>
         <ArrowIconContainer
@@ -137,8 +147,22 @@ function CardSetDetail() {
           <SectionTitle>測驗</SectionTitle>
         </SectionTitleWrapper>
         <GameOptionsWrapper>
-          <GameOptionButton>配對題</GameOptionButton>
-          <GameOptionButton>選擇題</GameOptionButton>
+          <GameOptionButton
+            onClick={() => {
+              if (cards.length < 4) {
+                alert("至少要有四張字卡才能進行配對測驗！");
+                return;
+              }
+              setShowCreateQuizModal("matching");
+            }}
+          >
+            配對題
+          </GameOptionButton>
+          <GameOptionButton
+            onClick={() => setShowCreateQuizModal("multipleChoices")}
+          >
+            選擇題
+          </GameOptionButton>
         </GameOptionsWrapper>
         <hr />
         <SectionTitleWrapper>
@@ -160,13 +184,18 @@ function CardSetDetail() {
                         </TextWrapper>
                       );
                     } else if (frontField.type === "image") {
-                      return (
-                        <ImagePreview
-                          key={index}
-                          src={card.frontFields[index].value}
-                          alt={frontField.name}
-                        />
-                      );
+                      if (
+                        card.frontFields[index]?.value &&
+                        card.frontFields[index].value.trim() !== ""
+                      ) {
+                        return (
+                          <ImagePreview
+                            key={index}
+                            src={card.frontFields[index].value}
+                            alt={frontField.name}
+                          />
+                        );
+                      }
                     }
                   })}
                 </Side>
@@ -181,13 +210,18 @@ function CardSetDetail() {
                         </TextWrapper>
                       );
                     } else if (backField.type === "image") {
-                      return (
-                        <ImagePreview
-                          key={index}
-                          src={card.backFields[index].value}
-                          alt={backField.name}
-                        />
-                      );
+                      if (
+                        card.backFields[index]?.value &&
+                        card.backFields[index].value.trim() !== ""
+                      ) {
+                        return (
+                          <ImagePreview
+                            key={index}
+                            src={card.backFields[index].value}
+                            alt={backField.name}
+                          />
+                        );
+                      }
                     }
                   })}
                 </Side>
@@ -479,15 +513,20 @@ function CardContent({ currentStyle, currentTemplate, currentCard }) {
 const renderFieldContent = (field, value) => {
   switch (field.type) {
     case "text":
-      return value; // 渲染文字內容
+      return value;
+
     case "image":
-      return (
-        <ImageWrapper>
-          <Image src={value} alt={field.name} style={field.style} />
-        </ImageWrapper>
-      );
+      if (value && value.trim() !== "") {
+        return (
+          <ImageWrapper>
+            <Image src={value} alt={field.name} style={field.style} />
+          </ImageWrapper>
+        );
+      }
+      return null;
+
     default:
-      return null; // 如果類型未定義，不渲染任何內容
+      return null;
   }
 };
 
