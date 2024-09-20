@@ -269,3 +269,22 @@ export async function getCardsOfCardSet(cardSetId) {
     console.error("獲取卡牌組卡牌失敗：", error);
   }
 }
+
+export async function getUserAllCardSets(userId) {
+  if (!userId) {
+    console.error("無效的用戶ID");
+    return null;
+  }
+
+  const cardSetsRef = collection(db, "cardSets");
+  try {
+    const q = query(cardSetsRef, where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
+    const cardSets = querySnapshot.docs.map((doc) => doc.data());
+    console.log("成功獲得用戶所有卡牌組：", cardSets);
+    return cardSets;
+  } catch (error) {
+    console.error("獲取用戶所有卡牌組失敗：", error);
+    return null;
+  }
+}

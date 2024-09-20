@@ -307,7 +307,7 @@ function CardSetCreate() {
           onChange={(e) =>
             setCardSetData({ ...cardSetData, title: e.target.value })
           }
-          isInvalid={invalidFields.includes("title")}
+          $isInvalid={invalidFields.includes("title")}
         />
         <InputLabel htmlFor="description">簡介</InputLabel>
         <Textarea
@@ -397,7 +397,7 @@ function CardSetCreate() {
               if (e.target.checked)
                 setCardSetData({ ...cardSetData, visibility: "public" });
             }}
-            isInvalid={invalidFields.includes("visibility")}
+            $isInvalid={invalidFields.includes("visibility")}
           />
           <InputLabel htmlFor="public">公開</InputLabel>
           <InputRadio
@@ -409,7 +409,7 @@ function CardSetCreate() {
               if (e.target.checked)
                 setCardSetData({ ...cardSetData, visibility: "private" });
             }}
-            isInvalid={invalidFields.includes("visibility")}
+            $isInvalid={invalidFields.includes("visibility")}
           />
           <InputLabel htmlFor="private">私人</InputLabel>
         </RadioWrapper>
@@ -552,7 +552,7 @@ const Input = styled.input`
   height: 36px;
   padding: 0px 5px;
   border: ${(props) =>
-    props.isInvalid ? "solid 1px red" : "solid 1px #c1c0c0"};
+    props.$isInvalid ? "solid 1px red" : "solid 1px #c1c0c0"};
   border-radius: 4px;
   font-size: 18px;
   &:focus {

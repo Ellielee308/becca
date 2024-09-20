@@ -15,14 +15,14 @@ export default function TemplatePreview({ currentTemplate }) {
             currentTemplate.frontFields.map((frontField, index) => {
               if (frontField.type === "text") {
                 return (
-                  <TextWrapper key={index} isRequired={frontField.required}>
+                  <TextWrapper key={index} $isRequired={frontField.required}>
                     {frontField.name}
                   </TextWrapper>
                 );
               } else if (frontField.type === "image") {
                 return (
                   <ImagePreviewWrapper key={index}>
-                    <ImageFieldName isRequired={frontField.required}>
+                    <ImageFieldName $isRequired={frontField.required}>
                       {frontField.name}
                     </ImageFieldName>
                     <ImagePreview src={imageIcon} alt={frontField.name} />
@@ -42,14 +42,14 @@ export default function TemplatePreview({ currentTemplate }) {
             currentTemplate.backFields.map((backField, index) => {
               if (backField.type === "text") {
                 return (
-                  <TextWrapper key={index} isRequired={backField.required}>
+                  <TextWrapper key={index} $isRequired={backField.required}>
                     {backField.name}
                   </TextWrapper>
                 );
               } else if (backField.type === "image") {
                 return (
                   <ImagePreviewWrapper key={index}>
-                    <ImageFieldName isRequired={backField.required}>
+                    <ImageFieldName $isRequired={backField.required}>
                       {backField.name}
                     </ImageFieldName>
                     <ImagePreview src={imageIcon} alt={backField.name} />
@@ -120,7 +120,7 @@ const TextWrapper = styled.div`
   border: 1px solid #c1c0c0;
   font-size: 14px;
   line-height: 30px;
-  color: ${(props) => (props.isRequired ? "red" : "rgb(84, 84, 84)")};
+  color: ${(props) => (props.$isRequired ? "red" : "rgb(84, 84, 84)")};
   background-color: rgba(239, 239, 239, 0.3);
   user-select: none;
 `;
@@ -132,7 +132,7 @@ const ImagePreviewWrapper = styled.div`
 `;
 const ImageFieldName = styled.p`
   font-size: 14px;
-  color: ${(props) => (props.isRequired ? "red" : "#636262")};
+  color: ${(props) => (props.$isRequired ? "red" : "#636262")};
 `;
 
 const ImagePreview = styled.img`

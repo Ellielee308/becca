@@ -11,4 +11,6 @@ const Wrapper = styled.div`
   padding: 20px 15px;
   background-color: #eff7ff;
   text-align: center;
+  position: relative; /* 確保有 position */
+  z-index: 999; /* 調整 z-index */
 `;

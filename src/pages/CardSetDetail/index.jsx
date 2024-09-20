@@ -73,7 +73,7 @@ function CardSetDetail() {
   };
 
   if (!cardSetData || !cards || !ownerData) {
-    return <div>Loading...</div>; // 也可以根據需求顯示其他內容
+    return <div>Loading...</div>;
   }
   return (
     <Wrapper>
@@ -114,14 +114,12 @@ function CardSetDetail() {
               <LabelIcon />
             </LabelIconContainer>
             <LabelNameContainer>
-              <LabelNameContainer>
-                {cardSetData.labels.map((label, index) => (
-                  <LabelName key={index}>
-                    {label}
-                    {index < cardSetData.labels.length - 1 && ", "}
-                  </LabelName>
-                ))}
-              </LabelNameContainer>
+              {cardSetData.labels.map((label, index) => (
+                <LabelName key={index}>
+                  {label}
+                  {index < cardSetData.labels.length - 1 && ", "}
+                </LabelName>
+              ))}
             </LabelNameContainer>
           </LabelWrapper>
         </ActionWrapper>
