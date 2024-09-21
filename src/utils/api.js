@@ -248,10 +248,10 @@ export async function getTemplate(fieldTemplateId) {
     const cardTemplateRef = doc(db, "cardFields", fieldTemplateId);
     const cardTemplateSnap = await getDoc(cardTemplateRef);
     const cardTemplateData = cardTemplateSnap.data();
-    console.log("成功獲取卡牌組資料：", cardTemplateData);
+    console.log("成功獲取模板：", cardTemplateData);
     return cardTemplateData;
   } catch (error) {
-    console.error("獲取卡牌組資料資料失敗：", error);
+    console.error("獲取模板資料失敗：", error);
     return null;
   }
 }
