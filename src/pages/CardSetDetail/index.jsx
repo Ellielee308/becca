@@ -124,12 +124,16 @@ function CardSetDetail() {
               <LabelIcon />
             </LabelIconContainer>
             <LabelNameContainer>
-              {cardSetData.labels.map((label, index) => (
-                <LabelName key={index}>
-                  {label}
-                  {index < cardSetData.labels.length - 1 && ", "}
-                </LabelName>
-              ))}
+              {cardSetData.labels.length > 0 ? (
+                cardSetData.labels.map((label, index) => (
+                  <LabelName key={index}>
+                    {label}
+                    {index < cardSetData.labels.length - 1 && ", "}
+                  </LabelName>
+                ))
+              ) : (
+                <LabelName>無標籤</LabelName>
+              )}
             </LabelNameContainer>
           </LabelWrapper>
         </ActionWrapper>

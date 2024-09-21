@@ -64,12 +64,16 @@ function UserCardSets() {
                       <LabelIcon />
                     </LabelIconContainer>
                     <LabelNameContainer>
-                      {cardSet.labels.map((label, index) => (
-                        <LabelName key={index}>
-                          {label}
-                          {index < cardSet.labels.length - 1 && ", "}
-                        </LabelName>
-                      ))}
+                      {cardSet.labels.length > 0 ? (
+                        cardSet.labels.map((label, index) => (
+                          <LabelName key={index}>
+                            {label}
+                            {index < cardSet.labels.length - 1 && ", "}
+                          </LabelName>
+                        ))
+                      ) : (
+                        <LabelName>無標籤</LabelName>
+                      )}
                     </LabelNameContainer>
                   </LabelWrapper>
                 </CardSetDetailsContainer>
