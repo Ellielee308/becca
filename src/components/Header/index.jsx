@@ -11,6 +11,9 @@ function Header() {
         <Link to="/">BECCA</Link>
       </LogoText>
       <NavigateWrapper>
+        {user && user.profilePicture && (
+          <WelcomeMessage>{`Welcome back, ${user.username}!`}</WelcomeMessage>
+        )}
         <Link to="/cardset/new">
           <IconContainer>
             <PlusIcon />
@@ -56,6 +59,13 @@ const NavigateWrapper = styled.div`
   align-items: center;
   justify-content: center;
   gap: 12px;
+`;
+
+const WelcomeMessage = styled.p`
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  margin-right: 8px;
+  user-select: none;
 `;
 
 const ProfilePictureWrapper = styled.div`
