@@ -163,7 +163,13 @@ function CardSetDetail() {
             配對題
           </GameOptionButton>
           <GameOptionButton
-            onClick={() => setShowCreateQuizModal("multipleChoices")}
+            onClick={() => {
+              if (cards.length < 4) {
+                alert("至少要有四張字卡才能進行選擇題測驗！");
+                return;
+              }
+              setShowCreateQuizModal("multipleChoices");
+            }}
           >
             選擇題
           </GameOptionButton>
