@@ -1,11 +1,16 @@
 import styled from "styled-components";
 import { useRef, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
+import { updateQuiz } from "../../utils/api";
 
 function Matching({ quizData, cardsData, template, style }) {
   const [randomCardPairs, setRandomCardPairs] = useState([]);
   const [selectedPairs, setSelectedPairs] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
+  const [pairStatus, setPairStatus] = useState(null);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [attempts, setAttempts] = useState(0); // 總配對次數
   const [timer, setTimer] = useState(0);
   // const cardRef = useRef(null);
   // const [cardWidth, setCardWidth] = useState(0);
@@ -57,6 +62,52 @@ function Matching({ quizData, cardsData, template, style }) {
     return () => clearInterval(interval);
   }, [randomCardPairs, isGameOver]);
 
+  useEffect(() => {
+    if (
+      matchedPairs.length === randomCardPairs.length &&
+      randomCardPairs.length > 0
+      //避免在初始化的時候就成立
+    ) {
+      setIsGameOver(true);
+      const timeUsed = timer;
+      const accuracy = (matchedPairs.length / 2 / attempts) * 100;
+      const attemptsMade = attempts;
+
+      const quizId = quizData.quizId;
+      updateQuiz(quizId, {
+        timeUsed,
+        accuracy,
+        attempts: attemptsMade,
+      });
+    }
+  }, [matchedPairs, randomCardPairs.length, timer, attempts, quizData]);
+
+  useEffect(() => {
+    if (selectedPairs.length === 2) {
+      const [firstCard, secondCard] = selectedPairs;
+      setAttempts((prev) => prev + 1);
+
+      // 延遲取消選取狀態
+      setTimeout(() => {
+        if (firstCard.cardId === secondCard.cardId) {
+          setMatchedPairs((prevMatchedPairs) => [
+            ...prevMatchedPairs,
+            firstCard,
+            secondCard,
+          ]);
+          setPairStatus("success");
+        } else {
+          setPairStatus("fail");
+        }
+
+        setTimeout(() => {
+          setSelectedPairs([]);
+          setPairStatus(null);
+        }, 500);
+      }, 500); // 500ms 延遲，確保選中動畫能顯示
+    }
+  }, [selectedPairs]);
+
   const formatTime = (time) => {
     const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
     const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
@@ -72,7 +123,6 @@ function Matching({ quizData, cardsData, template, style }) {
       // 如果點選重複的第一張卡片，取消選擇
       setSelectedPairs([]);
     } else {
-      // 如果還沒選滿兩張，繼續選擇
       if (newSelection.length < 2) {
         newSelection.push(card);
         setSelectedPairs(newSelection);
@@ -87,21 +137,6 @@ function Matching({ quizData, cardsData, template, style }) {
     );
   };
 
-  useEffect(() => {
-    if (selectedPairs.length === 2) {
-      const [firstCard, secondCard] = selectedPairs;
-
-      if (firstCard.cardId === secondCard.cardId) {
-        setMatchedPairs((prevMatchedPairs) => [
-          ...prevMatchedPairs,
-          firstCard,
-          secondCard,
-        ]);
-      }
-      setSelectedPairs([]);
-    }
-  }, [selectedPairs]);
-
   const isCardMatched = (card) => {
     return matchedPairs.some(
       (matchedCard) =>
@@ -109,15 +144,16 @@ function Matching({ quizData, cardsData, template, style }) {
     );
   };
 
-  useEffect(() => {
-    if (
-      matchedPairs.length === randomCardPairs.length &&
-      randomCardPairs.length > 0
-      //避免在初始化的時候就成立
-    ) {
-      setIsGameOver(true);
-    }
-  }, [matchedPairs, randomCardPairs.length]);
+  const getOutlineColor = (isMatched, isSelected, pairStatus) => {
+    if (isMatched) return "green";
+    if (isSelected && pairStatus === "success") return "green";
+    if (isSelected && pairStatus === "fail") return "red";
+    if (isSelected) return "#4e98dd"; // 選中狀態，藍色
+    return "none";
+  };
+
+  const accuracy =
+    attempts > 0 ? ((matchedPairs.length / 2 / attempts) * 100).toFixed(2) : 0;
 
   return (
     <Wrapper>
@@ -143,6 +179,17 @@ function Matching({ quizData, cardsData, template, style }) {
                 cardId: randomCard.cardId,
                 side: randomCard.side,
               })}
+              $outlineColor={getOutlineColor(
+                isCardMatched({
+                  cardId: randomCard.cardId,
+                  side: randomCard.side,
+                }),
+                isCardSelected({
+                  cardId: randomCard.cardId,
+                  side: randomCard.side,
+                }),
+                pairStatus
+              )} // 動態設置 outline 顏色
             >
               <CardContent>
                 {randomCard.side === "front"
@@ -180,6 +227,13 @@ function Matching({ quizData, cardsData, template, style }) {
             </CardWrapper>
           ))}
       </CardGridWrapper>
+      {matchedPairs.length > 0 && isGameOver && (
+        <QuizResultModal
+          timer={timer}
+          accuracy={accuracy}
+          cardSetId={quizData.cardSetId}
+        />
+      )}
     </Wrapper>
   );
 }
@@ -235,10 +289,9 @@ const FieldContainer = styled.div`
   user-select: none;
 `;
 
-// 用於顯示圖片的樣式
 const ImageWrapper = styled.div`
   position: relative;
-  display: inline-block; // 讓 ImageWrapper 的大小與圖片保持一致
+  display: inline-block;
 `;
 
 const Image = styled.img`
@@ -277,11 +330,7 @@ const CardWrapper = styled.div`
   padding-top: calc(2 / 3 * 100%);
   background-color: ${(props) => props.$style.backgroundColor};
   opacity: ${(props) =>
-    props.$isMatched
-      ? "0"
-      : props.$isSelected
-      ? "1"
-      : "0.8"}; /* 如果配對，完全透明 */
+    props.$isMatched ? "0" : props.$isSelected ? "1" : "0.8"};
   pointer-events: ${(props) =>
     props.$isMatched ? "none" : "auto"}; /* 配對後禁用互動 */
 
@@ -292,18 +341,14 @@ const CardWrapper = styled.div`
   font-family: ${(props) => props.$style.fontFamily};
   overflow-y: auto;
   cursor: pointer;
-  outline: ${(props) => (props.$isSelected ? "2px solid #4e98dd" : "none")};
+  outline: ${(props) => props.$outlineColor} 1px solid;
 
-  /* 添加動畫效果 */
   transition: transform 0.3s ease, box-shadow 0.3s ease, outline 0.1s ease,
-    opacity 0.5s ease; /* 增加 opacity 過渡 */
+    opacity 0.5s ease;
 
-  /* 選中時的效果 */
   transform: ${(props) => (props.$isSelected ? "translateY(-5px)" : "none")};
   box-shadow: ${(props) =>
-    props.$isSelected
-      ? "0 4px 8px rgba(0, 0, 0, 0.2)" /* 明顯的陰影效果 */
-      : "none"};
+    props.$isSelected ? "0 4px 8px rgba(0, 0, 0, 0.2)" : "none"};
 `;
 
 const CardContent = styled.div`
@@ -317,3 +362,124 @@ const CardContent = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
+Matching.propTypes = {
+  quizData: PropTypes.object,
+  cardsData: PropTypes.array,
+  template: PropTypes.object,
+  style: PropTypes.object,
+};
+
+const QuizResultModal = ({ timer, accuracy, cardSetId }) => {
+  const formatTime = (time) => {
+    const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
+    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
+    const milliseconds = String(Math.floor((time % 1000) / 100));
+    return `${minutes}:${seconds}.${milliseconds}`;
+  };
+  return (
+    <ModalWrapper>
+      <ModalContent>
+        <Heading>測驗結果</Heading>
+        <Title>花費時間：</Title>
+        <Time>{formatTime(timer)}</Time>
+        <Title>答對率：</Title>
+        <Accuracy>{accuracy}%</Accuracy>
+        <ButtonWrapper>
+          <ReviewButton>
+            <Link to={`/cardset/${cardSetId}`}>複習卡牌 </Link>
+          </ReviewButton>
+          <LeaveButton>
+            <Link to="/user/me/cardsets">離開</Link>
+          </LeaveButton>
+        </ButtonWrapper>
+      </ModalContent>
+    </ModalWrapper>
+  );
+};
+
+const ModalWrapper = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 40px 40px 28px 40px;
+  border-radius: 8px;
+  width: 400px;
+  height: fit-content;
+  position: relative;
+  overflow-y: auto;
+`;
+
+const Heading = styled.h3`
+  font-size: 20px;
+  margin-bottom: 18px;
+`;
+
+const Title = styled.p`
+  font-size: 16px;
+  margin-bottom: 28px;
+`;
+
+const Time = styled.p`
+  text-align: center;
+  font-size: 24px;
+  color: gray;
+  font-family: monospace;
+  margin-bottom: 18px;
+`;
+
+const Accuracy = styled.p`
+  text-align: center;
+  font-size: 24px;
+  color: gray;
+  font-family: monospace;
+  margin-bottom: 24px;
+`;
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const ReviewButton = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 45%;
+  height: 50px;
+  border-radius: 8px;
+  background-color: #adbce5;
+  cursor: pointer;
+  user-select: none;
+`;
+
+const LeaveButton = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 45%;
+  height: 50px;
+  border-radius: 8px;
+  background-color: #f59873;
+  cursor: pointer;
+  user-select: none;
+`;
+
+QuizResultModal.propTypes = {
+  timer: PropTypes.number.isRequired,
+  accuracy: PropTypes.number.isRequired,
+  cardSetId: PropTypes.string.isRequired,
+};

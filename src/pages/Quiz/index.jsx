@@ -91,7 +91,7 @@ function Quiz() {
 export default Quiz;
 
 const Wrapper = styled.div`
-  margin: 80px auto;
+  margin: 100px auto 120px auto;
   padding: 30px 20px;
   max-width: 1160px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);

@@ -223,3 +223,10 @@ const CreateButton = styled.input`
     cursor: not-allowed; /* 禁用時的鼠標樣式 */
   }
 `;
+
+CreateQuizModal.propTypes = {
+  onClose: PropTypes.func,
+  quizType: PropTypes.string,
+  totalCardsNumber: PropTypes.number,
+  cardSetId: PropTypes.string,
+};

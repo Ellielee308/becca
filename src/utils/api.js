@@ -331,3 +331,21 @@ export async function getQuiz(quizId) {
     return null;
   }
 }
+
+export async function updateQuiz(quizId, newQuizData) {
+  if (!quizId) {
+    console.error("無效的測驗資料！請確保 quizId 存在。");
+    return null;
+  }
+  try {
+    const quizRef = doc(db, "quizzes", quizId);
+    await updateDoc(quizRef, {
+      ...newQuizData,
+      completedAt: serverTimestamp(),
+    });
+    console.log("更新測驗資料成功！");
+  } catch (error) {
+    console.error("更新測驗資料失敗：", error);
+    return null;
+  }
+}
