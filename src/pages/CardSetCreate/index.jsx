@@ -44,6 +44,7 @@ function CardSetCreate() {
     cardOrder: [],
   });
   const [cardContent, setCardContent] = useState([]);
+  const [suggestedTranslations, setSuggestedTranslations] = useState([]);
 
   useEffect(() => {
     if (
@@ -64,6 +65,7 @@ function CardSetCreate() {
           })),
         }));
       setCardContent(newCardContent);
+      setSuggestedTranslations([]);
     }
   }, [selectedTemplate]);
 
@@ -354,7 +356,7 @@ function CardSetCreate() {
         {cardSetData.purpose === "languageLearning" && (
           <>
             <InputLabel htmlFor="label">
-              你想要學習的語言是什麼？<RequiredNotice>*</RequiredNotice>
+              正面字卡顯示的字詞語言是什麼呢？<RequiredNotice>*</RequiredNotice>
             </InputLabel>
             <Select
               options={languageOptions}
@@ -367,7 +369,7 @@ function CardSetCreate() {
               styles={selectStyles(invalidFields.includes("learningLanguage"))}
             />
             <InputLabel htmlFor="label">
-              你想要以什麼語言學習呢？<RequiredNotice>*</RequiredNotice>
+              背面字卡顯示的字詞語言是什麼呢？<RequiredNotice>*</RequiredNotice>
             </InputLabel>
             <Select
               options={languageOptions}
@@ -470,6 +472,10 @@ function CardSetCreate() {
           currentTemplate={selectedTemplate}
           cardContent={cardContent}
           setCardContent={setCardContent}
+          isPurposeLanguageLearning={cardSetData.purpose === "languageLearning"}
+          interfaceLanguage={cardSetData.interfaceLanguage}
+          suggestedTranslations={suggestedTranslations}
+          setSuggestedTranslations={setSuggestedTranslations}
         />
         <Submit type="submit" value="儲存" />
       </Form>

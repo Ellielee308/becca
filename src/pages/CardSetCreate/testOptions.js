@@ -1,8 +1,14 @@
 export const languageOptions = [
-  { value: "english", label: "英語" },
-  { value: "chinese", label: "中文" },
-  { value: "korean", label: "韓語" },
-  { value: "japanese", label: "日語" },
+  { value: "en", label: "英語" },
+  { value: "zh-TW", label: "繁體中文" },
+  { value: "ko", label: "韓語" },
+  { value: "ja", label: "日語" },
+  { value: "fr", label: "法語" },
+  { value: "de", label: "德語" },
+  { value: "es", label: "西班牙語" },
+  { value: "th", label: "泰語" },
+  { value: "it", label: "義大利語" },
+  { value: "pt", label: "葡萄牙語" },
   { value: "others", label: "其他" },
 ];
 
@@ -43,107 +49,4 @@ export const defaultCardField = {
     },
   ],
   createdAt: "2024-09-03T12:34:56Z", //資料庫時間
-};
-
-export const defaultCardFieldWithSentences = {
-  fieldTemplateId: "", //填入docRef.id
-  userId: "default",
-  templateName: "正面附例句",
-  frontFields: [
-    {
-      name: "單字 Vocabulary",
-      type: "text",
-      required: true,
-      position: { x: 150, y: 80 },
-      style: {
-        width: "300px",
-        height: "200px",
-        fontSize: "24px",
-        fontWeight: "bold",
-        color: "#333333",
-        textAlign: "center",
-      },
-    },
-    {
-      name: "例句 This is a sentence.",
-      type: "text",
-      required: true,
-      position: { x: 150, y: 200 },
-      style: {
-        width: "300px",
-        height: "200px",
-        fontSize: "18px",
-        fontWeight: "normal",
-        color: "#333333",
-        textAlign: "left",
-      },
-    },
-  ],
-  backFields: [
-    {
-      name: "字義 Definition",
-      type: "text",
-      required: true,
-      position: { x: 150, y: 100 },
-      style: {
-        width: "300px",
-        height: "200px",
-        fontSize: "24px",
-        fontWeight: "bold",
-        color: "#333333",
-        textAlign: "center",
-      },
-    },
-  ],
-  createdAt: "", //填入資料庫時間
-};
-
-export const defaultCardFieldWithImage = {
-  fieldTemplateId: "", //填入docRef.id
-  userId: "default",
-  templateName: "背面附圖片",
-  frontFields: [
-    {
-      name: "單字 Vocabulary",
-      type: "text",
-      required: true,
-      position: { x: 150, y: 100 },
-      style: {
-        width: "300px",
-        height: "200px",
-        fontSize: "24px",
-        fontWeight: "bold",
-        color: "#333333",
-        textAlign: "center",
-      },
-    },
-  ],
-  backFields: [
-    {
-      name: "字義 Definition",
-      type: "text",
-      required: true,
-      position: { x: 150, y: 50 },
-      style: {
-        width: "300px",
-        height: "200px",
-        fontSize: "24px",
-        fontWeight: "bold",
-        color: "#333333",
-        textAlign: "center",
-      },
-    },
-    {
-      name: "示意圖 Image",
-      type: "image",
-      required: false,
-      position: { x: 230, y: 200 },
-      style: {
-        width: "150px",
-        height: "150px",
-        objectFit: "cover",
-      },
-    },
-  ],
-  createdAt: "",
 };

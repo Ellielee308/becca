@@ -423,3 +423,31 @@ export async function updateActiveDays(userId) {
     throw error;
   }
 }
+
+const googleTranslateApiKey = import.meta.env.VITE_GOOGLE_TRANSLATE_API_KEY;
+
+const translateUrl = `https://translation.googleapis.com/language/translate/v2?key=${googleTranslateApiKey}`;
+
+export async function translateText(text, targetLanguage) {
+  const response = await fetch(translateUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      q: text,
+      target: targetLanguage,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (data.error) {
+    console.error("翻譯錯誤:", data.error.message);
+    return;
+  }
+
+  const translatedText = data.data.translations[0].translatedText;
+  console.log(`翻譯結果: ${translatedText}`);
+  return translatedText;
+}
