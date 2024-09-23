@@ -1,28 +1,34 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { getUserDocument } from "../utils/api";
+import { onAuthStateChanged } from "firebase/auth"; // 引入 Firebase 的監聽函數
+import { auth } from "../utils/firebaseConfig";
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // 用戶資料狀態
-  // 使用測試用的會員 ID 進行初始化
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const testUserId = "MRvw8pLirv7B0y4zZlnB"; // 測試用會員 ID
-    updateUser(testUserId); // 初始化時獲取用戶資料
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        try {
+          const userData = await getUserDocument(currentUser.uid);
+          console.log("獲取已登入用戶資料：", userData);
+          setUser(userData);
+        } catch (error) {
+          console.error("獲取用戶資料失敗：", error);
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
-  const updateUser = async (userId) => {
-    try {
-      const userData = await getUserDocument(userId);
-      console.log("獲取的用戶資料：", userData);
-      setUser(userData);
-    } catch (error) {
-      console.error("獲取用戶資料失敗：", error);
-    }
-  };
-
   return (
-    <UserContext.Provider value={{ user, updateUser }}>
+    <UserContext.Provider value={{ user, setUser, loading }}>
       {children}
     </UserContext.Provider>
   );

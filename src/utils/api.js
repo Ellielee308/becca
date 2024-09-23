@@ -1,4 +1,4 @@
-import { db, storage } from "./firebaseConfig";
+import { db, storage, auth } from "./firebaseConfig";
 import {
   collection,
   addDoc,
@@ -10,8 +10,14 @@ import {
   query,
   where,
   getDocs,
+  setDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 export async function getUserDocument(userId) {
   if (!userId) {
@@ -347,5 +353,54 @@ export async function updateQuiz(quizId, newQuizData) {
   } catch (error) {
     console.error("更新測驗資料失敗：", error);
     return null;
+  }
+}
+
+export async function register(email, password, username) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+    await setDoc(doc(db, "users", user.uid), {
+      email: user.email,
+      username: username,
+      createdAt: serverTimestamp(),
+      activeDays: [Timestamp.now()],
+      userId: user.uid,
+    });
+    console.log("User registered and data stored in Firestore:", user);
+  } catch (error) {
+    console.error("Error registering user:", error.message);
+    throw error;
+  }
+}
+
+export async function login(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+    console.log("User logged in:", user);
+  } catch (error) {
+    console.error("Error logging in:", error.message);
+    throw error;
+  }
+}
+
+export async function updateActiveDays(userId) {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      activeDays: arrayUnion(serverTimestamp()), // 推入當前活動時間
+    });
+    console.log("Active day added.");
+  } catch (error) {
+    console.error("Error updating activeDays:", error);
   }
 }

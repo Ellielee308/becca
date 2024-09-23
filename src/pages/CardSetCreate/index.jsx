@@ -17,7 +17,7 @@ import {
 } from "../../utils/api.js";
 
 function CardSetCreate() {
-  const { user, updateUser } = useUser();
+  const { user, setUser } = useUser();
   const [labelOptions, setLabelOptions] = useState([]);
   const [allStyles, setAllStyles] = useState([]);
   const [styleOptions, setStyleOptions] = useState([]);
@@ -189,7 +189,7 @@ function CardSetCreate() {
         ...prevInfo,
         labels: [...prevInfo.labels, newLabel],
       }));
-      updateUser(user.userId);
+      setUser(user.userId);
     } catch (error) {
       console.error("新增標籤失敗：", error);
     }

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Select from "react-select";
 import { useEffect, useState } from "react";
 import { TwitterPicker } from "react-color";
+import { useUser } from "../../context/UserContext.jsx";
 
 import borderRadiusIcon from "./images/borderRadius.png";
 import borderThicknessIcon from "./images/lineThickness.png";
@@ -69,9 +70,9 @@ const defaultBackgroundColors = [
 ];
 
 const NewStyleModal = ({ onClose, onStyleAdded }) => {
+  const { user, setUser } = useUser();
   const [style, setStyle] = useState({
     styleId: "",
-    userId: "MRvw8pLirv7B0y4zZlnB",
     styleName: "",
     borderStyle: "none",
     borderColor: "",
@@ -175,7 +176,10 @@ const NewStyleModal = ({ onClose, onStyleAdded }) => {
     } else {
       setInvalidStyleName(false);
       try {
-        const newStyleId = await saveCardStyle(style);
+        const newStyleId = await saveCardStyle({
+          ...style,
+          userId: user.userId,
+        });
         alert("儲存樣式成功！");
         onStyleAdded(style, newStyleId);
         onClose();

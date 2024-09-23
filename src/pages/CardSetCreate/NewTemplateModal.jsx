@@ -13,6 +13,7 @@ import {
   TextAlignLeftIcon,
 } from "./icon";
 import { saveCardTemplate } from "../../utils/api";
+import { useUser } from "../../context/UserContext.jsx";
 
 const fontSizeOptions = [
   { value: "8px", label: "8" },
@@ -30,9 +31,9 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
   const [invalidTemplateName, setInvalidTemplateName] = useState(false);
   const [isAddFieldModalOpen, setIsAddFieldModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState(null);
+  const { user, setUser } = useUser();
   const [newTemplateData, setNewTemplateData] = useState({
     fieldTemplateId: "", //自動生成
-    userId: "MRvw8pLirv7B0y4zZlnB", //測試ID
     templateName: "",
     frontFields: [
       {
@@ -160,7 +161,10 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
     }
 
     try {
-      const newTemplateId = await saveCardTemplate(newTemplateData); // 獲取保存的模板 ID
+      const newTemplateId = await saveCardTemplate({
+        ...newTemplateData,
+        userId: user.userId,
+      }); // 獲取保存的模板 ID
       alert("儲存樣式成功！");
       onTemplateAdded(newTemplateData, newTemplateId);
       onClose(); // 關閉模態框或執行其他操作
