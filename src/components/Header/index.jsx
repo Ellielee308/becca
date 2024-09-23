@@ -4,10 +4,10 @@ import { useUser } from "../../context/UserContext.jsx";
 import { useState } from "react";
 import { register, login } from "../../utils/api.js";
 import PropTypes from "prop-types";
-import photoPlaceholder from "./images/photo-placeholder.jpg";
 import { signOut } from "firebase/auth";
 import { auth } from "../../utils/firebaseConfig.js";
 import { useNavigate } from "react-router-dom";
+import beccaLogo from "./images/becca-logo.png";
 
 function Header() {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -27,9 +27,11 @@ function Header() {
 
   return (
     <Wrapper>
-      <LogoText>
-        <Link to="/">BECCA</Link>
-      </LogoText>
+      <ImageWrapper>
+        <Link to="/">
+          <LogoImg src={beccaLogo} />
+        </Link>
+      </ImageWrapper>
       <NavigateWrapper>
         {!loading && user && (
           <>
@@ -81,6 +83,19 @@ const Wrapper = styled.div`
   background-color: #eff7ff;
   z-index: 99;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const ImageWrapper = styled.div`
+  width: fit-content;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LogoImg = styled.img`
+  height: 48px;
+  width: auto;
 `;
 
 const LogoText = styled.h1`
