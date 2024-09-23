@@ -43,7 +43,7 @@ function Header() {
               </IconContainer>
             </Link>
             <ProfilePictureWrapper>
-              <Link to="/user/me/cardsets">
+              <Link to="/user/me/profile">
                 {user && user.profilePicture && (
                   <ProfilePicture src={user.profilePicture} />
                 )}

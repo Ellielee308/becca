@@ -143,7 +143,10 @@ function CardSetDetail() {
               <ProfilePicture src={ownerData.profilePicture} />
             )}
           </ProfilePictureWrapper>
-          <Description>{cardSetData.description}</Description>
+          <DescriptionWrapper>
+            <AuthorName>{`作者： ${ownerData.username}`}</AuthorName>
+            <Description>{cardSetData.description}</Description>
+          </DescriptionWrapper>
         </InformationWrapper>
         <hr />
         <SectionTitleWrapper>
@@ -338,6 +341,16 @@ const InformationWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+`;
+
+const DescriptionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const AuthorName = styled.p`
+  font-size: 12px;
+  margin-bottom: 8px;
 `;
 
 const Description = styled.div`
