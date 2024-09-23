@@ -62,9 +62,9 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
     if (selectedOption.cardId === correctAnswer.cardId) {
       console.log("答對了！");
       setCorrectAttempt((prev) => prev + 1);
-      setWrongCards((prev) => [...prev, correctAnswer]);
     } else {
       console.log("答錯了！");
+      setWrongCards((prev) => [...prev, correctAnswer]);
     }
     // 延遲進入下一個問題，並重置選擇狀態
     setTimeout(() => {
@@ -73,9 +73,44 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
         setSelectedAnswer(null);
       } else {
         setIsGameOver(true);
+        const timeUsed = timer;
+        const accuracy = (
+          (correctAttempt / quizData.questionQty) *
+          100
+        ).toFixed(2);
+        const correctAttempts = correctAttempt;
+
+        const quizId = quizData.quizId;
+        updateQuiz(quizId, {
+          timeUsed,
+          accuracy,
+          correctAttempts,
+        });
       }
     }, 1000);
   };
+
+  useEffect(() => {
+    let interval;
+    console.log(
+      "Timer effect running. randomCardPairs:",
+      quizQuestions.length,
+      "isGameOver:",
+      isGameOver
+    );
+    if (quizQuestions.length > 0 && !isGameOver) {
+      console.log("Starting timer");
+      interval = setInterval(() => {
+        setTimer((prevTime) => {
+          return prevTime + 10;
+        });
+      }, 10);
+    } else {
+      console.log("Clearing timer");
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [quizQuestions, isGameOver]);
 
   const getOutlineColorWhenSelected = (option) => {
     const correctAnswer = quizQuestions[currentQuestionNumber];
@@ -157,6 +192,8 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
           timer={timer}
           accuracy={accuracy}
           cardSetId={quizData.cardSetId}
+          wrongCards={wrongCards}
+          template={template}
         />
       )}
     </Wrapper>
@@ -342,7 +379,13 @@ const ImagePreview = styled.img`
   margin: 0 auto;
 `;
 
-const QuizResultModal = ({ timer, accuracy, cardSetId }) => {
+const QuizResultModal = ({
+  timer,
+  accuracy,
+  cardSetId,
+  wrongCards,
+  template,
+}) => {
   const formatTime = (time) => {
     const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
     const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
@@ -357,12 +400,72 @@ const QuizResultModal = ({ timer, accuracy, cardSetId }) => {
         <Time>{formatTime(timer)}</Time>
         <Title>答對率：</Title>
         <Accuracy>{accuracy}%</Accuracy>
+        <Title>答錯題目：</Title>
+        <ListSection>
+          {wrongCards.map((card) => (
+            <CardWrapper key={card.cardId}>
+              <CardContentWrapper>
+                <Side>
+                  <SideHeading>正面</SideHeading>
+                  {template.frontFields.map((frontField, index) => {
+                    if (frontField.type === "text") {
+                      return (
+                        <TextWrapper key={index}>
+                          {card.frontFields[index].value}
+                        </TextWrapper>
+                      );
+                    } else if (frontField.type === "image") {
+                      if (
+                        card.frontFields[index]?.value &&
+                        card.frontFields[index].value.trim() !== ""
+                      ) {
+                        return (
+                          <ImagePreview
+                            key={index}
+                            src={card.frontFields[index].value}
+                            alt={frontField.name}
+                          />
+                        );
+                      }
+                    }
+                  })}
+                </Side>
+                <SideSplit />
+                <Side>
+                  <SideHeading>背面</SideHeading>
+                  {template.backFields.map((backField, index) => {
+                    if (backField.type === "text") {
+                      return (
+                        <TextWrapper key={index}>
+                          {card.backFields[index].value}
+                        </TextWrapper>
+                      );
+                    } else if (backField.type === "image") {
+                      if (
+                        card.backFields[index]?.value &&
+                        card.backFields[index].value.trim() !== ""
+                      ) {
+                        return (
+                          <ImagePreview
+                            key={index}
+                            src={card.backFields[index].value}
+                            alt={backField.name}
+                          />
+                        );
+                      }
+                    }
+                  })}
+                </Side>
+              </CardContentWrapper>
+            </CardWrapper>
+          ))}
+        </ListSection>
         <ButtonWrapper>
           <ReviewButton>
-            <Link to={`/cardset/${cardSetId}`}>複習卡牌 </Link>
+            <CustomLink to={`/cardset/${cardSetId}`}>複習卡牌 </CustomLink>
           </ReviewButton>
           <LeaveButton>
-            <Link to="/user/me/cardsets">離開</Link>
+            <CustomLink to="/user/me/cardsets">離開</CustomLink>
           </LeaveButton>
         </ButtonWrapper>
       </ModalContent>
@@ -387,8 +490,8 @@ const ModalContent = styled.div`
   background: white;
   padding: 40px 40px 28px 40px;
   border-radius: 8px;
-  width: 400px;
-  height: fit-content;
+  width: 500px;
+  max-height: 640px;
   position: relative;
   overflow-y: auto;
 `;
@@ -454,4 +557,73 @@ QuizResultModal.propTypes = {
   timer: PropTypes.number.isRequired,
   accuracy: PropTypes.number.isRequired,
   cardSetId: PropTypes.string.isRequired,
+  template: PropTypes.object,
+  wrongCards: PropTypes.array,
 };
+
+const ListSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 16px;
+`;
+
+const CardWrapper = styled.div`
+  padding: 20px 30px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const CardContentWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const Side = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+`;
+
+const SideSplit = styled.div`
+  height: 90px;
+  border-left: 1px solid #c9c5c5;
+  align-self: center;
+  margin: 0px 30px;
+`;
+
+const SideHeading = styled.p`
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #696767;
+`;
+
+// const TextWrapper = styled.div`
+//   font-size: 16px;
+//   line-height: 30px;
+//   border-bottom: 1px solid #c0c5c5;
+// `;
+
+// const ImagePreview = styled.img`
+//   height: 80px;
+//   width: auto;
+//   margin: 0 auto;
+// `;
+
+const CustomLink = styled(Link)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #2e85b1;
+  }
+`;

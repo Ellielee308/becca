@@ -70,7 +70,7 @@ function Matching({ quizData, cardsData, template, style }) {
     ) {
       setIsGameOver(true);
       const timeUsed = timer;
-      const accuracy = (matchedPairs.length / 2 / attempts) * 100;
+      const accuracy = ((matchedPairs.length / 2 / attempts) * 100).toFixed(2);
       const attemptsMade = attempts;
 
       const quizId = quizData.quizId;
@@ -387,10 +387,10 @@ const QuizResultModal = ({ timer, accuracy, cardSetId }) => {
         <Accuracy>{accuracy}%</Accuracy>
         <ButtonWrapper>
           <ReviewButton>
-            <Link to={`/cardset/${cardSetId}`}>複習卡牌 </Link>
+            <CustomLink to={`/cardset/${cardSetId}`}>複習卡牌 </CustomLink>
           </ReviewButton>
           <LeaveButton>
-            <Link to="/user/me/cardsets">離開</Link>
+            <CustomLink to="/user/me/cardsets">離開</CustomLink>
           </LeaveButton>
         </ButtonWrapper>
       </ModalContent>
@@ -476,6 +476,19 @@ const LeaveButton = styled.div`
   background-color: #f59873;
   cursor: pointer;
   user-select: none;
+`;
+
+const CustomLink = styled(Link)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #2e85b1;
+  }
 `;
 
 QuizResultModal.propTypes = {
