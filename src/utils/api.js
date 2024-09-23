@@ -370,6 +370,8 @@ export async function register(email, password, username) {
       createdAt: serverTimestamp(),
       activeDays: [Timestamp.now()],
       userId: user.uid,
+      profilePicture:
+        "https://firebasestorage.googleapis.com/v0/b/becca-24.appspot.com/o/photo-placeholder.jpg?alt=media&token=6f95796c-a80d-4028-ab85-c284d3276a4a",
     });
     console.log("User registered and data stored in Firestore:", user);
   } catch (error) {

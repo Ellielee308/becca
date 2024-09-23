@@ -42,10 +42,8 @@ function Header() {
             </Link>
             <ProfilePictureWrapper>
               <Link to="/user/me/cardsets">
-                {user && user.profilePicture ? (
+                {user && user.profilePicture && (
                   <ProfilePicture src={user.profilePicture} />
-                ) : (
-                  <ProfilePicture src={photoPlaceholder} />
                 )}
               </Link>
             </ProfilePictureWrapper>
