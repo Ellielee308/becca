@@ -394,13 +394,32 @@ export async function login(email, password) {
 }
 
 export async function updateActiveDays(userId) {
+  const userRef = doc(db, "users", userId);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayTimestamp = Timestamp.fromDate(today);
+
   try {
-    const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      activeDays: arrayUnion(serverTimestamp()), // 推入當前活動時間
-    });
-    console.log("Active day added.");
+    const userDoc = await getDoc(userRef);
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const activeDays = userData.activeDays || [];
+
+      const lastActiveDay = activeDays[activeDays.length - 1];
+      if (!lastActiveDay || !lastActiveDay.isEqual(todayTimestamp)) {
+        // 如果不是今天，則添加今天的日期
+        await updateDoc(userRef, {
+          activeDays: arrayUnion(todayTimestamp),
+        });
+        console.log("用戶活躍日期已更新");
+      } else {
+        console.log("用戶今天已經被標記為活躍");
+      }
+    } else {
+      console.error("用戶文檔不存在");
+    }
   } catch (error) {
-    console.error("Error updating activeDays:", error);
+    console.error("更新用戶活躍日期時出錯:", error);
+    throw error;
   }
 }
