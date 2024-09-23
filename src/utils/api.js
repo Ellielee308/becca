@@ -12,6 +12,7 @@ import {
   getDocs,
   setDoc,
   Timestamp,
+  getCountFromServer,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
@@ -452,4 +453,37 @@ export async function translateText(text, targetLanguage) {
   const translatedText = data.data.translations[0].translatedText;
   console.log(`翻譯結果: ${translatedText}`);
   return translatedText;
+}
+
+export async function getUserCardSetCount(currentUserId) {
+  const collectionRef = collection(db, "cardSets");
+  const q = query(collectionRef, where("userId", "==", currentUserId));
+
+  try {
+    const snapshot = await getCountFromServer(q);
+
+    return snapshot.data().count;
+  } catch (error) {
+    console.error("Error fetching card set count:", error);
+    return 0;
+  }
+}
+
+export async function getCompletedQuizzesCount(currentUserId) {
+  const collectionRef = collection(db, "quizzes");
+
+  const q = query(
+    collectionRef,
+    where("userId", "==", currentUserId),
+    where("completedAt", "!=", null)
+  );
+
+  try {
+    const snapshot = await getCountFromServer(q);
+
+    return snapshot.data().count;
+  } catch (error) {
+    console.error("Error fetching completed quizzes count:", error);
+    return 0;
+  }
 }
