@@ -72,15 +72,36 @@ export async function getUserCardStyles(userId) {
   }
 }
 
-export async function addNewLabel(newLabel, userId) {
+export async function addNewLabel(labelData) {
+  const labelsCollectionRef = collection(db, "labels");
   try {
-    const userDocRef = doc(db, "users", userId);
-    await updateDoc(userDocRef, {
-      labels: arrayUnion(newLabel),
-    });
-    console.log("標籤已成功更新至資料庫");
+    // 先生成一個新的 document ID
+    const newLabelRef = doc(labelsCollectionRef);
+    const labelId = newLabelRef.id; // 獲取新生成的 document ID
+
+    await setDoc(newLabelRef, { ...labelData, labelId });
+
+    console.log("成功儲存標籤：", labelId);
+    return labelId;
   } catch (error) {
-    console.error("無法更新標籤：", error);
+    console.error("無法新增標籤：", error);
+  }
+}
+
+export async function getUserLabels(userId) {
+  const labels = [];
+  const labelsCollectionRef = collection(db, "labels");
+  try {
+    const q = query(labelsCollectionRef, where("createdBy", "==", userId));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      labels.push(doc.data());
+    });
+    console.log("成功獲取用戶標籤：", labels);
+    return labels;
+  } catch (error) {
+    console.error("獲取用戶標籤失敗：", error);
+    return [];
   }
 }
 

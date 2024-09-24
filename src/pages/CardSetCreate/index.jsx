@@ -14,6 +14,7 @@ import {
   addNewLabel,
   getUserCardTemplates,
   uploadCardSetWithCards,
+  getUserLabels,
 } from "../../utils/api.js";
 
 function CardSetCreate() {
@@ -71,14 +72,6 @@ function CardSetCreate() {
 
   useEffect(() => {
     console.log("目前的用戶資料：", user);
-
-    if (user && user.labels) {
-      const labelOptions = user.labels.map((label) => ({
-        value: label,
-        label: label,
-      }));
-      setLabelOptions(labelOptions);
-    }
     if (user) {
       const fetchUserCardStyles = async () => {
         try {
@@ -157,6 +150,19 @@ function CardSetCreate() {
         }
       };
       fetchUserCardTemplates();
+      const fetchUserLabels = async () => {
+        try {
+          const userLabels = await getUserLabels(user.userId);
+          const labelOptions = userLabels.map((label) => ({
+            value: label.labelId,
+            label: label.name,
+          }));
+          setLabelOptions(labelOptions);
+        } catch (error) {
+          console.error("獲取用戶標籤失敗：", error);
+        }
+      };
+      fetchUserLabels();
     }
   }, [user]);
 
@@ -183,15 +189,19 @@ function CardSetCreate() {
 
   const handleCreateLabel = async (newLabel) => {
     try {
-      await addNewLabel(newLabel, user.userId);
+      const newLabelId = await addNewLabel({
+        name: newLabel,
+        createdBy: user.userId,
+      });
       console.log("標籤已新增至資料庫：", newLabel);
-      const newOption = { value: newLabel, label: newLabel };
+
+      const newOption = { value: newLabelId, label: newLabel };
       setLabelOptions((prevOptions) => [...prevOptions, newOption]);
+
       setCardSetData((prevInfo) => ({
         ...prevInfo,
-        labels: [...prevInfo.labels, newLabel],
+        labels: [...prevInfo.labels, newLabelId],
       }));
-      setUser(user.userId);
     } catch (error) {
       console.error("新增標籤失敗：", error);
     }
