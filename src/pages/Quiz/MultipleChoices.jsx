@@ -116,7 +116,7 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
     const correctAnswer = quizQuestions[currentQuestionNumber];
 
     if (selectedAnswer?.cardId === option.cardId) {
-      return option.cardId === correctAnswer.cardId ? "#4e98dd" : "red";
+      return option.cardId === correctAnswer.cardId ? "green" : "red";
     }
 
     return "transparent";

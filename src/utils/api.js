@@ -61,7 +61,7 @@ export async function getUserCardStyles(userId) {
   if (!userId) return null;
   try {
     const cardStylesRef = collection(db, "cardStyles");
-    const q = query(cardStylesRef, where("userId", "==", userId));
+    const q = query(cardStylesRef, where("userId", "in", [userId, "default"]));
     const querySnapshot = await getDocs(q);
     const cardStyles = querySnapshot.docs.map((doc) => doc.data());
     console.log("成功獲取卡片樣式資料：", cardStyles);

@@ -16,6 +16,7 @@ import {
   uploadCardSetWithCards,
   getUserLabels,
 } from "../../utils/api.js";
+import { useNavigate } from "react-router-dom";
 
 function CardSetCreate() {
   const { user, loading, setUser } = useUser();
@@ -46,6 +47,7 @@ function CardSetCreate() {
   });
   const [cardContent, setCardContent] = useState([]);
   const [suggestedTranslations, setSuggestedTranslations] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (
@@ -76,19 +78,42 @@ function CardSetCreate() {
       const fetchUserCardStyles = async () => {
         try {
           const userCardStyles = await getUserCardStyles(user.userId); // 等待異步結果
-          console.log("用戶的卡片樣式：", userCardStyles);
+          console.log("用戶的卡片樣式(含預設)：", userCardStyles);
           setAllStyles(userCardStyles);
 
           const cardStyleOptions = userCardStyles.map((userCardStyle) => ({
             value: userCardStyle.styleId,
             label: userCardStyle.styleName,
           }));
+
+          const defaultStyleId = "bjqmNAR3MkEiRUZJCOS8";
+
+          // 將預設樣式排在第一個
+          cardStyleOptions.sort((a, b) => {
+            if (a.value === defaultStyleId) return -1; // 預設樣式排在第一
+            if (b.value === defaultStyleId) return 1;
+            return 0;
+          });
+
           setStyleOptions(cardStyleOptions);
+
+          // 設置預設樣式為選中的樣式
+          const defaultStyle = cardStyleOptions.find(
+            (option) => option.value === defaultStyleId
+          );
+          if (defaultStyle) {
+            setSelectedStyleOption(defaultStyle); // 設置為預選樣式
+            setCardSetData((prevInfo) => ({
+              ...prevInfo,
+              styleId: defaultStyleId,
+            }));
+          }
         } catch (error) {
           console.error("獲取卡片樣式失敗：", error);
         }
       };
       fetchUserCardStyles();
+
       const fetchUserCardTemplates = async () => {
         try {
           const userCardTemplates = await getUserCardTemplates(user.userId);
@@ -298,9 +323,13 @@ function CardSetCreate() {
     }
     //真正的提交邏輯
     try {
-      await uploadCardSetWithCards(cardSetData, cardContent, user.userId);
+      const newCardSetId = await uploadCardSetWithCards(
+        cardSetData,
+        cardContent,
+        user.userId
+      );
       alert("卡牌組提交成功！");
-      window.location.reload();
+      navigate(`/cardset/${newCardSetId}`);
     } catch (error) {
       console.error("儲存過程出現錯誤：", error);
       alert("儲存失敗，請重試。");

@@ -10,7 +10,7 @@ const Wrapper = styled.div`
   width: 100%;
   padding: 20px 15px;
   background-color: #eff7ff;
-  text-align: center;
+  text-align: left;
   position: relative; /* 確保有 position */
   z-index: 99; /* 調整 z-index */
 `;

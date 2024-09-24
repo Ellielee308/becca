@@ -341,7 +341,7 @@ const CardWrapper = styled.div`
   font-family: ${(props) => props.$style.fontFamily};
   overflow-y: auto;
   cursor: pointer;
-  outline: ${(props) => props.$outlineColor} 1px solid;
+  outline: ${(props) => props.$outlineColor} 2px solid;
 
   transition: transform 0.3s ease, box-shadow 0.3s ease, outline 0.1s ease,
     opacity 0.5s ease;

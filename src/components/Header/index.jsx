@@ -60,7 +60,7 @@ function Header() {
               setShowLoginModal(true);
             }}
           >
-            Login / Register
+            Sign in
           </LoginTrigger>
         )}
       </NavigateWrapper>
@@ -145,18 +145,18 @@ const LoginTrigger = styled.div`
   align-items: center;
   justify-content: center;
   height: 36px;
-  font-size: 16px;
+  font-size: 14px;
   padding: 8px 20px;
-  background-color: beige;
+  background-color: #1d1d1d;
+  color: white;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 1s ease;
 
   &:hover {
     background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
   }
 
   &:active {
@@ -240,14 +240,15 @@ const LoginModal = ({ onClose }) => {
       if (isLogin) {
         await login(email, password);
         console.log("已透過 Modal 登入成功");
+        onClose();
       } else {
         if (!username) {
           throw new Error("請輸入用戶名");
         }
         await register(email, password, username);
         console.log("已透過 Modal 註冊成功");
+        onClose();
       }
-      onClose();
     } catch (err) {
       handleAuthError(err);
     } finally {

@@ -357,12 +357,12 @@ const DescriptionWrapper = styled.div`
 `;
 
 const AuthorName = styled.p`
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 8px;
 `;
 
 const Description = styled.div`
-  font-size: 14px;
+  font-size: 16px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -379,8 +379,8 @@ const ProfilePictureWrapper = styled.div`
 `;
 
 const ProfilePicture = styled.img`
-  height: 50px;
-  width: 50px;
+  height: 64px;
+  width: 64px;
   border-radius: 50%;
   object-fit: cover;
 `;

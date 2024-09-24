@@ -151,12 +151,17 @@ function UserProfile() {
 export default UserProfile;
 
 const Wrapper = styled.div`
-  margin-top: 80px;
-  padding: 0 20px;
+  padding: 0 80px;
+  width: fit-content;
+  margin: 80px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const Title = styled.h2`
-  font-size: 28px;
+  font-size: 20px;
+  font-weight: 500;
 `;
 
 const Split = styled.div`
@@ -168,6 +173,7 @@ const Split = styled.div`
 
 const ProfileSection = styled.div`
   display: flex;
+  justify-content: center;
   width: 100%;
   padding: 8px 0;
   margin-bottom: 36px;
@@ -202,7 +208,7 @@ const AccountInfoItem = styled.p`
 const CalendarSection = styled.div`
   display: flex;
   width: 100%;
-  justify-content: flex-start;
+  justify-content: center;
 `;
 
 const EditProfilePictureIcon = styled.div`

@@ -108,11 +108,12 @@ export default UserCardSets;
 
 const Wrapper = styled.div`
   margin-top: 80px;
-  padding: 0 20px;
+  padding: 0 80px;
 `;
 
 const Title = styled.h2`
-  font-size: 28px;
+  font-size: 20px;
+  font-weight: 500;
 `;
 
 const Split = styled.div`
