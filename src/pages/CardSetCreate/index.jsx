@@ -17,7 +17,7 @@ import {
 } from "../../utils/api.js";
 
 function CardSetCreate() {
-  const { user, setUser } = useUser();
+  const { user, loading, setUser } = useUser();
   const [labelOptions, setLabelOptions] = useState([]);
   const [allStyles, setAllStyles] = useState([]);
   const [styleOptions, setStyleOptions] = useState([]);
@@ -296,6 +296,9 @@ function CardSetCreate() {
       alert("儲存失敗，請重試。");
     }
   };
+
+  if (!user || loading || !labelOptions || !allStyles || !allTemplates)
+    return <div>Loading...</div>;
 
   return (
     <Wrapper>

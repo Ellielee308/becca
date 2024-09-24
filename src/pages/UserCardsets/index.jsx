@@ -9,7 +9,7 @@ function UserCardSets() {
   const [currentUserId, setCurrentUserId] = useState("");
   const [userCardSets, setUserCardSets] = useState(null);
   const [userCardStyles, setUserCardStyles] = useState(null);
-  const [styleMap, setStyleMap] = useState({});
+  const [styleMap, setStyleMap] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -35,7 +35,7 @@ function UserCardSets() {
     fetchCardSets();
   }, [currentUserId]);
 
-  if (!currentUserId || !userCardSets || !userCardStyles) {
+  if (!currentUserId || !userCardSets || !userCardStyles || !styleMap) {
     return <div>Loading...</div>;
   }
   return (
