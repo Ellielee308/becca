@@ -2,14 +2,20 @@ import styled from "styled-components";
 import { useUser } from "../../context/UserContext.jsx";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getUserAllCardSets, getUserCardStyles } from "../../utils/api.js";
+import {
+  getUserAllCardSets,
+  getUserCardStyles,
+  getUserLabels,
+} from "../../utils/api.js";
 
 function UserCardSets() {
   const { user } = useUser();
   const [currentUserId, setCurrentUserId] = useState("");
   const [userCardSets, setUserCardSets] = useState(null);
   const [userCardStyles, setUserCardStyles] = useState(null);
+  const [userLabels, setUserLabels] = useState(null);
   const [styleMap, setStyleMap] = useState(null);
+  const [labelMap, setLabelMap] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -20,8 +26,10 @@ function UserCardSets() {
   useEffect(() => {
     const fetchCardSets = async () => {
       if (currentUserId) {
+        // 獲取卡牌組和樣式資料
         const cardSets = await getUserAllCardSets(currentUserId);
         setUserCardSets(cardSets);
+
         const cardStyles = await getUserCardStyles(currentUserId);
         setUserCardStyles(cardStyles);
         const newStyleMap = cardStyles.reduce((acc, style) => {
@@ -29,6 +37,15 @@ function UserCardSets() {
           return acc;
         }, {});
         setStyleMap(newStyleMap);
+
+        // 獲取標籤資料
+        const userLabels = await getUserLabels(currentUserId);
+        setUserLabels(userLabels);
+        const newLabelMap = userLabels.reduce((acc, label) => {
+          acc[label.labelId] = label;
+          return acc;
+        }, {});
+        setLabelMap(newLabelMap);
       }
     };
 
@@ -64,10 +81,12 @@ function UserCardSets() {
                       <LabelIcon />
                     </LabelIconContainer>
                     <LabelNameContainer>
-                      {cardSet.labels.length > 0 ? (
-                        cardSet.labels.map((label, index) => (
-                          <LabelName key={index}>
-                            {label}
+                      {cardSet.labels.length > 0 &&
+                      labelMap &&
+                      Object.keys(labelMap).length > 0 ? (
+                        cardSet.labels.map((labelId, index) => (
+                          <LabelName key={labelId}>
+                            {labelMap[labelId]?.name || "未知標籤"}
                             {index < cardSet.labels.length - 1 && ", "}
                           </LabelName>
                         ))

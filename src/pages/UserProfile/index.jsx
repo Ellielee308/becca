@@ -9,7 +9,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
 function UserProfile() {
-  const { user, setUser, loading } = useUser();
+  const { user, loading } = useUser();
   const [cardSetCount, setCardSetCount] = useState(null);
   const [completedQuizCount, setCompletedQuizCount] = useState(null);
   const [activeDays, setActiveDays] = useState([]);
@@ -51,11 +51,11 @@ function UserProfile() {
         <AccountInfo>
           <AccountInfoItem>{`Email: ${user.email}`}</AccountInfoItem>
           <AccountInfoItem>{`用戶名: ${user.username}`}</AccountInfoItem>
+          <AccountInfoItem>{`卡牌組數量: ${
+            cardSetCount ? cardSetCount : 0
+          }`}</AccountInfoItem>
           <AccountInfoItem>
-            {cardSetCount && `卡牌組數量: ${cardSetCount}`}
-          </AccountInfoItem>
-          <AccountInfoItem>
-            {completedQuizCount && `完成測驗數: ${completedQuizCount}`}
+            {`完成測驗數量: ${completedQuizCount ? completedQuizCount : 0}`}
           </AccountInfoItem>
         </AccountInfo>
       </ProfileSection>

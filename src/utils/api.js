@@ -105,6 +105,52 @@ export async function getUserLabels(userId) {
   }
 }
 
+export async function getLabelsOfCardSet(cardSetId) {
+  try {
+    // 取得指定牌組的文件
+    const cardSetRef = doc(db, "cardSets", cardSetId);
+    const cardSetSnapshot = await getDoc(cardSetRef);
+
+    if (!cardSetSnapshot.exists()) {
+      throw new Error(`Card set with id ${cardSetId} does not exist`);
+    }
+
+    // 取得 labels 陣列
+    const { labels } = cardSetSnapshot.data();
+    if (!labels || labels.length === 0) {
+      return []; // 如果沒有標籤，回傳空陣列
+    }
+
+    // Firestore 的 `in` 查詢最多支持 10 個項目，我們檢查是否超過
+    if (labels.length > 10) {
+      throw new Error("Too many labels, Firestore in query supports only 10.");
+    }
+
+    // 使用 labels 陣列中的 labelId 查詢 labels 集合
+    const labelsCollectionRef = collection(db, "labels");
+    const q = query(labelsCollectionRef, where("labelId", "in", labels));
+
+    const querySnapshot = await getDocs(q);
+
+    // 取得每個 label 的資料
+    const labelData = [];
+    querySnapshot.forEach((doc) => {
+      labelData.push(doc.data());
+    });
+
+    // 確認是否所有的 `labelId` 都有對應的資料
+    if (labelData.length !== labels.length) {
+      console.warn(
+        `Some labels not found in the labels collection. Expected: ${labels.length}, found: ${labelData.length}`
+      );
+    }
+
+    return labelData; // 回傳標籤資料陣列
+  } catch (error) {
+    console.error("Error fetching labels of card set:", error);
+    return [];
+  }
+}
 export async function getUserCardTemplates(userId) {
   const cardFields = [];
   const cardFieldsRef = collection(db, "cardFields");

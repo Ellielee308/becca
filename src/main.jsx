@@ -11,6 +11,7 @@ import CardSetDetail from "./pages/CardSetDetail";
 import CardSetCreate from "./pages/CardSetCreate";
 import CardSetEdit from "./pages/CardSetEdit";
 import Quiz from "./pages/Quiz";
+import PrivateRoute from "./components/PrivateRoute";
 import { UserProvider } from "./context/UserContext";
 
 createRoot(document.getElementById("root")).render(
@@ -20,15 +21,50 @@ createRoot(document.getElementById("root")).render(
         <Routes>
           <Route path="/" element={<App />}>
             <Route index element={<Home />} />
-            <Route path="user/me/*" element={<Layout />}>
+            <Route
+              path="user/me/*"
+              element={
+                <PrivateRoute>
+                  <Layout />
+                </PrivateRoute>
+              }
+            >
               <Route path="profile" element={<UserProfile />} />
               <Route path="analytics" element={<UserAnalytics />} />
               <Route path="cardsets" element={<UserCardSets />} />
             </Route>
-            <Route path="cardset/:cardSetId" element={<CardSetDetail />} />
-            <Route path="cardset/new" element={<CardSetCreate />} />
-            <Route path="cardset/:cardsetId/edit" element={<CardSetEdit />} />
-            <Route path="quiz/:quizId" element={<Quiz />} />
+            <Route
+              path="cardset/:cardSetId"
+              element={
+                <PrivateRoute>
+                  <CardSetDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="cardset/new"
+              element={
+                <PrivateRoute>
+                  <CardSetCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="cardset/:cardsetId/edit"
+              element={
+                <PrivateRoute>
+                  <CardSetEdit />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="quiz/:quizId"
+              element={
+                <PrivateRoute>
+                  <Quiz />
+                </PrivateRoute>
+              }
+            />
           </Route>
         </Routes>
       </BrowserRouter>

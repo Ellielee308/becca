@@ -8,6 +8,7 @@ import {
   getTemplate,
   getCardsOfCardSet,
   getUserDocument,
+  getLabelsOfCardSet,
 } from "../../utils/api";
 import CreateQuizModal from "./CreateQuizModal";
 
@@ -17,6 +18,7 @@ function CardSetDetail() {
   const [template, setTemplate] = useState(null);
   const [style, setStyle] = useState(null);
   const [cards, setCards] = useState([]);
+  const [labels, setLabels] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [ownerData, setOwnerData] = useState();
   const [showCreateQuizModal, setShowCreateQuizModal] = useState(null);
@@ -54,8 +56,14 @@ function CardSetDetail() {
         } else {
           console.error("無效的 userId");
         }
+
+        // 同時獲取該卡牌組的標籤資料
+        const fetchedCardSetLabelsData = await getLabelsOfCardSet(cardSetId);
+        if (!fetchedCardSetLabelsData) throw new Error("Labels not found");
+        console.log("獲取該卡牌組標籤成功：", fetchedCardSetLabelsData);
+        setLabels(fetchedCardSetLabelsData);
       } catch (error) {
-        console.error("獲取卡牌組資料失敗：", error);
+        console.error("獲取卡牌組資料或標籤失敗：", error);
       }
     };
 
@@ -124,11 +132,11 @@ function CardSetDetail() {
               <LabelIcon />
             </LabelIconContainer>
             <LabelNameContainer>
-              {cardSetData.labels.length > 0 ? (
-                cardSetData.labels.map((label, index) => (
+              {labels.length > 0 ? (
+                labels.map((label, index) => (
                   <LabelName key={index}>
-                    {label}
-                    {index < cardSetData.labels.length - 1 && ", "}
+                    {label.name}
+                    {index < labels.length - 1 && ", "}
                   </LabelName>
                 ))
               ) : (
