@@ -4,15 +4,18 @@ import { useEffect, useState } from "react";
 import {
   getUserCardSetCount,
   getCompletedQuizzesCount,
+  updateProfilePicture,
 } from "../../utils/api.js";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
 function UserProfile() {
-  const { user, loading } = useUser();
+  const { user, setUser, loading } = useUser();
   const [cardSetCount, setCardSetCount] = useState(null);
   const [completedQuizCount, setCompletedQuizCount] = useState(null);
   const [activeDays, setActiveDays] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 控制 Modal 的狀態
+  const [newProfilePicture, setNewProfilePicture] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -34,6 +37,49 @@ function UserProfile() {
     }
   }, [user]);
 
+  const handleIconClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setNewProfilePicture(null);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewProfilePicture(file);
+    }
+  };
+
+  const handleCancel = () => {
+    handleCloseModal(); // 取消時清空圖片並關閉 modal
+  };
+  const handleSaveProfilePicture = async () => {
+    if (newProfilePicture) {
+      try {
+        // 上傳新頭貼並獲取下載 URL
+        const updatedProfilePictureURL = await updateProfilePicture(
+          user.userId,
+          newProfilePicture
+        );
+
+        // 更新本地的 user 狀態，使頭像立即顯示新的圖片
+        setUser((prevUser) => ({
+          ...prevUser,
+          profilePicture: updatedProfilePictureURL, // 更新狀態中的頭像 URL
+        }));
+
+        alert("大頭貼更新成功！");
+        handleCloseModal(); // 關閉 modal
+      } catch (error) {
+        console.error("更新大頭貼失敗", error);
+        alert("更新大頭貼失敗，請稍後再試！");
+      }
+    }
+  };
+
   if (!user || loading)
     return (
       <>
@@ -46,7 +92,16 @@ function UserProfile() {
       <Split />
       <ProfileSection>
         <ProfilePictureContainer>
-          <ProfilePicture src={user.profilePicture} />
+          <ProfilePicture
+            src={
+              newProfilePicture
+                ? URL.createObjectURL(newProfilePicture)
+                : user.profilePicture
+            }
+          />
+          <EditProfilePictureIcon onClick={handleIconClick}>
+            <EditIcon />
+          </EditProfilePictureIcon>
         </ProfilePictureContainer>
         <AccountInfo>
           <AccountInfoItem>{`Email: ${user.email}`}</AccountInfoItem>
@@ -59,6 +114,31 @@ function UserProfile() {
           </AccountInfoItem>
         </AccountInfo>
       </ProfileSection>
+      {/* Modal 彈窗 */}
+      {isModalOpen && (
+        <ModalOverlay onClick={handleCloseModal}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>更換頭像</ModalHeader>
+            <FileInput
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {newProfilePicture && (
+              <ImagePreview
+                src={URL.createObjectURL(newProfilePicture)}
+                alt="New profile preview"
+              />
+            )}
+            <ModalActions>
+              <UploadButton onClick={handleSaveProfilePicture}>
+                上傳
+              </UploadButton>
+              <CancelButton onClick={handleCancel}>取消</CancelButton>
+            </ModalActions>
+          </ModalContent>
+        </ModalOverlay>
+      )}
       <Title>活躍足跡</Title>
       <Split />
       <CalendarSection>
@@ -99,8 +179,8 @@ const ProfilePictureContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative; /* 使其子元素可以使用絕對定位 */
 `;
-
 const ProfilePicture = styled.img`
   height: 160px;
   width: 160px;
@@ -111,7 +191,7 @@ const ProfilePicture = styled.img`
 const AccountInfo = styled.div`
   display: flex;
   flex-direction: column;
-  padding-left: 8%;
+  padding-left: 60px;
   justify-content: space-around;
 `;
 
@@ -123,6 +203,96 @@ const CalendarSection = styled.div`
   display: flex;
   width: 100%;
   justify-content: flex-start;
+`;
+
+const EditProfilePictureIcon = styled.div`
+  position: absolute; /* 確保它相對於父元素（頭像容器）進行定位 */
+  bottom: 5%; /* 將圖標移動到容器的底部 */
+  right: 5%; /* 將圖標移動到容器的右側 */
+  background-color: white; /* 讓圖標背景顯示白色，讓其不被頭像的背景顏色覆蓋 */
+  padding: 6px;
+  border-radius: 50%;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15); /* 添加陰影讓按鈕更明顯 */
+  cursor: pointer;
+`;
+const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width="20"
+    height="20"
+  >
+    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+  </svg>
+);
+
+/* Modal 相關樣式 */
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 130;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 12px;
+  min-width: 300px;
+  max-width: 400px;
+  min-height: 200px;
+`;
+
+const ModalHeader = styled.h3`
+  margin-bottom: 16px;
+  font-size: 18px;
+`;
+
+const FileInput = styled.input`
+  margin-bottom: 20px;
+`;
+
+const ImagePreview = styled.img`
+  width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+  border-radius: 8px;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+`;
+
+const UploadButton = styled.button`
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
+`;
+
+const CancelButton = styled.button`
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
 `;
 
 const UserCalendar = ({ activeDays }) => {

@@ -74,6 +74,7 @@ const Wrapper = styled.div`
   border: 1px solid #c2c2c2;
   width: 600px;
   min-height: 250px;
+  border-radius: 8px;
 `;
 
 const Heading = styled.p`

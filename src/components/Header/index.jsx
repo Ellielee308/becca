@@ -27,28 +27,31 @@ function Header() {
 
   return (
     <Wrapper>
-      <ImageWrapper>
-        <Link to="/">
-          <LogoImg src={beccaLogo} />
-        </Link>
-      </ImageWrapper>
+      <Link to="/">
+        <LogoImg src={beccaLogo} alt="Logo" />
+      </Link>
       <NavigateWrapper>
         {!loading && user && (
           <>
             <WelcomeMessage>{`Welcome back, ${user.username}!`}</WelcomeMessage>
-            <LogOutButton onClick={handleLogOut}>Log out</LogOutButton>
             <Link to="/cardset/new">
               <IconContainer>
                 <PlusIcon />
               </IconContainer>
             </Link>
-            <ProfilePictureWrapper>
-              <Link to="/user/me/profile">
+            <NavItemWrapper>
+              <ProfilePictureWrapper>
                 {user && user.profilePicture && (
                   <ProfilePicture src={user.profilePicture} />
                 )}
-              </Link>
-            </ProfilePictureWrapper>
+                <SubMenu>
+                  <SubMenuItem>
+                    <StyledLink to="/user/me/profile">Profile</StyledLink>
+                  </SubMenuItem>
+                  <SubMenuItem onClick={handleLogOut}>Log out</SubMenuItem>
+                </SubMenu>
+              </ProfilePictureWrapper>
+            </NavItemWrapper>
           </>
         )}
         {!loading && !user && (
@@ -67,7 +70,6 @@ function Header() {
     </Wrapper>
   );
 }
-
 export default Header;
 
 const Wrapper = styled.div`
@@ -85,23 +87,15 @@ const Wrapper = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
-const ImageWrapper = styled.div`
-  width: fit-content;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
 const LogoImg = styled.img`
-  height: 48px;
+  height: 36px;
   width: auto;
 `;
 
-const LogoText = styled.h1`
-  font-family: monospace;
-  font-size: 24px;
-`;
+// const LogoText = styled.h1`
+//   font-family: monospace;
+//   font-size: 24px;
+// `;
 
 const NavigateWrapper = styled.div`
   display: flex;
@@ -116,21 +110,6 @@ const WelcomeMessage = styled.p`
   font-size: 16px;
   margin-right: 8px;
   user-select: none;
-`;
-
-const ProfilePictureWrapper = styled.div`
-  height: 60px;
-  width: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ProfilePicture = styled.img`
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-  object-fit: cover;
 `;
 
 const IconContainer = styled.div`
@@ -186,34 +165,60 @@ const LoginTrigger = styled.div`
   }
 `;
 
-const LogOutButton = styled.div`
+const ProfilePictureWrapper = styled.div`
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 36px;
-  font-size: 16px;
-  padding: 8px 20px;
-  background-color: transparent;
-  color: #4e98dd; /* 藍色字體 */
-  border: 2px solid #4e98dd; /* 藍色邊框 */
-  border-radius: 8px; /* 圓角 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 簡單陰影 */
   cursor: pointer;
-  transition: all 0.2s ease; /* 簡單過渡效果 */
 
-  &:hover {
-    background-color: #e2f2ff; /* 懸停時，背景變為淡藍色 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 加強陰影效果 */
-    transform: translateY(-1px); /* 輕微上升效果 */
-  }
-
-  &:active {
-    transform: translateY(1px); /* 按下時稍微按下 */
-    background-color: #e0efff; /* 按下時背景變深 */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 陰影變小 */
+  &:hover > div {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0); /* 取消位移，顯示選單 */
   }
 `;
 
+const SubMenu = styled.div`
+  position: absolute;
+  top: 120%; /* 放在頭像正下方 */
+  right: 0;
+  background-color: white;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 150px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px); /* 初始狀態下稍微下移 */
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+  z-index: 100;
+`;
+
+const SubMenuItem = styled.div`
+  padding: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const StyledLink = styled(Link)`
+  display: block;
+  height: 100%;
+  width: 100%;
+`;
+
+const NavItemWrapper = styled.div`
+  display: flex;
+`;
+
+const ProfilePicture = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
 const LoginModal = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true); // 控制登入或註冊模式
   const [email, setEmail] = useState("");

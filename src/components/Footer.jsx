@@ -12,5 +12,5 @@ const Wrapper = styled.div`
   background-color: #eff7ff;
   text-align: center;
   position: relative; /* 確保有 position */
-  z-index: 999; /* 調整 z-index */
+  z-index: 99; /* 調整 z-index */
 `;

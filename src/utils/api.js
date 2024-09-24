@@ -554,3 +554,30 @@ export async function getCompletedQuizzesCount(currentUserId) {
     return 0;
   }
 }
+
+export async function updateProfilePicture(userId, file) {
+  if (!file) {
+    console.error("沒有選擇檔案");
+    return;
+  }
+
+  const storageRef = ref(storage, `profilePictures/${userId}/${file.name}`); // 設定 Storage 路徑
+
+  try {
+    await uploadBytes(storageRef, file);
+    console.log("檔案上傳成功");
+
+    const downloadURL = await getDownloadURL(storageRef);
+    console.log("圖片下載 URL：", downloadURL);
+
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      profilePicture: downloadURL,
+    });
+
+    console.log("用戶大頭貼已更新");
+    return downloadURL;
+  } catch (error) {
+    console.error("上傳或更新大頭貼失敗：", error);
+  }
+}

@@ -320,6 +320,7 @@ const CardWrapper = styled.div`
   border: 1px solid #c2c2c2;
   width: 600px;
   min-height: 180px;
+  border-radius: 8px;
 `;
 
 const TitleBar = styled.div`
@@ -377,6 +378,7 @@ const NewCardWrapper = styled.div`
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border-radius: 8px;
 `;
 
 const NewCardHeading = styled.div`
