@@ -9,7 +9,7 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
   body {
-    font-family: "jf-openhuninn", "Noto Sans TC", sans-serif;
+    font-family: "Noto Sans TC", sans-serif;
   }
   a {
     text-decoration: none; 
