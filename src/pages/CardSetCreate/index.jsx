@@ -19,7 +19,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 function CardSetCreate() {
-  const { user, loading, setUser } = useUser();
+  const { user, loading } = useUser();
   const [labelOptions, setLabelOptions] = useState([]);
   const [allStyles, setAllStyles] = useState([]);
   const [styleOptions, setStyleOptions] = useState([]);
@@ -102,7 +102,12 @@ function CardSetCreate() {
             (option) => option.value === defaultStyleId
           );
           if (defaultStyle) {
-            setSelectedStyleOption(defaultStyle); // 設置為預選樣式
+            setSelectedStyleOption(defaultStyle);
+            setSelectedStyle(
+              userCardStyles.find(
+                (style) => style.styleId === "bjqmNAR3MkEiRUZJCOS8"
+              )
+            );
             setCardSetData((prevInfo) => ({
               ...prevInfo,
               styleId: defaultStyleId,
@@ -499,9 +504,11 @@ function CardSetCreate() {
           onChange={handleTemplateChange}
           styles={selectStyles(invalidFields.includes("fieldTemplateId"))}
         />
-        <TemplatePreview currentTemplate={selectedTemplate} />
+        {selectedTemplate.templateName && (
+          <TemplatePreview currentTemplate={selectedTemplate} />
+        )}
         <InputLabel>預覽</InputLabel>
-        {selectedStyle.styleName && (
+        {selectedStyle.styleName && selectedTemplate.templateName && (
           <Preview
             currentStyle={selectedStyle}
             currentTemplate={selectedTemplate}

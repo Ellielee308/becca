@@ -83,7 +83,7 @@ const Wrapper = styled.div`
   height: 60px;
   width: 100%;
   background-color: #eff7ff;
-  z-index: 99;
+  z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
