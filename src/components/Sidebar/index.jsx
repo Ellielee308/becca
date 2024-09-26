@@ -31,7 +31,7 @@ const Wrapper = styled.div`
   flex-direction: column;
   background-color: #f0f4fa;
   min-height: calc(100vh - 60px);
-  width: 11vw;
+  width: 180px;
   align-items: center;
   gap: 4px;
 
@@ -42,7 +42,7 @@ const Wrapper = styled.div`
   transition: all 0.3s ease-in-out;
 
   &:hover {
-    width: 12vw;
+    width: 200px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
     background-color: #e2ebf5;
   }
