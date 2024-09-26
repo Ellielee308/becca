@@ -13,6 +13,7 @@ import CardSetEdit from "./pages/CardSetEdit";
 import Quiz from "./pages/Quiz";
 import SearchResult from "./SearchResult";
 import PrivateRoute from "./components/PrivateRoute";
+import UserCollection from "./pages/UserCollection/index.jsx";
 import { UserProvider } from "./context/UserContext";
 
 createRoot(document.getElementById("root")).render(
@@ -33,6 +34,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="profile" element={<UserProfile />} />
               <Route path="analytics" element={<UserAnalytics />} />
               <Route path="cardsets" element={<UserCardSets />} />
+              <Route path="collection" element={<UserCollection />} />
             </Route>
             <Route path="cardset/:cardSetId" element={<CardSetDetail />} />
             <Route
