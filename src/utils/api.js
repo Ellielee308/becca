@@ -252,6 +252,9 @@ export async function saveCard(data, cardSetId) {
   }
 }
 export async function uploadCardSetWithCards(cardSetData, cardContent, userId) {
+  if (!userId) {
+    throw new Error("儲存卡片失敗：無效的用戶");
+  }
   try {
     // 1. 儲存卡牌組資料並獲得 cardSetId
     const cardSetId = await saveCardSet(cardSetData);

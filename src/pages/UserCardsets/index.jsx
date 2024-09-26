@@ -13,9 +13,7 @@ function UserCardSets() {
   const [currentUserId, setCurrentUserId] = useState("");
   const [userCardSets, setUserCardSets] = useState(null);
   const [userCardStyles, setUserCardStyles] = useState(null);
-  const [userLabels, setUserLabels] = useState(null);
   const [styleMap, setStyleMap] = useState(null);
-  const [labelMap, setLabelMap] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -37,15 +35,6 @@ function UserCardSets() {
           return acc;
         }, {});
         setStyleMap(newStyleMap);
-
-        // 獲取標籤資料
-        const userLabels = await getUserLabels(currentUserId);
-        setUserLabels(userLabels);
-        const newLabelMap = userLabels.reduce((acc, label) => {
-          acc[label.labelId] = label;
-          return acc;
-        }, {});
-        setLabelMap(newLabelMap);
       }
     };
 
@@ -81,12 +70,10 @@ function UserCardSets() {
                       <LabelIcon />
                     </LabelIconContainer>
                     <LabelNameContainer>
-                      {cardSet.labels.length > 0 &&
-                      labelMap &&
-                      Object.keys(labelMap).length > 0 ? (
-                        cardSet.labels.map((labelId, index) => (
-                          <LabelName key={labelId}>
-                            {labelMap[labelId]?.name || "未知標籤"}
+                      {cardSet.labels.length > 0 ? (
+                        cardSet.labels.map((label, index) => (
+                          <LabelName key={label.labelId}>
+                            {label.name}
                             {index < cardSet.labels.length - 1 && ", "}
                           </LabelName>
                         ))

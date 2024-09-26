@@ -132,11 +132,11 @@ function CardSetDetail() {
               <LabelIcon />
             </LabelIconContainer>
             <LabelNameContainer>
-              {labels.length > 0 ? (
-                labels.map((label, index) => (
+              {cardSetData.labels.length > 0 ? (
+                cardSetData.labels.map((label, index) => (
                   <LabelName key={index}>
                     {label.name}
-                    {index < labels.length - 1 && ", "}
+                    {index < cardSetData.labels.length - 1 && ", "}
                   </LabelName>
                 ))
               ) : (

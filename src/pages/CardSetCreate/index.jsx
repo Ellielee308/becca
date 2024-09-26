@@ -86,7 +86,7 @@ function CardSetCreate() {
             label: userCardStyle.styleName,
           }));
 
-          const defaultStyleId = "bjqmNAR3MkEiRUZJCOS8";
+          const defaultStyleId = "rvM8Fc1efHo7Ho7kf1gT";
 
           // 將預設樣式排在第一個
           cardStyleOptions.sort((a, b) => {
@@ -105,7 +105,7 @@ function CardSetCreate() {
             setSelectedStyleOption(defaultStyle);
             setSelectedStyle(
               userCardStyles.find(
-                (style) => style.styleId === "bjqmNAR3MkEiRUZJCOS8"
+                (style) => style.styleId === "rvM8Fc1efHo7Ho7kf1gT"
               )
             );
             setCardSetData((prevInfo) => ({
@@ -127,9 +127,9 @@ function CardSetCreate() {
 
           // 定義模板的排序順序
           const templateOrder = [
-            "XWQvUaViTDuaBkbOu4Xp", // 預設模板
-            "8bhVw68E1aFe0Q57Y9WZ", // 正面附例句
-            "OmCVCwZgqjJ3Ntny8jWI", // 背面附圖片
+            "LqlohmCZJ1bmccWr01KD", // 預設模板
+            "kVGZwB50nuheUuK54YOU", // 正面附例句
+            "0uLnRxXM4ly0tvCmmCuG", // 背面附圖片
           ];
 
           const cardTemplateOptions = userCardTemplates.map(
@@ -157,7 +157,7 @@ function CardSetCreate() {
 
           setTemplateOptions(cardTemplateOptions);
           const defaultTemplate = cardTemplateOptions.find(
-            (option) => option.value === "XWQvUaViTDuaBkbOu4Xp" //預設模板
+            (option) => option.value === "LqlohmCZJ1bmccWr01KD" //預設模板
           );
 
           // 設置預設模板為選中的模板
@@ -166,13 +166,13 @@ function CardSetCreate() {
             setSelectedTemplate(
               userCardTemplates.find(
                 (template) =>
-                  template.fieldTemplateId === "XWQvUaViTDuaBkbOu4Xp"
+                  template.fieldTemplateId === "LqlohmCZJ1bmccWr01KD"
               )
             );
             setCardSetData((prevInfo) => ({
               ...prevInfo,
               userId: user.userId,
-              fieldTemplateId: "XWQvUaViTDuaBkbOu4Xp",
+              fieldTemplateId: "LqlohmCZJ1bmccWr01KD",
             }));
           }
         } catch (error) {
@@ -230,7 +230,7 @@ function CardSetCreate() {
 
       setCardSetData((prevInfo) => ({
         ...prevInfo,
-        labels: [...prevInfo.labels, newLabelId],
+        labels: [...prevInfo.labels, { labelId: newLabelId, name: newLabel }],
       }));
     } catch (error) {
       console.error("新增標籤失敗：", error);
@@ -468,13 +468,16 @@ function CardSetCreate() {
           isMulti
           options={labelOptions}
           value={labelOptions.filter((option) =>
-            cardSetData.labels.includes(option.value)
+            cardSetData.labels.some((label) => label.labelId === option.value)
           )}
           onChange={(selectedOptions) => {
             setCardSetData({
               ...cardSetData,
               labels: selectedOptions
-                ? selectedOptions.map((opt) => opt.value)
+                ? selectedOptions.map((opt) => ({
+                    labelId: opt.value,
+                    name: opt.label,
+                  }))
                 : [],
             });
           }}
