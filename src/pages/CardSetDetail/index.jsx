@@ -9,8 +9,12 @@ import {
   getCardsOfCardSet,
   getUserDocument,
   getLabelsOfCardSet,
+  isCardSetFavorited,
+  unfavoriteCardSet,
+  favoriteCardSet,
 } from "../../utils/api";
 import CreateQuizModal from "./CreateQuizModal";
+import { useUser } from "../../context/UserContext.jsx";
 
 function CardSetDetail() {
   const { cardSetId } = useParams();
@@ -22,6 +26,8 @@ function CardSetDetail() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [ownerData, setOwnerData] = useState();
   const [showCreateQuizModal, setShowCreateQuizModal] = useState(null);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const { user } = useUser();
   useEffect(() => {
     const fetchCardSetData = async () => {
       try {
@@ -58,10 +64,10 @@ function CardSetDetail() {
         }
 
         // 同時獲取該卡牌組的標籤資料
-        const fetchedCardSetLabelsData = await getLabelsOfCardSet(cardSetId);
-        if (!fetchedCardSetLabelsData) throw new Error("Labels not found");
-        console.log("獲取該卡牌組標籤成功：", fetchedCardSetLabelsData);
-        setLabels(fetchedCardSetLabelsData);
+        // const fetchedCardSetLabelsData = await getLabelsOfCardSet(cardSetId);
+        // if (!fetchedCardSetLabelsData) throw new Error("Labels not found");
+        // console.log("獲取該卡牌組標籤成功：", fetchedCardSetLabelsData);
+        // setLabels(fetchedCardSetLabelsData);
       } catch (error) {
         console.error("獲取卡牌組資料或標籤失敗：", error);
       }
@@ -69,6 +75,18 @@ function CardSetDetail() {
 
     fetchCardSetData();
   }, [cardSetId]);
+
+  useEffect(() => {
+    const checkIfFavorited = async () => {
+      const favorited = await isCardSetFavorited(user.userId, cardSetId); // 假設你有這個函數
+      setIsFavorited(favorited);
+    };
+    if (user) {
+      checkIfFavorited();
+    } else {
+      setIsFavorited(false);
+    }
+  }, [user, cardSetId]);
 
   const handleNextCard = () => {
     setCurrentCardIndex((prevIndex) =>
@@ -80,6 +98,20 @@ function CardSetDetail() {
     setCurrentCardIndex((prevIndex) =>
       prevIndex > 0 ? prevIndex - 1 : prevIndex
     );
+  };
+
+  const handleToggleFavorite = async () => {
+    try {
+      if (isFavorited) {
+        await unfavoriteCardSet(user.userId, cardSetId);
+        setIsFavorited(false);
+      } else {
+        await favoriteCardSet(user.userId, cardSetId);
+        setIsFavorited(true);
+      }
+    } catch (error) {
+      console.error("切換收藏狀態失敗：", error);
+    }
   };
 
   if (!cardSetData || !cards || !ownerData) {
@@ -95,7 +127,12 @@ function CardSetDetail() {
           totalCardsNumber={cards.length}
         />
       )}
-      <Title>{cardSetData.title}</Title>
+      <TitleBar>
+        <Title>{cardSetData.title}</Title>
+        <StarContainer onClick={handleToggleFavorite}>
+          {isFavorited ? <FilledStarIcon /> : <StarIcon />}
+        </StarContainer>
+      </TitleBar>
       <CardContainer>
         <ArrowIconContainer
           disabled={currentCardIndex === 0}
@@ -265,11 +302,27 @@ const Wrapper = styled.div`
   border-radius: 8px;
 `;
 
-const Title = styled.div`
-  width: 60%;
+const TitleBar = styled.div`
   margin: 32px auto;
+  width: 60%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const Title = styled.div`
   font-size: 32px;
   user-select: none;
+`;
+
+const StarContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgb(255, 205, 31);
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 const CardContainer = styled.div`
@@ -777,7 +830,7 @@ CardContent.propTypes = {
         value: PropTypes.string.isRequired,
       })
     ).isRequired,
-    createdAt: PropTypes.string.isRequired,
+    createdAt: PropTypes.object.isRequired,
   }).isRequired,
 };
 
@@ -865,6 +918,42 @@ const ListIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+    />
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="32"
+    height="32"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+    />
+  </svg>
+);
+
+const FilledStarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="32"
+    height="32"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
     />
   </svg>
 );
