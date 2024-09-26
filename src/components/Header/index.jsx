@@ -48,7 +48,7 @@ function Header() {
         </form>
       </SearchSection>
       <NavigateWrapper>
-        {!loading && user && (
+        {!loading && user ? (
           <>
             <WelcomeMessage>{`Welcome back, ${user.username}!`}</WelcomeMessage>
             <Link to="/cardset/new">
@@ -58,7 +58,7 @@ function Header() {
             </Link>
             <NavItemWrapper>
               <ProfilePictureWrapper>
-                {user && user.profilePicture && (
+                {user.profilePicture && (
                   <ProfilePicture src={user.profilePicture} />
                 )}
                 <SubMenu>
@@ -70,16 +70,11 @@ function Header() {
               </ProfilePictureWrapper>
             </NavItemWrapper>
           </>
-        )}
-        {!loading && !user && (
-          <LoginTrigger
-            onClick={() => {
-              setShowLoginModal(true);
-            }}
-          >
+        ) : !loading && !user ? (
+          <LoginTrigger onClick={() => setShowLoginModal(true)}>
             Sign in
           </LoginTrigger>
-        )}
+        ) : null}
       </NavigateWrapper>
       {showLoginModal && (
         <LoginModal onClose={() => setShowLoginModal(false)} />
