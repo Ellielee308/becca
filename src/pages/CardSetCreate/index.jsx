@@ -44,6 +44,7 @@ function CardSetCreate() {
     fieldTemplateId: "",
     createdAt: "",
     cardOrder: [],
+    labelNames: [],
   });
   const [cardContent, setCardContent] = useState([]);
   const [suggestedTranslations, setSuggestedTranslations] = useState([]);
@@ -231,6 +232,7 @@ function CardSetCreate() {
       setCardSetData((prevInfo) => ({
         ...prevInfo,
         labels: [...prevInfo.labels, { labelId: newLabelId, name: newLabel }],
+        labelNames: [...prevInfo.labelNames, newLabel],
       }));
     } catch (error) {
       console.error("新增標籤失敗：", error);
@@ -478,6 +480,9 @@ function CardSetCreate() {
                     labelId: opt.value,
                     name: opt.label,
                   }))
+                : [],
+              labelNames: selectedOptions
+                ? selectedOptions.map((opt) => opt.label)
                 : [],
             });
           }}

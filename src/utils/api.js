@@ -13,6 +13,7 @@ import {
   setDoc,
   Timestamp,
   getCountFromServer,
+  arrayRemove,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
@@ -582,5 +583,102 @@ export async function updateProfilePicture(userId, file) {
     return downloadURL;
   } catch (error) {
     console.error("上傳或更新大頭貼失敗：", error);
+  }
+}
+
+export async function search(searchKeyword) {
+  try {
+    // title 查詢，加上 visibility 為 public 的條件
+    const titleQuery = query(
+      collection(db, "cardSets"),
+      where("title", ">=", searchKeyword),
+      where("title", "<=", searchKeyword + "\uf8ff"),
+      where("visibility", "==", "public") // 加入 visibility 過濾條件
+    );
+
+    // description 查詢，加上 visibility 為 public 的條件
+    const descriptionQuery = query(
+      collection(db, "cardSets"),
+      where("description", ">=", searchKeyword),
+      where("description", "<=", searchKeyword + "\uf8ff"),
+      where("visibility", "==", "public") // 加入 visibility 過濾條件
+    );
+
+    // labelNames 查詢，加上 visibility 為 public 的條件
+    const labelsQuery = query(
+      collection(db, "cardSets"),
+      where("labelNames", "array-contains", searchKeyword),
+      where("visibility", "==", "public") // 加入 visibility 過濾條件
+    );
+
+    // 執行所有查詢
+    const [titleSnapshot, descriptionSnapshot, labelsSnapshot] =
+      await Promise.all([
+        getDocs(titleQuery),
+        getDocs(descriptionQuery),
+        getDocs(labelsQuery),
+      ]);
+
+    const combinedResults = new Set();
+
+    titleSnapshot.forEach((doc) => combinedResults.add(doc.data()));
+    descriptionSnapshot.forEach((doc) => combinedResults.add(doc.data()));
+    labelsSnapshot.forEach((doc) => combinedResults.add(doc.data()));
+
+    // 將結果轉換成陣列
+    const finalResults = Array.from(combinedResults);
+
+    console.log(finalResults);
+    return finalResults; // 返回搜尋結果
+  } catch (error) {
+    console.error("搜尋過程中發生錯誤：", error);
+  }
+}
+
+export async function favoriteCardSet(userId, cardSetId) {
+  const userDocRef = doc(db, "users", userId);
+
+  try {
+    // 使用 arrayUnion 將 cardSetId 加入 favorites 陣列中
+    await updateDoc(userDocRef, {
+      favorites: arrayUnion(cardSetId), // 僅儲存 cardSetId
+    });
+    console.log(`成功收藏卡牌組：${cardSetId}`);
+  } catch (error) {
+    console.error("收藏卡牌組失敗：", error);
+  }
+}
+
+export async function isCardSetFavorited(userId, cardSetId) {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const favorites = userData.favorites || []; // 確保 favorites 陣列存在
+      return favorites.includes(cardSetId); // 使用 includes 判斷是否已收藏
+    } else {
+      console.error("User document does not exist");
+      return false;
+    }
+  } catch (error) {
+    console.error("Failed to check if card set is favorited:", error);
+    return false;
+  }
+}
+
+export async function unfavoriteCardSet(userId, cardSetId) {
+  try {
+    const userDocRef = doc(db, "users", userId);
+
+    // 使用 arrayRemove 從 favorites 中移除指定的 cardSetId
+    await updateDoc(userDocRef, {
+      favorites: arrayRemove(cardSetId), // 移除 cardSetId
+    });
+
+    console.log(`Card set ${cardSetId} has been unfavorited by user ${userId}`);
+  } catch (error) {
+    console.error("Failed to unfavorite card set:", error);
   }
 }

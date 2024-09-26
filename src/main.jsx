@@ -11,6 +11,7 @@ import CardSetDetail from "./pages/CardSetDetail";
 import CardSetCreate from "./pages/CardSetCreate";
 import CardSetEdit from "./pages/CardSetEdit";
 import Quiz from "./pages/Quiz";
+import SearchResult from "./SearchResult";
 import PrivateRoute from "./components/PrivateRoute";
 import { UserProvider } from "./context/UserContext";
 
@@ -33,14 +34,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="analytics" element={<UserAnalytics />} />
               <Route path="cardsets" element={<UserCardSets />} />
             </Route>
-            <Route
-              path="cardset/:cardSetId"
-              element={
-                <PrivateRoute>
-                  <CardSetDetail />
-                </PrivateRoute>
-              }
-            />
+            <Route path="cardset/:cardSetId" element={<CardSetDetail />} />
             <Route
               path="cardset/new"
               element={
@@ -65,6 +59,7 @@ createRoot(document.getElementById("root")).render(
                 </PrivateRoute>
               }
             />
+            <Route path="search/:keyword" element={<SearchResult />} />
           </Route>
         </Routes>
       </BrowserRouter>

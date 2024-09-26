@@ -12,6 +12,7 @@ import beccaLogo from "./images/becca-logo.png";
 function Header() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { user, setUser, loading } = useUser();
+  const [searchInputValue, setSearchInputValue] = useState("");
   const navigate = useNavigate();
 
   const handleLogOut = async () => {
@@ -25,11 +26,27 @@ function Header() {
     }
   };
 
+  const handleSearch = (event) => {
+    event.preventDefault();
+    navigate(`/search/${searchInputValue}`);
+    setSearchInputValue("");
+  };
+
   return (
     <Wrapper>
       <Link to="/">
         <LogoImg src={beccaLogo} alt="Logo" />
       </Link>
+      <SearchSection>
+        <SearchIcon />
+        <form onSubmit={handleSearch}>
+          <SearchInput
+            placeholder="搜尋 Flashcards"
+            value={searchInputValue}
+            onChange={(e) => setSearchInputValue(e.target.value)}
+          />
+        </form>
+      </SearchSection>
       <NavigateWrapper>
         {!loading && user && (
           <>
@@ -219,6 +236,51 @@ const ProfilePicture = styled.img`
   border-radius: 50%;
   object-fit: cover;
 `;
+
+const SearchSection = styled.div`
+  position: absolute; /* 設定為絕對定位 */
+  top: 50%; /* 水平垂直居中 */
+  left: 50%;
+  transform: translate(-50%, -50%); /* 將元素的左上角移到中心點 */
+  display: flex;
+  flex-direction: row;
+  height: 40px;
+  align-items: center;
+  background-color: #d9dce2;
+  border-radius: 12px;
+  padding: 0 20px 0 20px;
+`;
+
+const SearchInput = styled.input`
+  margin-left: 20px;
+  border: none;
+  height: 40px;
+  font-size: 16px;
+  line-height: 40px;
+  background-color: transparent;
+  &:focus {
+    outline: none;
+  }
+`;
+
+const SearchIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+    />
+  </svg>
+);
+
 const LoginModal = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true); // 控制登入或註冊模式
   const [email, setEmail] = useState("");
