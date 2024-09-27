@@ -2,11 +2,7 @@ import styled from "styled-components";
 import { useUser } from "../../context/UserContext.jsx";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import {
-  getUserAllCardSets,
-  getUserCardStyles,
-  getUserLabels,
-} from "../../utils/api.js";
+import { getUserAllCardSets, getUserCardStyles } from "../../utils/api.js";
 
 function UserCardSets() {
   const { user } = useUser();
@@ -61,9 +57,16 @@ function UserCardSets() {
                   </CardWrapper>
                 </Link>
                 <CardSetDetailsContainer>
-                  <Link to={`/cardset/${cardSet.cardSetId}`}>
-                    <CardSetTitle>{cardSet.title}</CardSetTitle>
-                  </Link>
+                  <CardSetActionWrapper>
+                    <Link to={`/cardset/${cardSet.cardSetId}`}>
+                      <CardSetTitle>{cardSet.title}</CardSetTitle>
+                    </Link>
+                    <EditIconContainer>
+                      <Link to={`/cardset/${cardSet.cardSetId}/edit`}>
+                        <EditIcon />
+                      </Link>
+                    </EditIconContainer>
+                  </CardSetActionWrapper>
                   <CardSetDescription>{cardSet.description}</CardSetDescription>
                   <LabelWrapper>
                     {cardSet.visibility === "public" ? (
@@ -168,6 +171,11 @@ const CardSetDetailsContainer = styled.div`
   flex-direction: column;
 `;
 
+const CardSetActionWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
 const CardSetTitle = styled.p`
   font-size: 16px;
 `;
@@ -204,6 +212,15 @@ const LabelName = styled.span`
   white-space: pre;
   color: gray;
   font-size: 14px;
+`;
+
+const EditIconContainer = styled.div`
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  cursor: pointer;
 `;
 
 const LabelIcon = () => (
@@ -250,5 +267,17 @@ const PrivateIcon = () => (
     <path d="M3.53 2.47a.75.75 0 0 0-1.06 1.06l18 18a.75.75 0 1 0 1.06-1.06l-18-18ZM22.676 12.553a11.249 11.249 0 0 1-2.631 4.31l-3.099-3.099a5.25 5.25 0 0 0-6.71-6.71L7.759 4.577a11.217 11.217 0 0 1 4.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113Z" />
     <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0 1 15.75 12ZM12.53 15.713l-4.243-4.244a3.75 3.75 0 0 0 4.244 4.243Z" />
     <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 0 0-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 0 1 6.75 12Z" />
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width="18"
+    height="18"
+  >
+    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
   </svg>
 );

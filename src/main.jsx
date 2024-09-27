@@ -46,7 +46,7 @@ createRoot(document.getElementById("root")).render(
               }
             />
             <Route
-              path="cardset/:cardsetId/edit"
+              path="cardset/:cardSetId/edit"
               element={
                 <PrivateRoute>
                   <CardSetEdit />

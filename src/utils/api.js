@@ -14,6 +14,8 @@ import {
   Timestamp,
   getCountFromServer,
   arrayRemove,
+  deleteDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
@@ -619,14 +621,26 @@ export async function search(searchKeyword) {
         getDocs(labelsQuery),
       ]);
 
-    const combinedResults = new Set();
+    // 使用 Set 來過濾重複的 cardSetId
+    const uniqueResults = new Map();
 
-    titleSnapshot.forEach((doc) => combinedResults.add(doc.data()));
-    descriptionSnapshot.forEach((doc) => combinedResults.add(doc.data()));
-    labelsSnapshot.forEach((doc) => combinedResults.add(doc.data()));
+    // 處理 titleSnapshot
+    titleSnapshot.forEach((doc) => {
+      uniqueResults.set(doc.id, doc.data()); // 根據 doc.id 作為 key 存入 Map
+    });
 
-    // 將結果轉換成陣列
-    const finalResults = Array.from(combinedResults);
+    // 處理 descriptionSnapshot
+    descriptionSnapshot.forEach((doc) => {
+      uniqueResults.set(doc.id, doc.data()); // 如果相同 id 已經存在，會自動更新
+    });
+
+    // 處理 labelsSnapshot
+    labelsSnapshot.forEach((doc) => {
+      uniqueResults.set(doc.id, doc.data()); // 確保只存一次相同的 cardSet
+    });
+
+    // 將 Map 的值轉換成陣列
+    const finalResults = Array.from(uniqueResults.values());
 
     console.log(finalResults);
     return finalResults; // 返回搜尋結果
@@ -699,5 +713,85 @@ export async function getUserCollection(userId) {
   } catch (error) {
     console.error("查找用戶收藏失敗：", error);
     return false;
+  }
+}
+
+export async function updateCardSet(cardSetId, data) {
+  try {
+    const docRef = doc(db, "cardSets", cardSetId);
+    await updateDoc(docRef, { ...data, lastEditedAt: serverTimestamp() });
+    console.log("成功更新牌組資料");
+  } catch (error) {
+    console.error("更新牌組資料失敗", error);
+  }
+}
+
+export async function updateCard(cardId, data) {
+  try {
+    const cardRef = doc(db, "cards", cardId);
+    await updateDoc(cardRef, { ...data });
+    console.log("成功更新卡牌：", cardId);
+  } catch (error) {
+    console.error("更新卡牌失敗", error);
+  }
+}
+
+export async function updateCardSetWithNewCards(
+  cardSetData,
+  cardContent,
+  userId,
+  deletedCards
+) {
+  if (!userId) {
+    throw new Error("儲存卡片失敗：無效的用戶");
+  }
+
+  try {
+    // 1. 更新卡牌組資料
+    await updateCardSet(cardSetData.cardSetId, cardSetData);
+
+    const newCardIds = [];
+    const batch = writeBatch(db); // 使用批量寫入
+
+    // 2. 處理卡片內容（新增和更新）
+    for (const card of cardContent) {
+      if (card.isNew) {
+        const cardData = {
+          userId: userId,
+          frontFields: card.frontFields,
+          backFields: card.backFields,
+        };
+        const cardId = await saveCard(cardData, cardSetData.cardSetId); // 假設 saveCard 新增卡片
+        newCardIds.push(cardId); // 將新卡片的 ID 存入
+      } else {
+        const cardRef = doc(db, "cards", card.cardId);
+        batch.update(cardRef, card); // 使用批量更新現有卡片
+      }
+    }
+
+    // 3. 更新卡牌組中的 cardOrder，加入新卡片的 ID
+    const cardSetRef = doc(db, "cardSets", cardSetData.cardSetId);
+    batch.update(cardSetRef, {
+      cardOrder: arrayUnion(...newCardIds), // 展開 newCardIds 以將每個新卡片 ID 添加到 cardOrder
+    });
+
+    // 4. 處理刪除的卡片
+    for (const deletedCardId of deletedCards) {
+      const cardRef = doc(db, "cards", deletedCardId);
+      batch.delete(cardRef); // 批量刪除卡片
+
+      // 從 cardOrder 中移除刪除的卡片 ID
+      batch.update(cardSetRef, {
+        cardOrder: arrayRemove(deletedCardId),
+      });
+    }
+
+    // 5. 提交批量操作
+    await batch.commit();
+
+    console.log("更新卡牌組成功！");
+  } catch (error) {
+    console.error("更新卡牌組失敗：", error.message);
+    return null;
   }
 }

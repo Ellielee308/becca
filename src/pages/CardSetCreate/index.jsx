@@ -216,6 +216,8 @@ function CardSetCreate() {
       ...prevOptions,
       { value: styleId, label: newStyle.styleName },
     ]);
+    setSelectedStyleOption({ value: styleId, label: newStyle.styleName });
+    setSelectedStyle(newStyle);
   };
 
   const handleCreateLabel = async (newLabel) => {
@@ -350,7 +352,7 @@ function CardSetCreate() {
     <Wrapper>
       <Heading>新增卡牌組</Heading>
       <Form onSubmit={handleSubmit}>
-        <InputLabel>
+        <InputLabel htmlFor="title">
           標題<RequiredNotice>*</RequiredNotice>
         </InputLabel>
         <Input
@@ -359,6 +361,7 @@ function CardSetCreate() {
             setCardSetData({ ...cardSetData, title: e.target.value })
           }
           $isInvalid={invalidFields.includes("title")}
+          id="title"
         />
         <InputLabel htmlFor="description">簡介</InputLabel>
         <Textarea
@@ -370,7 +373,7 @@ function CardSetCreate() {
         <InputLabel>
           目的
           <RequiredNotice>
-            {`*${invalidFields.includes("purpose") ? " 必選項" : ""}`}
+            {invalidFields.includes("purpose") ? " 必選項" : ""}
           </RequiredNotice>
         </InputLabel>
         <RadioWrapper>
@@ -404,7 +407,7 @@ function CardSetCreate() {
         </RadioWrapper>
         {cardSetData.purpose === "languageLearning" && (
           <>
-            <InputLabel htmlFor="label">
+            <InputLabel>
               正面字卡顯示的字詞語言是什麼呢？<RequiredNotice>*</RequiredNotice>
             </InputLabel>
             <Select
@@ -417,7 +420,7 @@ function CardSetCreate() {
               }
               styles={selectStyles(invalidFields.includes("learningLanguage"))}
             />
-            <InputLabel htmlFor="label">
+            <InputLabel>
               背面字卡顯示的字詞語言是什麼呢？<RequiredNotice>*</RequiredNotice>
             </InputLabel>
             <Select
@@ -540,9 +543,6 @@ function CardSetCreate() {
         <NewStyleModal
           onClose={() => {
             setShowNewStyleModal(false);
-            setSelectedStyleOption(null); // 重置選擇器為未選擇狀態
-            setSelectedStyle({});
-            setCardSetData({ ...cardSetData, styleId: "" });
           }}
           onStyleAdded={handleStyleAdded}
         />
