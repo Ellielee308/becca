@@ -62,9 +62,9 @@ function Header() {
                   <ProfilePicture src={user.profilePicture} />
                 )}
                 <SubMenu>
-                  <SubMenuItem>
-                    <StyledLink to="/user/me/profile">Profile</StyledLink>
-                  </SubMenuItem>
+                  <StyledLink to="/user/me/profile">
+                    <SubMenuItem>Profile</SubMenuItem>
+                  </StyledLink>
                   <SubMenuItem onClick={handleLogOut}>Log out</SubMenuItem>
                 </SubMenu>
               </ProfilePictureWrapper>

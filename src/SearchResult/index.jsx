@@ -2,10 +2,12 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { search } from "../utils/api";
+import { useUser } from "../context/UserContext";
 
 function SearchResult() {
   const { keyword } = useParams();
   const [searchResults, setSearchResults] = useState([]);
+  const { user } = useUser();
   const [loading, setLoading] = useState(true); // 新增 loading 狀態
 
   useEffect(() => {
@@ -18,7 +20,14 @@ function SearchResult() {
         const searchResults = await search(keyword);
         if (searchResults.length > 0) {
           console.log("搜尋結果：", searchResults);
-          setSearchResults(searchResults);
+          if (user && user.userId) {
+            const filteredSearchResults = searchResults.filter(
+              (result) => result.userId !== user.userId
+            );
+            setSearchResults(filteredSearchResults);
+          } else {
+            setSearchResults(searchResults);
+          }
         } else {
           console.log("查無搜尋結果");
         }
@@ -29,14 +38,14 @@ function SearchResult() {
       }
     };
     fetchSearchResult();
-  }, [keyword]);
+  }, [keyword, user]);
 
   if (loading) return <div>Loading...</div>; // 搜尋進行中顯示 loading 畫面
 
   if (!searchResults.length)
     return (
       <Wrapper>
-        <Title>查無搜尋結果，換個字詞搜尋看看吧！</Title>
+        <Title>查無搜尋結果，換個關鍵字搜尋看看吧！</Title>
       </Wrapper>
     );
 

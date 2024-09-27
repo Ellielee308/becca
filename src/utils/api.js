@@ -682,3 +682,22 @@ export async function unfavoriteCardSet(userId, cardSetId) {
     console.error("Failed to unfavorite card set:", error);
   }
 }
+
+export async function getUserCollection(userId) {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const favorites = userData.favorites || [];
+      console.log("查詢用戶收藏結果：", favorites);
+      return favorites;
+    } else {
+      console.error("User document does not exist");
+      return [];
+    }
+  } catch (error) {
+    console.error("查找用戶收藏失敗：", error);
+    return false;
+  }
+}
