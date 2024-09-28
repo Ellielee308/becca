@@ -2,7 +2,11 @@ import styled from "styled-components";
 import { useUser } from "../../context/UserContext.jsx";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getUserAllCardSets, getUserCardStyles } from "../../utils/api.js";
+import {
+  getUserAllCardSets,
+  getUserCardStyles,
+  deleteCardSet,
+} from "../../utils/api.js";
 
 function UserCardSets() {
   const { user } = useUser();
@@ -10,6 +14,8 @@ function UserCardSets() {
   const [userCardSets, setUserCardSets] = useState(null);
   const [userCardStyles, setUserCardStyles] = useState(null);
   const [styleMap, setStyleMap] = useState(null);
+  const [visibleMenuCardSetId, setVisibleMenuCardSetId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -36,6 +42,70 @@ function UserCardSets() {
 
     fetchCardSets();
   }, [currentUserId]);
+
+  const toggleMenu = (cardSetId) => {
+    setVisibleMenuCardSetId((prev) => (prev === cardSetId ? null : cardSetId));
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // 如果點擊發生在選單或按鈕內部，則不關閉
+      if (
+        event.target.closest(".more-actions-container") ||
+        event.target.closest(".sub-menu")
+      ) {
+        return;
+      }
+      // 如果點擊發生在外部，關閉選單
+      setVisibleMenuCardSetId(null);
+    };
+
+    // 監聽 mousedown 事件來捕捉點擊
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // 清除監聽器
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  function copyShareUrl(cardSetId) {
+    const copyText = `https://becca-24.web.app/cardset/${cardSetId}`;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      // 使用 Clipboard API
+      navigator.clipboard
+        .writeText(copyText)
+        .then(() => {
+          alert("已複製分享連結！");
+        })
+        .catch((error) => {
+          console.error("無法複製分享連結：", error);
+        });
+    } else {
+      console.error("無法複製分享連結：沒有clipboard API");
+    }
+  }
+
+  async function handleDeleteCardSet(cardSetId) {
+    if (isDeleting) return;
+    const confirmation = confirm("刪除卡牌組後無法復原，確定刪除嗎？");
+    if (confirmation) {
+      try {
+        setIsDeleting(true);
+        await deleteCardSet(cardSetId);
+        alert("已刪除卡牌。");
+        setUserCardSets((prev) =>
+          prev.filter((set) => set.cardSetId !== cardSetId)
+        );
+      } catch (error) {
+        console.error("刪除卡牌組失敗：", error);
+        alert("刪除卡牌失敗，請稍後再試！");
+      } finally {
+        setIsDeleting(false); // 無論成功與否都重置刪除狀態
+      }
+    }
+  }
 
   if (!currentUserId || !userCardSets || !userCardStyles || !styleMap) {
     return <div>Loading...</div>;
@@ -101,6 +171,33 @@ function UserCardSets() {
                         <LabelName>無標籤</LabelName>
                       )}
                     </LabelNameContainer>
+                    <MoreActionsContainer
+                      className="more-actions-container"
+                      onClick={() => toggleMenu(cardSet.cardSetId)}
+                    >
+                      <MoreIcon />
+                      {visibleMenuCardSetId === cardSet.cardSetId && (
+                        <SubMenu className="sub-menu">
+                          <SubMenuItem
+                            onClick={() => copyShareUrl(cardSet.cardSetId)}
+                          >
+                            <ShareIcon />
+                            <SubMenuItemText>分享</SubMenuItemText>
+                          </SubMenuItem>
+                          <SubMenuItem>
+                            <TrashIcon />
+                            <SubMenuItemText
+                              $isDelete
+                              onClick={() =>
+                                handleDeleteCardSet(cardSet.cardSetId)
+                              }
+                            >
+                              {isDeleting ? "刪除中..." : "刪除"}
+                            </SubMenuItemText>
+                          </SubMenuItem>
+                        </SubMenu>
+                      )}
+                    </MoreActionsContainer>
                   </LabelWrapper>
                 </CardSetDetailsContainer>
               </CardContainer>
@@ -223,6 +320,44 @@ const EditIconContainer = styled.div`
   cursor: pointer;
 `;
 
+const MoreActionsContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-left: auto;
+`;
+
+const SubMenu = styled.div`
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background-color: white;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 120px;
+  z-index: 100;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+`;
+
+const SubMenuItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const SubMenuItemText = styled.p`
+  margin-left: 14px;
+  color: ${(props) => (props.$isDelete ? "red" : "inherit")};
+`;
+
 const LabelIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -279,5 +414,59 @@ const EditIcon = () => (
     height="18"
   >
     <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+  </svg>
+);
+
+const ShareIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="18"
+    height="18"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"
+    />
+  </svg>
+);
+
+const MoreIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="22"
+    height="22"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+    />
+  </svg>
+);
+
+export const TrashIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="red"
+    width="18"
+    height="18"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+    />
   </svg>
 );

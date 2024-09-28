@@ -795,3 +795,39 @@ export async function updateCardSetWithNewCards(
     return null;
   }
 }
+
+export async function deleteCardSet(cardSetId) {
+  try {
+    const cardSetRef = doc(db, "cardSets", cardSetId);
+    await deleteDoc(cardSetRef);
+    console.log(`成功刪除卡牌組：${cardSetId}`);
+
+    const usersQuery = query(
+      collection(db, "users"),
+      where("favorites", "array-contains", { cardSetId })
+    );
+    const usersSnapshot = await getDocs(usersQuery);
+
+    for (const userDoc of usersSnapshot.docs) {
+      const userRef = doc(db, "users", userDoc.id);
+      await updateDoc(userRef, {
+        favorites: arrayRemove({ cardSetId }),
+      });
+    }
+    console.log(`已成功從所有收藏該卡牌組的用戶中移除該卡牌組`);
+    const cardsQuery = query(
+      collection(db, "cards"),
+      where("cardSetId", "==", cardSetId)
+    );
+    const cardsSnapshot = await getDocs(cardsQuery);
+
+    for (const cardDoc of cardsSnapshot.docs) {
+      const cardRef = doc(db, "cards", cardDoc.id);
+      await deleteDoc(cardRef);
+      console.log(`成功刪除卡片：${cardDoc.id}`);
+    }
+    console.log(`已成功刪除所有屬於卡牌組 ${cardSetId} 的卡片`);
+  } catch (error) {
+    console.error("刪除卡牌組失敗：", error);
+  }
+}

@@ -65,6 +65,9 @@ function Header() {
                   <StyledLink to="/user/me/profile">
                     <SubMenuItem>Profile</SubMenuItem>
                   </StyledLink>
+                  <StyledLink to="/user/me/cardsets">
+                    <SubMenuItem>Card Sets</SubMenuItem>
+                  </StyledLink>
                   <SubMenuItem onClick={handleLogOut}>Log out</SubMenuItem>
                 </SubMenu>
               </ProfilePictureWrapper>
