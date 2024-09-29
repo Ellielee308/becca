@@ -63,12 +63,12 @@ function Header() {
                 )}
                 <SubMenu>
                   <StyledLink to="/user/me/profile">
-                    <SubMenuItem>Profile</SubMenuItem>
+                    <SubMenuItem>用戶總覽</SubMenuItem>
                   </StyledLink>
                   <StyledLink to="/user/me/cardsets">
-                    <SubMenuItem>Card Sets</SubMenuItem>
+                    <SubMenuItem>卡牌組</SubMenuItem>
                   </StyledLink>
-                  <SubMenuItem onClick={handleLogOut}>Log out</SubMenuItem>
+                  <SubMenuItem onClick={handleLogOut}>登出</SubMenuItem>
                 </SubMenu>
               </ProfilePictureWrapper>
             </NavItemWrapper>
