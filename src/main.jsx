@@ -13,7 +13,8 @@ import CardSetEdit from "./pages/CardSetEdit";
 import Quiz from "./pages/Quiz";
 import SearchResult from "./SearchResult";
 import PrivateRoute from "./components/PrivateRoute";
-import UserCollection from "./pages/UserCollection/index.jsx";
+import UserCollection from "./pages/UserCollection";
+import Game from "./pages/Game";
 import { UserProvider } from "./context/UserContext";
 
 createRoot(document.getElementById("root")).render(
@@ -62,6 +63,7 @@ createRoot(document.getElementById("root")).render(
               }
             />
             <Route path="search/:keyword" element={<SearchResult />} />
+            <Route path="game/:gameId" element={<Game />} />
           </Route>
         </Routes>
       </BrowserRouter>

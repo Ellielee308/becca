@@ -831,3 +831,97 @@ export async function deleteCardSet(cardSetId) {
     console.error("刪除卡牌組失敗：", error);
   }
 }
+
+export async function createGameDoc(data) {
+  try {
+    const gamesCollectionRef = collection(db, "games");
+    const docRef = await addDoc(gamesCollectionRef, {
+      ...data,
+      createdAt: serverTimestamp(),
+      status: "waiting",
+    });
+    await updateDoc(docRef, { gameId: docRef.id });
+    console.log("成功創建新遊戲：", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.log("創建遊戲失敗：", error);
+    return null;
+  }
+}
+
+export async function uploadGameQuestionDoc(data) {
+  try {
+    const gameQuestionCollectionRef = collection(db, "gameQuestions");
+    const docRef = await addDoc(gameQuestionCollectionRef, {
+      ...data,
+      gameQuestionId: "",
+    });
+    await updateDoc(docRef, { gameQuestionId: docRef.id });
+    console.log("成功儲存遊戲題目：", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.log("儲存遊戲題目失敗：", error);
+    return null;
+  }
+}
+
+export async function createGameWithQuestion(gameData, questionData) {
+  try {
+    const gameId = await createGameDoc(gameData);
+    if (!gameId) {
+      throw new Error("創建遊戲失敗");
+    }
+    const gameQuestionId = await uploadGameQuestionDoc({
+      ...questionData,
+      gameId,
+    });
+    if (!gameQuestionId) {
+      throw new Error("創建遊戲題目失敗");
+    }
+
+    // 將 gameQuestionId 更新到 game 文檔中
+    const gameDocRef = doc(db, "games", gameId);
+    await updateDoc(gameDocRef, { gameQuestionId });
+    console.log(
+      `已成功創建遊戲和題目，gameId: ${gameId}、gameQuestionId： ${gameQuestionId}`
+    );
+    return gameId;
+  } catch (error) {
+    console.log("創建遊戲和題目失敗：", error);
+    return null;
+  }
+}
+
+export async function getGameDoc(gameId) {
+  try {
+    const gameRef = doc(db, "games", gameId);
+    const gameSnapshot = await getDoc(gameRef);
+    if (gameSnapshot.exists()) {
+      const gameData = gameSnapshot.data();
+      console.log("已成功取得遊戲資料：", gameData);
+      return gameData;
+    } else {
+      throw new Error("找不到遊戲資料");
+    }
+  } catch (error) {
+    console.log("獲取遊戲資料失敗：", error);
+    return null;
+  }
+}
+
+export async function getGameQuestions(gameQuestionId) {
+  try {
+    const gameQuestionRef = doc(db, "gameQuestions", gameQuestionId);
+    const gameQuestionSnapshot = await getDoc(gameQuestionRef);
+    if (gameQuestionSnapshot.exists()) {
+      const gameQuestionData = gameQuestionSnapshot.data();
+      console.log("已成功取得遊戲問題：", gameQuestionData);
+      return gameQuestionData;
+    } else {
+      throw new Error("找不到遊戲問題");
+    }
+  } catch (error) {
+    console.log("獲取遊戲問題資料失敗：", error);
+    return null;
+  }
+}
