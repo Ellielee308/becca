@@ -4,13 +4,6 @@ import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
 
-const formatTime = (time) => {
-  const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
-  const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
-  const milliseconds = String(Math.floor((time % 1000) / 100));
-  return `${minutes}:${seconds}.${milliseconds}`;
-};
-
 function MultipleChoices({
   gameData,
   gameQuestionData,
@@ -420,6 +413,12 @@ const GameEndModal = ({ gameStatus, gameData, correctAttempt, timer }) => {
     return `${minutes} 分 ${seconds} 秒`;
   };
 
+  const formatTimeLimit = (timeLimitInSeconds) => {
+    const minutes = Math.floor(timeLimitInSeconds / 60); // 計算分鐘
+    const seconds = timeLimitInSeconds % 60; // 計算剩餘的秒數
+    return `${minutes} 分 ${seconds} 秒`;
+  };
+
   return (
     <ModalWrapper>
       <ModalContent>
@@ -442,7 +441,11 @@ const GameEndModal = ({ gameStatus, gameData, correctAttempt, timer }) => {
                   <RankingItem key={index}>
                     {`第${index + 1}名 ${player.username} - 得分: ${
                       player.score
-                    }, 用時: ${formatTime(player.timeUsed)}`}
+                    }, 用時: ${
+                      player.timeUsed
+                        ? formatTime(player.timeUsed)
+                        : formatTimeLimit(gameData.timeLimit)
+                    }`}
                   </RankingItem>
                 ))}
               </RankingList>

@@ -426,6 +426,10 @@ const GameEndModal = ({ gameStatus, gameData, participantId, timer }) => {
     const seconds = timeLimitInSeconds % 60; // 計算剩餘的秒數
     return `${minutes} 分 ${seconds} 秒`;
   };
+
+  if (!gameData || !gameStatus === "completed") {
+    return <div>Loading...</div>;
+  }
   return (
     <ModalWrapper>
       <ModalContent>

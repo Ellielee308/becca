@@ -13,7 +13,7 @@ import {
 } from "../../utils/api";
 import { useUser } from "../../context/UserContext.jsx";
 import { QRCodeSVG } from "qrcode.react";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../utils/firebaseConfig.js";
 import Matching from "./Matching";
 import MultipleChoices from "./MultipleChoices";
@@ -160,6 +160,53 @@ function Game() {
     }
   }, [gameId]);
 
+  useEffect(() => {
+    if (gameId && gameData) {
+      const participantsRef = collection(db, "participants");
+      const participantsQuery = query(
+        participantsRef,
+        where("gameId", "==", gameId)
+      );
+
+      const unsubscribe = onSnapshot(participantsQuery, (querySnapshot) => {
+        let participants = [];
+        querySnapshot.forEach((doc) => {
+          participants.push({ id: doc.id, ...doc.data() });
+        });
+
+        if (participants.length === 0) {
+          console.log("沒有參與者，等待玩家加入");
+          return;
+        }
+
+        const allParticipantsFinished = participants.every(
+          (participant) =>
+            participant.timeUsed != null && participant.timeUsed > 0
+        );
+
+        const gameHasStarted = participants.some(
+          (participant) => participant.timeUsed != null
+        );
+
+        if (
+          allParticipantsFinished &&
+          gameHasStarted &&
+          gameData.status !== "completed"
+        ) {
+          updateGameStatus(gameId, "completed")
+            .then(() => {
+              console.log("所有玩家已完成遊戲，遊戲狀態已更新為 completed");
+            })
+            .catch((error) => {
+              console.error("更新遊戲狀態為 completed 失敗：", error);
+            });
+        }
+
+        setPlayers(participants);
+      });
+      return () => unsubscribe();
+    }
+  }, [gameId, gameData]);
   const handleShareClick = () => {
     if (navigator.clipboard) {
       navigator.clipboard

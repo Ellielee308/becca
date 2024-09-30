@@ -939,7 +939,7 @@ export async function joinCompetition(gameId, username) {
         participantId: "",
         gameId,
         username,
-        timeUsed: 0,
+        timeUsed: null,
       };
       const docRef = await addDoc(participantsCollectionRef, participantData);
 
