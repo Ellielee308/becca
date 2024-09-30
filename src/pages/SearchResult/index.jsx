@@ -1,8 +1,8 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { search } from "../utils/api";
-import { useUser } from "../context/UserContext";
+import { search } from "../../utils/api";
+import { useUser } from "../../context/UserContext";
 
 function SearchResult() {
   const { keyword } = useParams();

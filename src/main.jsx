@@ -11,7 +11,7 @@ import CardSetDetail from "./pages/CardSetDetail";
 import CardSetCreate from "./pages/CardSetCreate";
 import CardSetEdit from "./pages/CardSetEdit";
 import Quiz from "./pages/Quiz";
-import SearchResult from "./SearchResult";
+import SearchResult from "./pages/SearchResult";
 import PrivateRoute from "./components/PrivateRoute";
 import UserCollection from "./pages/UserCollection";
 import Game from "./pages/Game";

@@ -16,6 +16,7 @@ import {
   arrayRemove,
   deleteDoc,
   writeBatch,
+  runTransaction,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
@@ -922,6 +923,81 @@ export async function getGameQuestions(gameQuestionId) {
     }
   } catch (error) {
     console.log("獲取遊戲問題資料失敗：", error);
+    return null;
+  }
+}
+
+export async function joinCompetition(gameId, username) {
+  try {
+    let participantId = ""; // 定義一個變數來存儲參賽者 ID
+
+    // 開始 Firestore 事務
+    await runTransaction(db, async (transaction) => {
+      // 創建參賽者文檔
+      const participantsCollectionRef = collection(db, "participants");
+      const participantData = {
+        participantId: "",
+        gameId,
+        username,
+        timeUsed: 0,
+      };
+      const docRef = await addDoc(participantsCollectionRef, participantData);
+
+      // 獲取參賽者 ID
+      participantId = docRef.id;
+
+      // 更新 participantId
+      transaction.update(docRef, { participantId });
+
+      // 更新遊戲的 players 列表
+      const gameRef = doc(db, "games", gameId);
+      transaction.update(gameRef, {
+        players: arrayUnion({
+          participantId,
+          username,
+        }),
+      });
+    });
+
+    console.log("成功加入競賽");
+    return participantId; // 返回 participantId
+  } catch (error) {
+    console.error("加入競賽失敗：", error);
+    return null; // 返回 null 表示失敗
+  }
+}
+
+export async function updateGameStatus(gameId, status) {
+  try {
+    const gameRef = doc(db, "games", gameId);
+    await updateDoc(gameRef, { status, startedAt: serverTimestamp() });
+  } catch (error) {
+    console.error("更新遊戲狀態失敗：", error);
+  }
+}
+
+export async function updateParticipantDoc(participantId, data) {
+  try {
+    const participantDocRef = doc(db, "participants", participantId);
+    await updateDoc(participantDocRef, data);
+  } catch (error) {
+    console.error("更新玩家成績失敗：", error);
+  }
+}
+
+export async function getParticipantDoc(participantId) {
+  try {
+    const participantDocRef = doc(db, "participants", participantId);
+    const participantDocSnapshot = await getDoc(participantDocRef);
+
+    if (participantDocSnapshot.exists()) {
+      return participantDocSnapshot.data();
+    } else {
+      console.error("找不到參賽者文檔");
+      return null;
+    }
+  } catch (error) {
+    console.error("獲取玩家資料失敗：", error);
     return null;
   }
 }
