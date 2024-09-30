@@ -46,7 +46,7 @@ const fontOptions = [
 const animationOptions = [
   { value: "verticalFlip", label: "上下翻轉" },
   { value: "horizontalFlip", label: "左右翻轉" },
-  { value: "fade", label: "淡入淡出" },
+  // { value: "fade", label: "淡入淡出" },
 ];
 
 const defaultBackgroundColors = [

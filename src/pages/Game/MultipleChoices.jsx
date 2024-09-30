@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -223,13 +223,6 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
-const Timer = styled.div`
-  align-self: center;
-  font-size: 18px;
-  color: gray;
-  font-family: monospace;
-`;
-
 const QuestionWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -314,31 +307,64 @@ const Note = styled.p`
   align-self: flex-start;
   margin-top: 8px;
 `;
-
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
-  left: ${(props) => `${(props.$position.x / 600) * 100}%`};
-  top: ${(props) => `${(props.$position.y / 400) * 100}%`};
   justify-content: ${(props) => props.$style.textAlign || "center"};
   align-items: center;
-  width: ${(props) =>
-    props.$style.width
-      ? `${(parseInt(props.$style.width) / 600) * 100}%`
-      : "auto"};
-  height: ${(props) =>
-    props.$style.height
-      ? `${(parseInt(props.$style.height) / 400) * 100}%`
-      : "auto"};
-  font-size: ${(props) =>
-    props.$style.fontSize
-      ? `${(parseInt(props.$style.fontSize) / 600) * 480}px`
-      : "inherit"};
-  font-weight: ${(props) => props.$style.fontWeight || "normal"};
-  color: ${(props) => props.$style.color || "#333"};
-  font-style: ${(props) => props.$style.fontStyle || "normal"};
+  ${(props) =>
+    props.$style &&
+    css`
+      width: ${props.$style.width};
+      height: ${props.$style.height};
+      font-weight: ${props.$style.fontWeight};
+      color: ${props.$style.color};
+      font-style: ${props.$style.fontStyle};
+      ${getResponsiveFontSize(props.$style.fontSize)};
+    `}
+  left: ${(props) => props.$position?.x};
+  top: ${(props) => props.$position?.y};
   user-select: none;
 `;
+
+const getResponsiveFontSize = (fontSizeValue) => {
+  let sizes;
+
+  switch (fontSizeValue) {
+    case "xs":
+      sizes = { small: "8px", medium: "10px", large: "12px" };
+      break;
+    case "s":
+      sizes = { small: "12px", medium: "14px", large: "18px" };
+      break;
+    case "m":
+      sizes = { small: "16px", medium: "18px", large: "24px" };
+      break;
+    case "l":
+      sizes = { small: "20px", medium: "22px", large: "30px" };
+      break;
+    case "xl":
+      sizes = { small: "24px", medium: "26px", large: "36px" };
+      break;
+    case "2xl":
+      sizes = { small: "29px", medium: "30px", large: "42px" };
+      break;
+    default:
+      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+  }
+
+  return css`
+    font-size: ${sizes.small};
+
+    @media (min-width: 600px) {
+      font-size: ${sizes.medium};
+    }
+
+    @media (min-width: 1024px) {
+      font-size: ${sizes.large};
+    }
+  `;
+};
 
 const ImageWrapper = styled.div`
   position: relative;

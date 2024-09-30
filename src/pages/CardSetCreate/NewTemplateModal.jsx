@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import React, { useState } from "react";
+import styled, { css } from "styled-components";
+import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
 import Select from "react-select";
 import { Rnd } from "react-rnd";
@@ -16,22 +16,37 @@ import { saveCardTemplate } from "../../utils/api";
 import { useUser } from "../../context/UserContext.jsx";
 
 const fontSizeOptions = [
-  { value: "8px", label: "8" },
-  { value: "12px", label: "12" },
-  { value: "16px", label: "16" },
-  { value: "20px", label: "20" },
-  { value: "24px", label: "24" },
-  { value: "28px", label: "28" },
-  { value: "36px", label: "36" },
-  { value: "48px", label: "48" },
-  { value: "72px", label: "72" },
+  {
+    value: "xs",
+    label: "XS",
+  },
+  {
+    value: "s",
+    label: "S",
+  },
+  {
+    value: "m",
+    label: "M",
+  },
+  {
+    value: "l",
+    label: "L",
+  },
+  {
+    value: "xl",
+    label: "XL",
+  },
+  {
+    value: "2xl",
+    label: "2XL",
+  },
 ];
-
 const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
   const [invalidTemplateName, setInvalidTemplateName] = useState(false);
   const [isAddFieldModalOpen, setIsAddFieldModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState(null);
-  const { user, setUser } = useUser();
+  const { user } = useUser();
+  const cardRef = useRef(null);
   const [newTemplateData, setNewTemplateData] = useState({
     fieldTemplateId: "", //自動生成
     templateName: "",
@@ -39,12 +54,12 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
       {
         name: "Front Text",
         type: "text",
-        required: true, //驗證時是否為必填項
+        required: true,
         position: { x: 200, y: 150 },
         style: {
-          width: "200px", //容器寬度
-          height: "100px", //容器高度
-          fontSize: "24px",
+          width: "200px",
+          height: "100px",
+          fontSize: "m",
           fontWeight: "normal",
           fontStyle: "normal",
           color: "#333333",
@@ -56,12 +71,12 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
       {
         name: "Back Text",
         type: "text",
-        required: true, //驗證時是否為必填項
+        required: true,
         position: { x: 200, y: 150 },
         style: {
-          width: "200px", //容器寬度
-          height: "100px", //容器高度
-          fontSize: "24px",
+          width: "200px",
+          height: "100px",
+          fontSize: "m",
           fontWeight: "normal",
           fontStyle: "normal",
           color: "#333333",
@@ -131,6 +146,10 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
     }));
   };
 
+  const handleFieldClick = (side, index, fieldType) => {
+    setSelectedField({ side, index, fieldType }); // 設定選中的欄位
+  };
+
   const handleSubmit = async () => {
     if (
       newTemplateData.frontFields.length < 1 ||
@@ -143,39 +162,58 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
       setInvalidTemplateName(true);
       return;
     }
-    setInvalidTemplateName(false); // 重置錯誤狀態
-    // 檢查正面欄位名稱是否為空
-    for (let i = 0; i < newTemplateData.frontFields.length; i++) {
-      if (newTemplateData.frontFields[i].name.trim() === "") {
-        alert("正面欄位名稱為必填！");
-        return;
-      }
-    }
+    setInvalidTemplateName(false);
 
-    // 檢查背面欄位名稱是否為空
-    for (let i = 0; i < newTemplateData.backFields.length; i++) {
-      if (newTemplateData.backFields[i].name.trim() === "") {
-        alert("背面欄位名稱為必填！");
-        return;
-      }
-    }
+    // 取得 CardWrapper 的大小
+    const cardRect = cardRef.current.getBoundingClientRect();
+
+    // 計算百分比位置和大小
+    const updatedFrontFields = newTemplateData.frontFields.map((field) => ({
+      ...field,
+      position: {
+        x: (field.position.x / cardRect.width) * 100 + "%",
+        y: (field.position.y / cardRect.height) * 100 + "%",
+      },
+      style: {
+        ...field.style,
+        width: (parseInt(field.style.width, 10) / cardRect.width) * 100 + "%",
+        height:
+          (parseInt(field.style.height, 10) / cardRect.height) * 100 + "%",
+      },
+    }));
+
+    const updatedBackFields = newTemplateData.backFields.map((field) => ({
+      ...field,
+      position: {
+        x: (field.position.x / cardRect.width) * 100 + "%",
+        y: (field.position.y / cardRect.height) * 100 + "%",
+      },
+      style: {
+        ...field.style,
+        width: (parseInt(field.style.width, 10) / cardRect.width) * 100 + "%",
+        height:
+          (parseInt(field.style.height, 10) / cardRect.height) * 100 + "%",
+      },
+    }));
+
+    const updatedTemplateData = {
+      ...newTemplateData,
+      frontFields: updatedFrontFields,
+      backFields: updatedBackFields,
+    };
 
     try {
       const newTemplateId = await saveCardTemplate({
-        ...newTemplateData,
+        ...updatedTemplateData,
         userId: user.userId,
-      }); // 獲取保存的模板 ID
+      });
       alert("儲存樣式成功！");
-      onTemplateAdded(newTemplateData, newTemplateId);
-      onClose(); // 關閉模態框或執行其他操作
+      onTemplateAdded(updatedTemplateData, newTemplateId);
+      onClose();
     } catch (error) {
       console.error("儲存樣式失敗：", error.message);
       alert("儲存樣式失敗，請再試一次。");
     }
-  };
-
-  const handleFieldClick = (side, index, fieldType) => {
-    setSelectedField({ side, index, fieldType }); // 設定選中的欄位
   };
 
   return (
@@ -282,7 +320,7 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
               點選文字進一步編輯
             </TextStyleEditorPlaceholder>
           )}
-          <CardWrapper>
+          <CardWrapper ref={cardRef}>
             <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
               <FrontCard isFlipped={isFlipped} currentStyle={currentStyle}>
                 {newTemplateData.frontFields.map((field, index) => (
@@ -304,7 +342,6 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
                       handleFieldResize("frontFields", index, {
                         width: ref.style.width,
                         height: ref.style.height,
-                        ...position,
                       });
                       handleFieldClick("frontFields", index, field.type); // 調整大小後選取
                     }}
@@ -343,7 +380,6 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
                       handleFieldResize("backFields", index, {
                         width: ref.style.width,
                         height: ref.style.height,
-                        ...position,
                       });
                       handleFieldClick("backFields", index, field.type); // 調整大小後選取
                     }}
@@ -406,6 +442,44 @@ const renderFieldContent = (field) => {
   }
 };
 
+const getResponsiveFontSize = (fontSizeValue) => {
+  let sizes;
+
+  switch (fontSizeValue) {
+    case "xs":
+      sizes = { small: "8px", medium: "10px", large: "12px" };
+      break;
+    case "s":
+      sizes = { small: "12px", medium: "14px", large: "18px" };
+      break;
+    case "m":
+      sizes = { small: "16px", medium: "18px", large: "24px" };
+      break;
+    case "l":
+      sizes = { small: "20px", medium: "22px", large: "30px" };
+      break;
+    case "xl":
+      sizes = { small: "24px", medium: "26px", large: "36px" };
+      break;
+    case "2xl":
+      sizes = { small: "29px", medium: "30px", large: "42px" };
+      break;
+    default:
+      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+  }
+
+  return css`
+    font-size: ${sizes.small};
+
+    @media (min-width: 600px) {
+      font-size: ${sizes.medium};
+    }
+
+    @media (min-width: 1024px) {
+      font-size: ${sizes.large};
+    }
+  `;
+};
 const Label = styled.label`
   font-size: 16px;
 `;
@@ -579,14 +653,14 @@ const FieldContainer = styled.div`
   cursor: move;
   ${(props) =>
     props.style &&
-    `
-    width: ${props.style.width};
-    height: ${props.style.height};
-    font-size: ${props.style.fontSize};
-    font-weight: ${props.style.fontWeight};
-    color: ${props.style.color};
-    background-color: ${props.style.backgroundColor};
-  `};
+    css`
+      width: ${props.style.width};
+      height: ${props.style.height};
+      font-weight: ${props.style.fontWeight};
+      color: ${props.style.color};
+      font-style: ${props.style.fontStyle};
+      ${getResponsiveFontSize(props.style.fontSize)};
+    `}
 `;
 
 // 用於顯示圖片的樣式
