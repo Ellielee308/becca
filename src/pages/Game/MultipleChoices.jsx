@@ -84,7 +84,11 @@ function MultipleChoices({
       "isGameOver:",
       isGameOver
     );
-    if (gameQuestionData.questions.length > 0 && !isGameOver) {
+    if (
+      gameQuestionData.questions.length > 0 &&
+      !isGameOver &&
+      gameData.status === "in-progress"
+    ) {
       console.log("Starting timer");
       interval = setInterval(() => {
         setTimer((prevTime) => {
@@ -96,7 +100,7 @@ function MultipleChoices({
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [gameQuestionData, isGameOver]);
+  }, [gameQuestionData, isGameOver, gameData.status]);
 
   const getOutlineColorWhenSelected = (option) => {
     const correctAnswerId =
@@ -176,7 +180,6 @@ function MultipleChoices({
             )}
         </ChoicesWrapper>
       </QuestionWrapper>
-      <Timer>{formatTime(timer)}</Timer>
       {(isGameOver || gameData.status === "completed") && (
         <GameEndModal
           gameStatus={gameData.status}

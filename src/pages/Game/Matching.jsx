@@ -1,54 +1,30 @@
 import styled from "styled-components";
-import { useRef, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import { updateQuiz } from "../../utils/api";
+import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
 
-function Matching({ gameData, gameQuestionData, cardsData, template, style }) {
-  const [randomCardPairs, setRandomCardPairs] = useState([]);
+function Matching({
+  gameData,
+  gameQuestionData,
+  template,
+  style,
+  participantId,
+}) {
   const [selectedPairs, setSelectedPairs] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [pairStatus, setPairStatus] = useState(null);
   const [isGameOver, setIsGameOver] = useState(false);
-  const [attempts, setAttempts] = useState(0); // 總配對次數
   const [timer, setTimer] = useState(0);
-  // const cardRef = useRef(null);
-  // const [cardWidth, setCardWidth] = useState(0);
 
-  useEffect(() => {
-    if (quizData && cardsData.length > 0) {
-      const pairNumbers = quizData.questionQty;
-      const shuffledCards = [...cardsData].sort(() => 0.5 - Math.random());
-      const selectedPairs = shuffledCards.slice(0, pairNumbers);
-      //把一組卡牌拆分成兩組
-      const cardPairs = selectedPairs.flatMap((card) => [
-        { ...card, side: "front" },
-        { ...card, side: "back" },
-      ]);
-
-      // 打亂正反面後的卡牌對
-      const randomizedCardPairs = cardPairs.sort(() => 0.5 - Math.random());
-
-      console.log("題目組：", randomizedCardPairs);
-      setRandomCardPairs(randomizedCardPairs);
-    }
-  }, [quizData, cardsData]);
-
-  // useEffect(() => {
-  //   if (cardRef.current) {
-  //     setCardWidth(cardRef.current.offsetWidth);
-  //   }
-  // }, []);
-
+  //計時器
   useEffect(() => {
     let interval;
-    console.log(
-      "Timer effect running. randomCardPairs:",
-      randomCardPairs.length,
-      "isGameOver:",
-      isGameOver
-    );
-    if (randomCardPairs.length > 0 && !isGameOver) {
+    if (
+      gameQuestionData.questions.length > 0 &&
+      !isGameOver &&
+      gameData.status === "in-progress"
+    ) {
       console.log("Starting timer");
       interval = setInterval(() => {
         setTimer((prevTime) => {
@@ -60,41 +36,43 @@ function Matching({ gameData, gameQuestionData, cardsData, template, style }) {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [randomCardPairs, isGameOver]);
+  }, [gameQuestionData, isGameOver, gameData.status]);
 
-  useEffect(() => {
-    if (
-      matchedPairs.length === randomCardPairs.length &&
-      randomCardPairs.length > 0
-      //避免在初始化的時候就成立
-    ) {
-      setIsGameOver(true);
-      const timeUsed = timer;
-      const accuracy = ((matchedPairs.length / 2 / attempts) * 100).toFixed(2);
-      const attemptsMade = attempts;
-
-      const quizId = quizData.quizId;
-      updateQuiz(quizId, {
-        timeUsed,
-        accuracy,
-        attempts: attemptsMade,
-      });
-    }
-  }, [matchedPairs, randomCardPairs.length, timer, attempts, quizData]);
+  const updateFirestore = useCallback(
+    async (newScore) => {
+      try {
+        await updateParticipantDoc(participantId, {
+          currentScore: newScore,
+        });
+        console.log("Successfully updated participant's score");
+      } catch (error) {
+        console.error("Failed to update player score:", error);
+      }
+    },
+    [participantId]
+  );
 
   useEffect(() => {
     if (selectedPairs.length === 2) {
       const [firstCard, secondCard] = selectedPairs;
-      setAttempts((prev) => prev + 1);
 
-      // 延遲取消選取狀態
       setTimeout(() => {
         if (firstCard.cardId === secondCard.cardId) {
-          setMatchedPairs((prevMatchedPairs) => [
-            ...prevMatchedPairs,
-            firstCard,
-            secondCard,
-          ]);
+          setMatchedPairs((prevMatchedPairs) => {
+            const newMatchedPairs = [
+              ...prevMatchedPairs,
+              firstCard,
+              secondCard,
+            ];
+            const newScore = newMatchedPairs.length / 2;
+
+            // 在狀態更新後更新 Firestore
+            setTimeout(() => {
+              updateFirestore(newScore);
+            }, 0);
+
+            return newMatchedPairs;
+          });
           setPairStatus("success");
         } else {
           setPairStatus("fail");
@@ -104,9 +82,38 @@ function Matching({ gameData, gameQuestionData, cardsData, template, style }) {
           setSelectedPairs([]);
           setPairStatus(null);
         }, 500);
-      }, 500); // 500ms 延遲，確保選中動畫能顯示
+      }, 500);
     }
-  }, [selectedPairs]);
+  }, [selectedPairs, updateFirestore]);
+
+  useEffect(() => {
+    const updateGameCompletion = async () => {
+      if (
+        matchedPairs.length === gameQuestionData.questions.length &&
+        gameQuestionData.questions.length > 0 &&
+        !isGameOver
+      ) {
+        setIsGameOver(true);
+        try {
+          await updateParticipantDoc(participantId, {
+            timeUsed: timer,
+            currentScore: matchedPairs.length / 2,
+          });
+          console.log("玩家已完成遊戲，已更新分數和時間");
+        } catch (error) {
+          console.error("更新玩家分數失敗：", error);
+        }
+      }
+    };
+
+    updateGameCompletion();
+  }, [
+    matchedPairs.length,
+    gameQuestionData.questions.length,
+    timer,
+    isGameOver,
+    participantId,
+  ]);
 
   const formatTime = (time) => {
     const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
@@ -152,47 +159,43 @@ function Matching({ gameData, gameQuestionData, cardsData, template, style }) {
     return "none";
   };
 
-  const accuracy =
-    attempts > 0 ? ((matchedPairs.length / 2 / attempts) * 100).toFixed(2) : 0;
-
   return (
     <Wrapper>
-      <Timer>{formatTime(timer)}</Timer>
       <CardGridWrapper>
-        {randomCardPairs.length > 0 &&
+        {gameQuestionData.questions.length > 0 &&
           template &&
-          randomCardPairs.map((randomCard) => (
+          gameQuestionData.questions.map((question) => (
             <CardWrapper
-              key={`${randomCard.cardId}-${randomCard.side}`}
+              key={`${question.cardId}-${question.side}`}
               $style={style}
               onClick={() =>
                 handleSelect({
-                  cardId: randomCard.cardId,
-                  side: randomCard.side,
+                  cardId: question.cardId,
+                  side: question.side,
                 })
               }
               $isSelected={isCardSelected({
-                cardId: randomCard.cardId,
-                side: randomCard.side,
+                cardId: question.cardId,
+                side: question.side,
               })}
               $isMatched={isCardMatched({
-                cardId: randomCard.cardId,
-                side: randomCard.side,
+                cardId: question.cardId,
+                side: question.side,
               })}
               $outlineColor={getOutlineColor(
                 isCardMatched({
-                  cardId: randomCard.cardId,
-                  side: randomCard.side,
+                  cardId: question.cardId,
+                  side: question.side,
                 }),
                 isCardSelected({
-                  cardId: randomCard.cardId,
-                  side: randomCard.side,
+                  cardId: question.cardId,
+                  side: question.side,
                 }),
                 pairStatus
-              )} // 動態設置 outline 顏色
+              )}
             >
               <CardContent>
-                {randomCard.side === "front"
+                {question.side === "front"
                   ? template.frontFields.map((frontField, index) => (
                       <FieldContainer
                         key={index}
@@ -202,8 +205,8 @@ function Matching({ gameData, gameQuestionData, cardsData, template, style }) {
                       >
                         {renderFieldContent(
                           frontField,
-                          randomCard.frontFields[index]
-                            ? randomCard.frontFields[index].value
+                          question.fields[index]
+                            ? question.fields[index].value
                             : ""
                         )}
                       </FieldContainer>
@@ -217,8 +220,8 @@ function Matching({ gameData, gameQuestionData, cardsData, template, style }) {
                       >
                         {renderFieldContent(
                           backField,
-                          randomCard.backFields[index]
-                            ? randomCard.backFields[index].value
+                          question.fields[index]
+                            ? question.fields[index].value
                             : ""
                         )}
                       </FieldContainer>
@@ -227,11 +230,12 @@ function Matching({ gameData, gameQuestionData, cardsData, template, style }) {
             </CardWrapper>
           ))}
       </CardGridWrapper>
-      {matchedPairs.length > 0 && isGameOver && (
-        <QuizResultModal
+      {(isGameOver || gameData.status === "completed") && (
+        <GameEndModal
+          gameStatus={gameData.status}
+          gameData={gameData}
+          participantId={participantId}
           timer={timer}
-          accuracy={accuracy}
-          cardSetId={quizData.cardSetId}
         />
       )}
     </Wrapper>
@@ -370,29 +374,97 @@ Matching.propTypes = {
   style: PropTypes.object,
 };
 
-const QuizResultModal = ({ timer, accuracy, cardSetId }) => {
+const GameEndModal = ({ gameStatus, gameData, participantId, timer }) => {
+  const [rankings, setRankings] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (gameStatus === "completed" && gameData?.players.length > 0) {
+      const fetchParticipants = async () => {
+        try {
+          const participantsData = await Promise.all(
+            gameData?.players.map(async (player) => {
+              const participantData = await getParticipantDoc(
+                player.participantId
+              );
+              return { ...participantData, username: player.username };
+            })
+          );
+
+          // 排名邏輯
+          participantsData.sort((a, b) => {
+            if (a.timeUsed && b.timeUsed) {
+              return a.timeUsed - b.timeUsed; // 完成遊戲的玩家按時間升序排序
+            } else if (a.timeUsed) {
+              return -1; // 完成遊戲的玩家優先
+            } else if (b.timeUsed) {
+              return 1; // 完成遊戲的玩家優先
+            } else {
+              return b.currentScore - a.currentScore; // 未完成遊戲的玩家按配對數排序
+            }
+          });
+
+          setRankings(participantsData);
+        } catch (error) {
+          console.error("獲取參賽者資料失敗：", error);
+        }
+      };
+
+      fetchParticipants();
+    }
+  }, [gameStatus, gameData?.players]);
+
   const formatTime = (time) => {
     const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
     const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
-    const milliseconds = String(Math.floor((time % 1000) / 100));
-    return `${minutes}:${seconds}.${milliseconds}`;
+    return `${minutes} 分 ${seconds} 秒`;
+  };
+
+  const formatTimeLimit = (timeLimitInSeconds) => {
+    const minutes = Math.floor(timeLimitInSeconds / 60); // 計算分鐘
+    const seconds = timeLimitInSeconds % 60; // 計算剩餘的秒數
+    return `${minutes} 分 ${seconds} 秒`;
   };
   return (
     <ModalWrapper>
       <ModalContent>
-        <Heading>測驗結果</Heading>
-        <Title>花費時間：</Title>
-        <Time>{formatTime(timer)}</Time>
-        <Title>答對率：</Title>
-        <Accuracy>{accuracy}%</Accuracy>
-        <ButtonWrapper>
-          <ReviewButton>
-            <CustomLink to={`/cardset/${cardSetId}`}>複習卡牌 </CustomLink>
-          </ReviewButton>
-          <LeaveButton>
-            <CustomLink to="/user/me/cardsets">離開</CustomLink>
-          </LeaveButton>
-        </ButtonWrapper>
+        {gameStatus === "in-progress" && (
+          <WaitingWrapper>
+            <h2>遊戲完成！</h2>
+            <p>花費時間：{formatTime(timer)}</p>
+            <p>等待遊戲結束中...</p>
+          </WaitingWrapper>
+        )}
+        {gameStatus === "completed" && (
+          <>
+            <RankingTitle>排行榜</RankingTitle>
+            {isLoading ? (
+              <p>加載中...</p>
+            ) : (
+              <RankingList>
+                {rankings.map((player, index) => (
+                  <RankingItem key={index}>
+                    {`第${index + 1}名 ${player.username} - 得分: ${
+                      player.currentScore
+                    }, 用時: ${
+                      player.timeUsed
+                        ? formatTime(player.timeUsed)
+                        : formatTimeLimit(gameData.timeLimit)
+                    }`}
+                  </RankingItem>
+                ))}
+              </RankingList>
+            )}
+            <CloseButton
+              onClick={() => {
+                navigate("/");
+              }}
+            >
+              離開
+            </CloseButton>
+          </>
+        )}
       </ModalContent>
     </ModalWrapper>
   );
@@ -402,97 +474,78 @@ const ModalWrapper = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 3000;
+  justify-content: center;
+  z-index: 1000;
 `;
 
 const ModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   background: white;
-  padding: 40px 40px 28px 40px;
-  border-radius: 8px;
-  width: 400px;
-  height: fit-content;
-  position: relative;
-  overflow-y: auto;
-`;
-
-const Heading = styled.h3`
-  font-size: 20px;
-  margin-bottom: 18px;
-`;
-
-const Title = styled.p`
-  font-size: 16px;
-  margin-bottom: 28px;
-`;
-
-const Time = styled.p`
+  padding: 20px;
+  border-radius: 10px;
   text-align: center;
-  font-size: 24px;
-  color: gray;
-  font-family: monospace;
-  margin-bottom: 18px;
-`;
-
-const Accuracy = styled.p`
-  text-align: center;
-  font-size: 24px;
-  color: gray;
-  font-family: monospace;
-  margin-bottom: 24px;
-`;
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const ReviewButton = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 45%;
-  height: 50px;
-  border-radius: 8px;
-  background-color: #adbce5;
-  cursor: pointer;
-  user-select: none;
-`;
-
-const LeaveButton = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 45%;
-  height: 50px;
-  border-radius: 8px;
-  background-color: #f59873;
-  cursor: pointer;
-  user-select: none;
-`;
-
-const CustomLink = styled(Link)`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  max-width: 400px;
   width: 100%;
-  height: 100%;
-  transition: color 0.3s ease;
+  min-height: 360px;
+`;
+const WaitingWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+const RankingTitle = styled.h2`
+  font-size: 20px;
+`;
+
+const RankingList = styled.ul`
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+`;
+
+const RankingItem = styled.li`
+  margin: 10px 0;
+`;
+
+const CloseButton = styled.button`
+  align-self: center;
+  width: 50%;
+  margin-top: auto;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #92a3fd, #adbce5);
+  color: white;
+  font-size: 16px;
+  font-family: "Noto Sans TC", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* 增加過渡效果使變化更柔和 */
 
   &:hover {
-    color: #2e85b1;
+    background: linear-gradient(135deg, #8292f1, #9bb0eb);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #7282e0, #8ea6d6);
   }
 `;
 
-QuizResultModal.propTypes = {
-  timer: PropTypes.number.isRequired,
-  accuracy: PropTypes.number.isRequired,
-  cardSetId: PropTypes.string.isRequired,
+GameEndModal.propTypes = {
+  gameStatus: PropTypes.string,
+  gameData: PropTypes.object,
+  participantId: PropTypes.string,
+  attempts: PropTypes.number,
+  timer: PropTypes.number,
 };
