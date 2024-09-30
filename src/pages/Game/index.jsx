@@ -181,11 +181,11 @@ function Game() {
 
         const allParticipantsFinished = participants.every(
           (participant) =>
-            participant.timeUsed != null && participant.timeUsed > 0
+            participant.gameEndedAt != null && participant.gameEndedAt > 0
         );
 
         const gameHasStarted = participants.some(
-          (participant) => participant.timeUsed != null
+          (participant) => participant.gameEndedAt != null
         );
 
         if (

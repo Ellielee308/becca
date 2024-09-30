@@ -3,6 +3,7 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
+import { serverTimestamp } from "firebase/firestore";
 
 function Matching({
   gameData,
@@ -15,28 +16,6 @@ function Matching({
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [pairStatus, setPairStatus] = useState(null);
   const [isGameOver, setIsGameOver] = useState(false);
-  const [timer, setTimer] = useState(0);
-
-  //計時器
-  useEffect(() => {
-    let interval;
-    if (
-      gameQuestionData.questions.length > 0 &&
-      !isGameOver &&
-      gameData.status === "in-progress"
-    ) {
-      console.log("Starting timer");
-      interval = setInterval(() => {
-        setTimer((prevTime) => {
-          return prevTime + 10;
-        });
-      }, 10);
-    } else {
-      console.log("Clearing timer");
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [gameQuestionData, isGameOver, gameData.status]);
 
   const updateFirestore = useCallback(
     async (newScore) => {
@@ -96,7 +75,7 @@ function Matching({
         setIsGameOver(true);
         try {
           await updateParticipantDoc(participantId, {
-            timeUsed: timer,
+            gameEndedAt: serverTimestamp(),
             currentScore: matchedPairs.length / 2,
           });
           console.log("玩家已完成遊戲，已更新分數和時間");
@@ -110,7 +89,6 @@ function Matching({
   }, [
     matchedPairs.length,
     gameQuestionData.questions.length,
-    timer,
     isGameOver,
     participantId,
   ]);
@@ -235,7 +213,7 @@ function Matching({
           gameStatus={gameData.status}
           gameData={gameData}
           participantId={participantId}
-          timer={timer}
+          isGameOver={isGameOver}
         />
       )}
     </Wrapper>
@@ -374,9 +352,10 @@ Matching.propTypes = {
   style: PropTypes.object,
 };
 
-const GameEndModal = ({ gameStatus, gameData, participantId, timer }) => {
+const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
   const [rankings, setRankings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserTimeUsed, setCurrentUserTimeUsed] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -388,20 +367,50 @@ const GameEndModal = ({ gameStatus, gameData, participantId, timer }) => {
               const participantData = await getParticipantDoc(
                 player.participantId
               );
-              return { ...participantData, username: player.username };
+
+              // 計算 timeUsed，如果玩家未完成遊戲 (gameEndedAt 為 null)，則 timeUsed 為 null
+              let timeUsed = null;
+              if (participantData?.gameEndedAt && gameData?.startedAt) {
+                // 確保使用的都是正確的時間戳記
+                const startedAtMillis = gameData.startedAt.toMillis();
+                const gameEndedAtMillis =
+                  participantData.gameEndedAt.toMillis();
+
+                // 確保 endedAt 比 startedAt 晚
+                if (gameEndedAtMillis >= startedAtMillis) {
+                  timeUsed = gameEndedAtMillis - startedAtMillis;
+                } else {
+                  console.warn(
+                    `玩家 ${player.username} 的結束時間早於開始時間，可能有記錄錯誤。`
+                  );
+                }
+              }
+
+              return {
+                ...participantData,
+                username: player.username,
+                timeUsed: timeUsed,
+              };
             })
           );
 
           // 排名邏輯
           participantsData.sort((a, b) => {
-            if (a.timeUsed && b.timeUsed) {
-              return a.timeUsed - b.timeUsed; // 完成遊戲的玩家按時間升序排序
-            } else if (a.timeUsed) {
-              return -1; // 完成遊戲的玩家優先
-            } else if (b.timeUsed) {
-              return 1; // 完成遊戲的玩家優先
-            } else {
-              return b.currentScore - a.currentScore; // 未完成遊戲的玩家按配對數排序
+            // 排序已完成遊戲的玩家，timeUsed 小的排在前面
+            if (a.timeUsed !== null && b.timeUsed !== null) {
+              return a.timeUsed - b.timeUsed;
+            }
+            // 如果 a 已完成，b 未完成，a 優先
+            else if (a.timeUsed !== null) {
+              return -1;
+            }
+            // 如果 b 已完成，a 未完成，b 優先
+            else if (b.timeUsed !== null) {
+              return 1;
+            }
+            // 兩者均未完成，按 currentScore 降序排序
+            else {
+              return b.currentScore - a.currentScore;
             }
           });
 
@@ -413,7 +422,39 @@ const GameEndModal = ({ gameStatus, gameData, participantId, timer }) => {
 
       fetchParticipants();
     }
-  }, [gameStatus, gameData?.players]);
+  }, [gameStatus, gameData?.players, gameData?.startedAt, participantId]);
+
+  // 獲取當前玩家的 timeUsed
+  useEffect(() => {
+    if (isGameOver && participantId) {
+      const fetchCurrentUserTime = async () => {
+        try {
+          const participantData = await getParticipantDoc(participantId);
+
+          let timeUsed = null;
+          if (participantData?.gameEndedAt && gameData?.startedAt) {
+            // 確保使用的都是正確的時間戳記
+            const startedAtMillis = gameData.startedAt.toMillis();
+            const gameEndedAtMillis = participantData.gameEndedAt.toMillis();
+
+            // 確保 endedAt 比 startedAt 晚
+            if (gameEndedAtMillis >= startedAtMillis) {
+              timeUsed = gameEndedAtMillis - startedAtMillis;
+            } else {
+              console.warn(
+                `玩家 ${participantData.username} 的結束時間早於開始時間，可能有記錄錯誤。`
+              );
+            }
+          }
+          setCurrentUserTimeUsed(timeUsed);
+        } catch (error) {
+          console.error("獲取當前用戶資料失敗：", error);
+        }
+      };
+
+      fetchCurrentUserTime();
+    }
+  }, [isGameOver, gameData.startedAt, participantId]);
 
   const formatTime = (time) => {
     const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
@@ -436,7 +477,9 @@ const GameEndModal = ({ gameStatus, gameData, participantId, timer }) => {
         {gameStatus === "in-progress" && (
           <WaitingWrapper>
             <h2>遊戲完成！</h2>
-            <p>花費時間：{formatTime(timer)}</p>
+            <p>
+              花費時間：{currentUserTimeUsed && formatTime(currentUserTimeUsed)}
+            </p>
             <p>等待遊戲結束中...</p>
           </WaitingWrapper>
         )}

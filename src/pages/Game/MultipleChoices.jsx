@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
+import { serverTimestamp } from "firebase/firestore";
 
 function MultipleChoices({
   gameData,
@@ -11,7 +12,6 @@ function MultipleChoices({
   style,
   participantId,
 }) {
-  const [timer, setTimer] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [currentQuestionNumber, setCurrentQuestionNumber] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -50,16 +50,10 @@ function MultipleChoices({
         setSelectedAnswer(null);
       } else {
         setIsGameOver(true);
-        const timeUsed = timer;
-        const accuracy = (
-          (correctAttempt / gameData.questionQty) *
-          100
-        ).toFixed(2);
         try {
           updateParticipantDoc(participantId, {
-            timeUsed: timeUsed,
+            gameEndedAt: serverTimestamp(),
             currentScore: newCorrectAttempt,
-            accuracy: parseFloat(accuracy),
           });
           console.log("已成功記錄玩家完成狀態");
         } catch (error) {
@@ -68,33 +62,6 @@ function MultipleChoices({
       }
     }, 1000);
   };
-
-  useEffect(() => {
-    let interval;
-    console.log(
-      "Timer effect running. randomCardPairs:",
-      gameQuestionData.questions.length,
-      "isGameOver:",
-      isGameOver
-    );
-    if (
-      gameQuestionData.questions.length > 0 &&
-      !isGameOver &&
-      gameData.status === "in-progress"
-    ) {
-      console.log("Starting timer");
-      interval = setInterval(() => {
-        setTimer((prevTime) => {
-          return prevTime + 10;
-        });
-      }, 10);
-    } else {
-      console.log("Clearing timer");
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [gameQuestionData, isGameOver, gameData.status]);
-
   const getOutlineColorWhenSelected = (option) => {
     const correctAnswerId =
       gameQuestionData.questions[currentQuestionNumber].correctAnswerId;
@@ -105,8 +72,6 @@ function MultipleChoices({
 
     return "transparent";
   };
-
-  const accuracy = ((correctAttempt / gameData.questionQty) * 100).toFixed(2);
 
   return (
     <Wrapper>
@@ -179,7 +144,7 @@ function MultipleChoices({
           gameData={gameData}
           participantId={participantId}
           correctAttempt={correctAttempt}
-          timer={timer}
+          isGameOver={isGameOver}
         />
       )}
     </Wrapper>
@@ -391,9 +356,16 @@ const ImagePreview = styled.img`
   margin: 0 auto;
 `;
 
-const GameEndModal = ({ gameStatus, gameData, correctAttempt, timer }) => {
+const GameEndModal = ({
+  gameStatus,
+  gameData,
+  participantId,
+  correctAttempt,
+  isGameOver,
+}) => {
   const [rankings, setRankings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserTimeUsed, setCurrentUserTimeUsed] = useState(null);
   const navigate = useNavigate();
 
   // 當遊戲完成後，獲取所有玩家的成績並排序
@@ -404,21 +376,40 @@ const GameEndModal = ({ gameStatus, gameData, correctAttempt, timer }) => {
         try {
           const playerDetails = await Promise.all(
             gameData.players.map(async (player) => {
-              const participant = await getParticipantDoc(player.participantId);
+              const participantData = await getParticipantDoc(
+                player.participantId
+              );
+
+              let timeUsed = null;
+              if (participantData?.gameEndedAt && gameData?.startedAt) {
+                // 確保使用的都是正確的時間戳記
+                const startedAtMillis = gameData.startedAt.toMillis();
+                const gameEndedAtMillis =
+                  participantData.gameEndedAt.toMillis();
+
+                // 確保 endedAt 比 startedAt 晚
+                if (gameEndedAtMillis >= startedAtMillis) {
+                  timeUsed = gameEndedAtMillis - startedAtMillis;
+                } else {
+                  console.warn(
+                    `玩家 ${player.username} 的結束時間早於開始時間，可能有記錄錯誤。`
+                  );
+                }
+              }
+
               return {
+                ...participantData,
                 username: player.username,
-                score: participant?.currentScore || 0,
-                timeUsed: participant?.timeUsed || 0,
+                timeUsed: timeUsed,
               };
             })
           );
-
           // 排序邏輯：根據分數（由高到低）和時間（由少到多）
           playerDetails.sort((a, b) => {
-            if (b.score === a.score) {
+            if (b.currentScore === a.currentScore) {
               return a.timeUsed - b.timeUsed;
             }
-            return b.score - a.score;
+            return b.currentScore - a.currentScore;
           });
 
           setRankings(playerDetails);
@@ -432,6 +423,38 @@ const GameEndModal = ({ gameStatus, gameData, correctAttempt, timer }) => {
       fetchPlayerRankings();
     }
   }, [gameStatus, gameData]);
+
+  // 獲取當前玩家的 timeUsed
+  useEffect(() => {
+    if (isGameOver && participantId) {
+      const fetchCurrentUserTime = async () => {
+        try {
+          const participantData = await getParticipantDoc(participantId);
+
+          let timeUsed = null;
+          if (participantData?.gameEndedAt && gameData?.startedAt) {
+            // 確保使用的都是正確的時間戳記
+            const startedAtMillis = gameData.startedAt.toMillis();
+            const gameEndedAtMillis = participantData.gameEndedAt.toMillis();
+
+            // 確保 endedAt 比 startedAt 晚
+            if (gameEndedAtMillis >= startedAtMillis) {
+              timeUsed = gameEndedAtMillis - startedAtMillis;
+            } else {
+              console.warn(
+                `玩家 ${participantData.username} 的結束時間早於開始時間，可能有記錄錯誤。`
+              );
+            }
+          }
+          setCurrentUserTimeUsed(timeUsed);
+        } catch (error) {
+          console.error("獲取當前用戶資料失敗：", error);
+        }
+      };
+
+      fetchCurrentUserTime();
+    }
+  }, [isGameOver, gameData.startedAt, participantId]);
 
   const formatTime = (time) => {
     const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
@@ -452,7 +475,9 @@ const GameEndModal = ({ gameStatus, gameData, correctAttempt, timer }) => {
           <WaitingWrapper>
             <h2>遊戲完成！</h2>
             <p>答對題數：{correctAttempt}</p>
-            <p>花費時間：{formatTime(timer)}</p>
+            <p>
+              花費時間：{currentUserTimeUsed && formatTime(currentUserTimeUsed)}
+            </p>
             <p>等待遊戲結束中...</p>
           </WaitingWrapper>
         )}
@@ -466,7 +491,7 @@ const GameEndModal = ({ gameStatus, gameData, correctAttempt, timer }) => {
                 {rankings.map((player, index) => (
                   <RankingItem key={index}>
                     {`第${index + 1}名 ${player.username} - 得分: ${
-                      player.score
+                      player.currentScore
                     }, 用時: ${
                       player.timeUsed
                         ? formatTime(player.timeUsed)

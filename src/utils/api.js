@@ -939,7 +939,7 @@ export async function joinCompetition(gameId, username) {
         participantId: "",
         gameId,
         username,
-        timeUsed: null,
+        gameEndedAt: null,
       };
       const docRef = await addDoc(participantsCollectionRef, participantData);
 
@@ -970,7 +970,11 @@ export async function joinCompetition(gameId, username) {
 export async function updateGameStatus(gameId, status) {
   try {
     const gameRef = doc(db, "games", gameId);
-    await updateDoc(gameRef, { status, startedAt: serverTimestamp() });
+    if (status === "in-progress") {
+      await updateDoc(gameRef, { status, startedAt: serverTimestamp() });
+    } else if (status === "completed") {
+      await updateDoc(gameRef, { status, endeddAt: serverTimestamp() });
+    }
   } catch (error) {
     console.error("更新遊戲狀態失敗：", error);
   }
