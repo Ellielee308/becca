@@ -349,6 +349,7 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
     if (gameStatus === "completed" && gameData?.players.length > 0) {
       const fetchParticipants = async () => {
         try {
+          setIsLoading(true);
           const participantsData = await Promise.all(
             gameData?.players.map(async (player) => {
               const participantData = await getParticipantDoc(
@@ -402,7 +403,7 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
           });
 
           setRankings(participantsData);
-          setIsLoading(true);
+          setIsLoading(false);
         } catch (error) {
           console.error("獲取參賽者資料失敗：", error);
         }
@@ -481,7 +482,7 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
                 {rankings.map((player, index) => (
                   <RankingItem key={index}>
                     {`第${index + 1}名 ${player.username} - 得分: ${
-                      player.currentScore
+                      player.currentScore ? player.currentScore : 0
                     }, 用時: ${
                       player.timeUsed
                         ? formatTime(player.timeUsed)

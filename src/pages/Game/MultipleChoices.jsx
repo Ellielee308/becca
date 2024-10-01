@@ -492,7 +492,7 @@ const GameEndModal = ({
                 {rankings.map((player, index) => (
                   <RankingItem key={index}>
                     {`第${index + 1}名 ${player.username} - 得分: ${
-                      player.currentScore
+                      player.currentScore ? player.currentScore : 0
                     }, 用時: ${
                       player.timeUsed
                         ? formatTime(player.timeUsed)
