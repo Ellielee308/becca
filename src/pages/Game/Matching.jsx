@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
@@ -92,13 +92,6 @@ function Matching({
     isGameOver,
     participantId,
   ]);
-
-  const formatTime = (time) => {
-    const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
-    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
-    const milliseconds = String(Math.floor((time % 1000) / 100));
-    return `${minutes}:${seconds}.${milliseconds}`;
-  };
 
   const handleSelect = (card) => {
     const newSelection = [...selectedPairs];
@@ -291,13 +284,6 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
-const Timer = styled.div`
-  align-self: center;
-  font-size: 26px;
-  color: gray;
-  font-family: monospace;
-`;
-
 const CardGridWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -346,10 +332,11 @@ const CardContent = styled.div`
 `;
 
 Matching.propTypes = {
-  quizData: PropTypes.object,
-  cardsData: PropTypes.array,
+  gameData: PropTypes.object,
+  gameQuestionData: PropTypes.object,
   template: PropTypes.object,
   style: PropTypes.object,
+  participantId: PropTypes.string,
 };
 
 const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
@@ -415,6 +402,7 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
           });
 
           setRankings(participantsData);
+          setIsLoading(true);
         } catch (error) {
           console.error("獲取參賽者資料失敗：", error);
         }
@@ -594,5 +582,5 @@ GameEndModal.propTypes = {
   gameData: PropTypes.object,
   participantId: PropTypes.string,
   attempts: PropTypes.number,
-  timer: PropTypes.number,
+  isGameOver: PropTypes.bool,
 };

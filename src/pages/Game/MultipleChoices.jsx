@@ -158,6 +158,7 @@ MultipleChoices.propTypes = {
   gameQuestionData: PropTypes.object,
   template: PropTypes.object,
   style: PropTypes.object,
+  participantId: PropTypes.string,
 };
 
 const renderFieldContent = (field, value) => {
@@ -586,3 +587,11 @@ const CloseButton = styled.button`
     background: linear-gradient(135deg, #7282e0, #8ea6d6);
   }
 `;
+
+GameEndModal.propTypes = {
+  gameStatus: PropTypes.string,
+  gameData: PropTypes.object,
+  participantId: PropTypes.string,
+  correctAttempt: PropTypes.number,
+  isGameOver: PropTypes.bool,
+};
