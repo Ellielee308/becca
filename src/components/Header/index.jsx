@@ -13,6 +13,7 @@ function Header() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { user, setUser, loading } = useUser();
   const [searchInputValue, setSearchInputValue] = useState("");
+  const [showMobileSearchBar, setShowMobileSearchBar] = useState(false);
   const navigate = useNavigate();
 
   const handleLogOut = async () => {
@@ -30,6 +31,15 @@ function Header() {
     event.preventDefault();
     navigate(`/search/${searchInputValue}`);
     setSearchInputValue("");
+    setShowMobileSearchBar(false);
+  };
+
+  const handleClickMobileSearchTrigger = () => {
+    setShowMobileSearchBar(true);
+  };
+
+  const handleCloseMobileSearch = () => {
+    setShowMobileSearchBar(false);
   };
 
   return (
@@ -37,6 +47,21 @@ function Header() {
       <Link to="/">
         <LogoImg src={beccaLogo} alt="Logo" />
       </Link>
+      {showMobileSearchBar && (
+        <MobileSearchSection>
+          <SearchIcon />
+          <form onSubmit={handleSearch}>
+            <SearchInput
+              placeholder="搜尋 Flashcards"
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
+            />
+          </form>
+          <CloseIconContainer onClick={handleCloseMobileSearch}>
+            <CloseIcon />
+          </CloseIconContainer>
+        </MobileSearchSection>
+      )}
       <SearchSection>
         <SearchIcon />
         <form onSubmit={handleSearch}>
@@ -48,14 +73,17 @@ function Header() {
         </form>
       </SearchSection>
       <NavigateWrapper>
+        <MobileSearchTrigger onClick={handleClickMobileSearchTrigger}>
+          <SearchIconMobile />
+        </MobileSearchTrigger>
         {!loading && user ? (
           <>
             <WelcomeMessage>{`Welcome back, ${user.username}!`}</WelcomeMessage>
-            <Link to="/cardset/new">
+            <LinkToCardSetNew to="/cardset/new">
               <IconContainer>
                 <PlusIcon />
               </IconContainer>
-            </Link>
+            </LinkToCardSetNew>
             <NavItemWrapper>
               <ProfilePictureWrapper>
                 {user.profilePicture && (
@@ -68,6 +96,9 @@ function Header() {
                   <StyledLink to="/user/me/cardsets">
                     <SubMenuItem>卡牌組</SubMenuItem>
                   </StyledLink>
+                  <MobileLinkToCardSetNew to="/cardset/new">
+                    <SubMenuItem>新增卡牌組</SubMenuItem>
+                  </MobileLinkToCardSetNew>
                   <SubMenuItem onClick={handleLogOut}>登出</SubMenuItem>
                 </SubMenu>
               </ProfilePictureWrapper>
@@ -125,6 +156,9 @@ const WelcomeMessage = styled.p`
   font-size: 16px;
   margin-right: 8px;
   user-select: none;
+  @media only screen and (max-width: 1023px) {
+    display: none;
+  }
 `;
 
 const IconContainer = styled.div`
@@ -178,6 +212,9 @@ const LoginTrigger = styled.div`
     transform: translateY(1px);
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
   }
+  @media only screen and (max-width: 639px) {
+    padding: 8px 12px;
+  }
 `;
 
 const ProfilePictureWrapper = styled.div`
@@ -226,6 +263,7 @@ const StyledLink = styled(Link)`
 
 const NavItemWrapper = styled.div`
   display: flex;
+  margin-right: 4px;
 `;
 
 const ProfilePicture = styled.img`
@@ -247,6 +285,9 @@ const SearchSection = styled.div`
   background-color: #d9dce2;
   border-radius: 12px;
   padding: 0 20px 0 20px;
+  @media only screen and (max-width: 639px) {
+    display: none;
+  }
 `;
 
 const SearchInput = styled.input`
@@ -278,6 +319,96 @@ const SearchIcon = () => (
     />
   </svg>
 );
+
+const MobileSearchTrigger = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+
+  @media only screen and (min-width: 640px) {
+    display: none;
+  }
+`;
+
+const MobileSearchSection = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: row;
+  height: 40px;
+  width: 96%;
+  z-index: 101;
+  align-items: center;
+  background-color: #d9dce2;
+  border-radius: 12px;
+  padding: 0 10px 0 20px;
+  @media only screen and (min-width: 640px) {
+    display: none;
+  }
+`;
+
+const SearchIconMobile = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="28"
+    height="28"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+    />
+  </svg>
+);
+
+const CloseIconContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+`;
+
+const CloseIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 18 18 6M6 6l12 12"
+    />
+  </svg>
+);
+
+const LinkToCardSetNew = styled(Link)`
+  display: none;
+  @media only screen and (min-width: 640px) {
+    display: block;
+  }
+`;
+
+const MobileLinkToCardSetNew = styled(Link)`
+  display: block;
+  @media only screen and (min-width: 640px) {
+    display: none;
+  }
+`;
 
 const LoginModal = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true); // 控制登入或註冊模式
