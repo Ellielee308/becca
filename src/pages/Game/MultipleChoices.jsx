@@ -501,7 +501,7 @@ const GameEndModal = ({
         )}
         {gameStatus === "completed" && (
           <>
-            <RankingTitle>排行榜</RankingTitle>
+            <RankingTitle>✨排行榜✨</RankingTitle>
             {isLoading ? (
               <p>加載中...</p>
             ) : (
