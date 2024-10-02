@@ -47,6 +47,9 @@ const Wrapper = styled.div`
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
     background-color: #e2ebf5;
   }
+  @media only screen and (max-width: 639px) {
+    display: none;
+  }
 `;
 const StyledNavLink = styled(NavLink)`
   display: flex;

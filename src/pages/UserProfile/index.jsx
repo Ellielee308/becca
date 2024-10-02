@@ -151,12 +151,16 @@ function UserProfile() {
 export default UserProfile;
 
 const Wrapper = styled.div`
-  padding: 0 80px;
+  padding: 0 100px 0 120px;
   width: fit-content;
   margin: 80px auto 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
+  @media only screen and (max-width: 639px) {
+    padding: 0;
+    width: 100%;
+  }
 `;
 
 const Title = styled.h2`
@@ -177,6 +181,11 @@ const ProfileSection = styled.div`
   width: 100%;
   padding: 8px 0;
   margin-bottom: 36px;
+  @media only screen and (max-width: 480px) {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
 `;
 
 const ProfilePictureContainer = styled.div`
@@ -185,7 +194,7 @@ const ProfilePictureContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative; /* 使其子元素可以使用絕對定位 */
+  position: relative;
 `;
 const ProfilePicture = styled.img`
   height: 160px;
@@ -199,6 +208,11 @@ const AccountInfo = styled.div`
   flex-direction: column;
   padding-left: 60px;
   justify-content: space-around;
+  @media only screen and (max-width: 480px) {
+    gap: 14px;
+    padding-left: 0;
+    align-items: center;
+  }
 `;
 
 const AccountInfoItem = styled.p`
@@ -283,7 +297,7 @@ const ModalActions = styled.div`
 
 const UploadButton = styled.button`
   padding: 10px 20px;
-  background-color: #4caf50;
+  background-color: #f59873;
   color: white;
   border: none;
   border-radius: 4px;
@@ -293,7 +307,7 @@ const UploadButton = styled.button`
 
 const CancelButton = styled.button`
   padding: 10px 20px;
-  background-color: #f44336;
+  background-color: #c9c5c5;
   color: white;
   border: none;
   border-radius: 4px;
@@ -341,7 +355,6 @@ const UserCalendar = ({ activeDays }) => {
 
 const CalendarWrapper = styled.div`
   .react-calendar {
-    width: 100%;
     width: 400px;
     height: 400px;
     background-color: #f9f9f9;
@@ -352,6 +365,10 @@ const CalendarWrapper = styled.div`
     font-family: monospace;
     display: flex;
     flex-direction: column;
+    @media only screen and (max-width: 480px) {
+      width: 100%;
+      height: 360px;
+    }
   }
 
   .react-calendar__viewContainer,

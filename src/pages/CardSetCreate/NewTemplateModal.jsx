@@ -907,7 +907,7 @@ const AddFieldModal = ({ onClose, onSave }) => {
           ? {
               width: "200px",
               height: "100px",
-              fontSize: "24px",
+              fontSize: "m",
               fontWeight: "normal",
               fontStyle: "normal",
               color: "#333333",

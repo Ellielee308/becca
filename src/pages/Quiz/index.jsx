@@ -106,11 +106,15 @@ const QuizDescription = styled.div`
   width: 60%;
   margin: 32px auto;
   user-select: none;
+  @media only screen and (max-width: 639px) {
+    width: 100%;
+  }
 `;
 
 const Title = styled.p`
   font-size: 24px;
   margin-bottom: 16px;
+  text-align: center;
 `;
 
 const QuizTypeDescription = styled.p`

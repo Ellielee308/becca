@@ -230,6 +230,11 @@ const QuestionCardWrapper = styled.div`
   border-radius: ${(props) => props.$style.borderRadius};
   font-family: ${(props) => props.$style.fontFamily};
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15);
+  @media only screen and (max-width: 639px) {
+    width: 90vw;
+    aspect-ratio: 3 / 2;
+    height: auto;
+  }
 `;
 
 const ChoicesWrapper = styled.div`
@@ -238,6 +243,9 @@ const ChoicesWrapper = styled.div`
   gap: 16px;
   margin: 16px auto 0 auto;
   width: 100%;
+  @media only screen and (max-width: 639px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const ChoiceCard = styled.div`
@@ -249,6 +257,7 @@ const ChoiceCard = styled.div`
   min-height: 150px;
   padding: 10px 20px 10px 20px;
   border-radius: 8px;
+  background-color: white;
   overflow-y: auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
   cursor: pointer;
@@ -273,6 +282,7 @@ const Note = styled.p`
   align-self: flex-start;
   margin-top: 8px;
 `;
+
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
@@ -313,7 +323,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
       sizes = { small: "24px", medium: "26px", large: "36px" };
       break;
     case "2xl":
-      sizes = { small: "29px", medium: "30px", large: "42px" };
+      sizes = { small: "28px", medium: "30px", large: "42px" };
       break;
     default:
       sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
@@ -322,7 +332,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
   return css`
     font-size: ${sizes.small};
 
-    @media (min-width: 600px) {
+    @media (min-width: 640px) {
       font-size: ${sizes.medium};
     }
 
@@ -427,7 +437,7 @@ const GameEndModal = ({
 
   // 獲取當前玩家的 timeUsed
   useEffect(() => {
-    if (isGameOver && participantId) {
+    if (isGameOver && participantId && gameData?.startedAt) {
       const fetchCurrentUserTime = async () => {
         try {
           const participantData = await getParticipantDoc(participantId);
@@ -435,8 +445,12 @@ const GameEndModal = ({
           let timeUsed = null;
           if (participantData?.gameEndedAt && gameData?.startedAt) {
             // 確保使用的都是正確的時間戳記
-            const startedAtMillis = gameData.startedAt.toMillis();
-            const gameEndedAtMillis = participantData.gameEndedAt.toMillis();
+            const startedAtMillis = gameData.startedAt.toMillis
+              ? gameData.startedAt.toMillis()
+              : gameData.startedAt;
+            const gameEndedAtMillis = participantData.gameEndedAt.toMillis
+              ? participantData.gameEndedAt.toMillis()
+              : participantData.gameEndedAt;
 
             // 確保 endedAt 比 startedAt 晚
             if (gameEndedAtMillis >= startedAtMillis) {
@@ -477,7 +491,10 @@ const GameEndModal = ({
             <h2>遊戲完成！</h2>
             <p>答對題數：{correctAttempt}</p>
             <p>
-              花費時間：{currentUserTimeUsed && formatTime(currentUserTimeUsed)}
+              花費時間：
+              {currentUserTimeUsed !== null
+                ? formatTime(currentUserTimeUsed)
+                : "加載中..."}
             </p>
             <p>等待遊戲結束中...</p>
           </WaitingWrapper>
@@ -490,14 +507,17 @@ const GameEndModal = ({
             ) : (
               <RankingList>
                 {rankings.map((player, index) => (
-                  <RankingItem key={index}>
-                    {`第${index + 1}名 ${player.username} - 得分: ${
+                  <RankingItem key={index} $rank={index + 1}>
+                    <RankColumn>{`第${index + 1}名`}</RankColumn>
+                    <NameColumn>{player.username}</NameColumn>
+                    <ScoreColumn>{`${
                       player.currentScore ? player.currentScore : 0
-                    }, 用時: ${
-                      player.timeUsed
+                    }分`}</ScoreColumn>
+                    <TimeColumn>
+                      {player.timeUsed
                         ? formatTime(player.timeUsed)
-                        : formatTimeLimit(gameData.timeLimit)
-                    }`}
+                        : formatTimeLimit(gameData.timeLimit)}
+                    </TimeColumn>
                   </RankingItem>
                 ))}
               </RankingList>
@@ -551,13 +571,50 @@ const RankingTitle = styled.h2`
 `;
 
 const RankingList = styled.ul`
-  margin-top: 20px;
+  margin-top: 16px;
   list-style: none;
   padding: 0;
 `;
 
 const RankingItem = styled.li`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin: 10px 0;
+  height: 36px;
+  border-radius: 8px;
+  padding: 0 16px;
+  background-color: ${(props) => {
+    if (props.$rank === 1) {
+      return "#ffd700";
+    } else if (props.$rank === 2) {
+      return "#c0c0c0";
+    } else if (props.$rank === 3) {
+      return "#cd7f32";
+    } else {
+      return "#92a3fd";
+    }
+  }};
+`;
+
+const RankColumn = styled.span`
+  width: 20%;
+  text-align: center;
+`;
+
+const NameColumn = styled.span`
+  width: 30%;
+  text-align: center;
+`;
+
+const ScoreColumn = styled.span`
+  width: 20%;
+  text-align: center;
+`;
+
+const TimeColumn = styled.span`
+  width: 30%;
+  text-align: center;
 `;
 
 const CloseButton = styled.button`

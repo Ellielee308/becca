@@ -128,9 +128,9 @@ function CardSetCreate() {
 
           // 定義模板的排序順序
           const templateOrder = [
-            "LqlohmCZJ1bmccWr01KD", // 預設模板
-            "kVGZwB50nuheUuK54YOU", // 正面附例句
-            "0uLnRxXM4ly0tvCmmCuG", // 背面附圖片
+            "nHtBt7t26umO6NPqP4YC", // 預設模板
+            "GTpFoUK1bYzNEeniNTbr", // 正面附例句
+            "0Z4xgB2uBqUJIgmRXuTi", // 背面附圖片
           ];
 
           const cardTemplateOptions = userCardTemplates.map(
@@ -158,7 +158,7 @@ function CardSetCreate() {
 
           setTemplateOptions(cardTemplateOptions);
           const defaultTemplate = cardTemplateOptions.find(
-            (option) => option.value === "LqlohmCZJ1bmccWr01KD" //預設模板
+            (option) => option.value === "nHtBt7t26umO6NPqP4YC" //預設模板
           );
 
           // 設置預設模板為選中的模板
@@ -167,13 +167,13 @@ function CardSetCreate() {
             setSelectedTemplate(
               userCardTemplates.find(
                 (template) =>
-                  template.fieldTemplateId === "LqlohmCZJ1bmccWr01KD"
+                  template.fieldTemplateId === "nHtBt7t26umO6NPqP4YC"
               )
             );
             setCardSetData((prevInfo) => ({
               ...prevInfo,
               userId: user.userId,
-              fieldTemplateId: "LqlohmCZJ1bmccWr01KD",
+              fieldTemplateId: "nHtBt7t26umO6NPqP4YC",
             }));
           }
         } catch (error) {

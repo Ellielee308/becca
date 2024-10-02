@@ -222,11 +222,7 @@ const renderFieldContent = (field, value) => {
 
     case "image":
       if (value && value.trim() !== "") {
-        return (
-          <ImageWrapper>
-            <Image src={value} alt={field.name} imageStyle={field.style} />
-          </ImageWrapper>
-        );
+        return <Image src={value} alt={field.name} $imageStyle={field.style} />;
       }
       return null;
 
@@ -238,41 +234,31 @@ const renderFieldContent = (field, value) => {
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
-  left: ${(props) => `${(props.currentposition.x / 600) * 100}%`};
-  top: ${(props) => `${(props.currentposition.y / 400) * 100}%`};
+  left: ${(props) => props.currentposition.x};
+  top: ${(props) => props.currentposition.y};
   justify-content: ${(props) => props.currentstyle.textAlign || "center"};
   align-items: center;
   width: ${(props) =>
-    props.currentstyle.width
-      ? `${(parseInt(props.currentstyle.width) / 600) * 100}%`
-      : "auto"};
+    props.currentstyle.width ? props.currentstyle.width : "auto"};
   height: ${(props) =>
-    props.currentstyle.height
-      ? `${(parseInt(props.currentstyle.height) / 400) * 100}%`
-      : "auto"};
-
-  /* font-size: ${(props) =>
-    props.currentstyle.fontSize
-      ? `${
-          (parseInt(props.currentstyle.fontSize) / 600) *
-          (props.actualCardWidth || 600) // 當寬度為 0 時使用默認寬度 600
-        }px`
-      : "inherit"}; */
+    props.currentstyle.height ? props.currentstyle.height : "auto"};
+  font-size: 14px;
+  @media (min-width: 640px) {
+    font-size: 16px;
+  }
+  @media (min-width: 1024px) {
+    font-size: 18px;
+  }
   font-weight: ${(props) => props.currentstyle.fontWeight || "normal"};
   color: ${(props) => props.currentstyle.color || "#333"};
   font-style: ${(props) => props.currentstyle.fontStyle || "normal"};
   user-select: none;
 `;
 
-const ImageWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-`;
-
 const Image = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: ${(props) => props.$imageStyle?.objectFit || "cover"};
   display: block;
 `;
 
@@ -290,19 +276,21 @@ const CardGridWrapper = styled.div`
   gap: 16px;
   margin-top: 16px;
   width: 100%;
+  @media only screen and (max-width: 639px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
 `;
 
 const CardWrapper = styled.div`
   position: relative;
   width: 100%;
-  padding-top: calc(2 / 3 * 100%);
+  aspect-ratio: 3 / 2;
   background-color: ${(props) => props.$style.backgroundColor};
   opacity: ${(props) =>
-    props.$isMatched ? "0" : props.$isSelected ? "1" : "0.8"};
+    props.$isMatched ? "0" : props.$isSelected ? "1" : "0.7"};
   pointer-events: ${(props) =>
     props.$isMatched ? "none" : "auto"}; /* 配對後禁用互動 */
-
-  border-radius: ${(props) => props.$style.borderRadius};
   border-style: ${(props) => props.$style.borderStyle};
   border-width: ${(props) => props.$style.borderWidth};
   border-color: ${(props) => props.$style.borderColor};
@@ -413,18 +401,21 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
     }
   }, [gameStatus, gameData?.players, gameData?.startedAt, participantId]);
 
-  // 獲取當前玩家的 timeUsed
   useEffect(() => {
-    if (isGameOver && participantId) {
+    if (isGameOver && participantId && gameData?.startedAt) {
       const fetchCurrentUserTime = async () => {
         try {
           const participantData = await getParticipantDoc(participantId);
 
           let timeUsed = null;
-          if (participantData?.gameEndedAt && gameData?.startedAt) {
+          if (participantData?.gameEndedAt && gameData.startedAt) {
             // 確保使用的都是正確的時間戳記
-            const startedAtMillis = gameData.startedAt.toMillis();
-            const gameEndedAtMillis = participantData.gameEndedAt.toMillis();
+            const startedAtMillis = gameData.startedAt.toMillis
+              ? gameData.startedAt.toMillis()
+              : gameData.startedAt;
+            const gameEndedAtMillis = participantData.gameEndedAt.toMillis
+              ? participantData.gameEndedAt.toMillis()
+              : participantData.gameEndedAt;
 
             // 確保 endedAt 比 startedAt 晚
             if (gameEndedAtMillis >= startedAtMillis) {
@@ -443,7 +434,7 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
 
       fetchCurrentUserTime();
     }
-  }, [isGameOver, gameData.startedAt, participantId]);
+  }, [isGameOver, gameData, participantId]);
 
   const formatTime = (time) => {
     const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
@@ -457,9 +448,6 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
     return `${minutes} 分 ${seconds} 秒`;
   };
 
-  if (!gameData || !gameStatus === "completed") {
-    return <div>Loading...</div>;
-  }
   return (
     <ModalWrapper>
       <ModalContent>
@@ -467,27 +455,33 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
           <WaitingWrapper>
             <h2>遊戲完成！</h2>
             <p>
-              花費時間：{currentUserTimeUsed && formatTime(currentUserTimeUsed)}
+              花費時間：
+              {currentUserTimeUsed !== null
+                ? formatTime(currentUserTimeUsed)
+                : "加載中..."}
             </p>
             <p>等待遊戲結束中...</p>
           </WaitingWrapper>
         )}
         {gameStatus === "completed" && (
           <>
-            <RankingTitle>排行榜</RankingTitle>
+            <RankingTitle>✨排行榜✨</RankingTitle>
             {isLoading ? (
               <p>加載中...</p>
             ) : (
               <RankingList>
                 {rankings.map((player, index) => (
-                  <RankingItem key={index}>
-                    {`第${index + 1}名 ${player.username} - 得分: ${
+                  <RankingItem key={index} $rank={index + 1}>
+                    <RankColumn>{`第${index + 1}名`}</RankColumn>
+                    <NameColumn>{player.username}</NameColumn>
+                    <ScoreColumn>{`${
                       player.currentScore ? player.currentScore : 0
-                    }, 用時: ${
-                      player.timeUsed
+                    }分`}</ScoreColumn>
+                    <TimeColumn>
+                      {player.timeUsed
                         ? formatTime(player.timeUsed)
-                        : formatTimeLimit(gameData.timeLimit)
-                    }`}
+                        : formatTimeLimit(gameData.timeLimit)}
+                    </TimeColumn>
                   </RankingItem>
                 ))}
               </RankingList>
@@ -541,13 +535,50 @@ const RankingTitle = styled.h2`
 `;
 
 const RankingList = styled.ul`
-  margin-top: 20px;
+  margin-top: 16px;
   list-style: none;
   padding: 0;
 `;
 
 const RankingItem = styled.li`
-  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+  height: 36px;
+  border-radius: 8px;
+  padding: 0 16px;
+  background-color: ${(props) => {
+    if (props.$rank === 1) {
+      return "#ffd700";
+    } else if (props.$rank === 2) {
+      return "#c0c0c0";
+    } else if (props.$rank === 3) {
+      return "#cd7f32";
+    } else {
+      return "#92a3fd";
+    }
+  }};
+`;
+
+const RankColumn = styled.span`
+  width: 20%;
+  text-align: center;
+`;
+
+const NameColumn = styled.span`
+  width: 30%;
+  text-align: center;
+`;
+
+const ScoreColumn = styled.span`
+  width: 20%;
+  text-align: center;
+`;
+
+const TimeColumn = styled.span`
+  width: 30%;
+  text-align: center;
 `;
 
 const CloseButton = styled.button`
@@ -585,3 +616,21 @@ GameEndModal.propTypes = {
   attempts: PropTypes.number,
   isGameOver: PropTypes.bool,
 };
+
+const TrophyIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0"
+    />
+  </svg>
+);

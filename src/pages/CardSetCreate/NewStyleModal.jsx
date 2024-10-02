@@ -26,7 +26,6 @@ const borderWidthOptions = [
   { value: "8px", label: "8px" },
   { value: "12px", label: "12px" },
   { value: "16px", label: "16px" },
-  { value: "24px", label: "24px" },
 ];
 
 const fontOptions = [

@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import PropTypes from "prop-types";
 import { useState } from "react";
 import imageIcon from "./images/photo.png";
@@ -16,8 +16,8 @@ export default function Preview({ currentStyle, currentTemplate }) {
           {currentTemplate.frontFields.map((field, index) => (
             <FieldContainer
               key={index}
-              style={field.style}
-              position={field.position}
+              $style={field.style}
+              $position={field.position}
             >
               {renderFieldContent(field)}
             </FieldContainer>
@@ -27,8 +27,8 @@ export default function Preview({ currentStyle, currentTemplate }) {
           {currentTemplate.backFields.map((field, index) => (
             <FieldContainer
               key={index}
-              style={field.style}
-              position={field.position}
+              $style={field.style}
+              $position={field.position}
             >
               {renderFieldContent(field)}
             </FieldContainer>
@@ -110,6 +110,45 @@ const renderFieldContent = (field) => {
     default:
       return null; // 如果類型未定義，不渲染任何內容
   }
+};
+
+const getResponsiveFontSize = (fontSizeValue) => {
+  let sizes;
+
+  switch (fontSizeValue) {
+    case "xs":
+      sizes = { small: "8px", medium: "10px", large: "12px" };
+      break;
+    case "s":
+      sizes = { small: "12px", medium: "14px", large: "18px" };
+      break;
+    case "m":
+      sizes = { small: "16px", medium: "18px", large: "24px" };
+      break;
+    case "l":
+      sizes = { small: "20px", medium: "22px", large: "30px" };
+      break;
+    case "xl":
+      sizes = { small: "24px", medium: "26px", large: "36px" };
+      break;
+    case "2xl":
+      sizes = { small: "29px", medium: "30px", large: "42px" };
+      break;
+    default:
+      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+  }
+
+  return css`
+    font-size: ${sizes.small};
+
+    @media (min-width: 600px) {
+      font-size: ${sizes.medium};
+    }
+
+    @media (min-width: 1024px) {
+      font-size: ${sizes.large};
+    }
+  `;
 };
 
 const Wrapper = styled.div`
@@ -227,22 +266,22 @@ const BackCard = styled.div`
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
-  justify-content: ${(props) => props.style.textAlign || "center"};
+  justify-content: ${(props) => props.$style.textAlign || "center"};
   align-items: center;
   ${(props) =>
-    props.style &&
-    `
-    width: ${props.style.width};
-    height: ${props.style.height};
-    font-size: ${props.style.fontSize};
-    font-weight: ${props.style.fontWeight};
-    color: ${props.style.color};
-    background-color: ${props.style.backgroundColor};
-  `};
-  left: ${(props) => props.position?.x || "0"}px;
-  top: ${(props) => props.position?.y || "0"}px;
+    props.$style &&
+    css`
+      width: ${props.$style.width};
+      height: ${props.$style.height};
+      font-weight: ${props.$style.fontWeight};
+      color: ${props.$style.color};
+      font-style: ${props.$style.fontStyle};
+      ${getResponsiveFontSize(props.$style.fontSize)};
+    `}
+  left: ${(props) => props.$position?.x};
+  top: ${(props) => props.$position?.y};
+  user-select: none;
 `;
-
 // 用於顯示圖片的樣式
 const ImageWrapper = styled.div`
   position: relative;

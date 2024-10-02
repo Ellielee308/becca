@@ -26,7 +26,6 @@ const borderWidthOptions = [
   { value: "8px", label: "8px" },
   { value: "12px", label: "12px" },
   { value: "16px", label: "16px" },
-  { value: "24px", label: "24px" },
 ];
 
 const fontOptions = [
@@ -46,7 +45,7 @@ const fontOptions = [
 const animationOptions = [
   { value: "verticalFlip", label: "上下翻轉" },
   { value: "horizontalFlip", label: "左右翻轉" },
-  { value: "fade", label: "淡入淡出" },
+  // { value: "fade", label: "淡入淡出" },
 ];
 
 const defaultBackgroundColors = [

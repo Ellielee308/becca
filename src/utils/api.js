@@ -805,14 +805,14 @@ export async function deleteCardSet(cardSetId) {
 
     const usersQuery = query(
       collection(db, "users"),
-      where("favorites", "array-contains", { cardSetId })
+      where("favorites", "array-contains", cardSetId)
     );
     const usersSnapshot = await getDocs(usersQuery);
 
     for (const userDoc of usersSnapshot.docs) {
       const userRef = doc(db, "users", userDoc.id);
       await updateDoc(userRef, {
-        favorites: arrayRemove({ cardSetId }),
+        favorites: arrayRemove(cardSetId),
       });
     }
     console.log(`已成功從所有收藏該卡牌組的用戶中移除該卡牌組`);

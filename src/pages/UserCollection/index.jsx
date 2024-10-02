@@ -93,8 +93,15 @@ function UserCollection() {
 export default UserCollection;
 
 const Wrapper = styled.div`
-  margin: 80px 0 0 50px;
+  margin-top: 80px;
   padding: 0 80px;
+  min-height: 100vh;
+  @media only screen and (max-width: 639px) {
+    padding: 0;
+  }
+  @media only screen and (min-width: 640px) and (max-width: 1023px) {
+    margin-left: 60px;
+  }
 `;
 
 const Title = styled.h2`
@@ -132,7 +139,8 @@ const CardContainer = styled.div`
 
 const CardWrapper = styled.div`
   width: 100%;
-  height: 200px;
+  aspect-ratio: 3 / 2;
+  max-height: 270px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -142,8 +150,10 @@ const CardWrapper = styled.div`
   border-color: ${(props) => props.$cardSetStyle.borderColor};
   background-color: ${(props) => props.$cardSetStyle.backgroundColor};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @media only screen and (max-width: 1024px) {
+    max-height: 320px;
+  }
 `;
-
 const CardSetDetailsContainer = styled.div`
   padding-top: 14px;
   display: flex;

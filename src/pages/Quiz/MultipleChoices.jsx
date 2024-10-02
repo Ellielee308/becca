@@ -285,6 +285,11 @@ const QuestionCardWrapper = styled.div`
   border-radius: ${(props) => props.$style.borderRadius};
   font-family: ${(props) => props.$style.fontFamily};
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15);
+  @media only screen and (max-width: 639px) {
+    width: 90vw;
+    aspect-ratio: 3 / 2;
+    height: auto;
+  }
 `;
 
 const ChoicesWrapper = styled.div`
@@ -293,6 +298,9 @@ const ChoicesWrapper = styled.div`
   gap: 16px;
   margin: 16px auto 0 auto;
   width: 100%;
+  @media only screen and (max-width: 639px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const ChoiceCard = styled.div`
@@ -348,7 +356,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
       sizes = { small: "24px", medium: "26px", large: "36px" };
       break;
     case "2xl":
-      sizes = { small: "29px", medium: "30px", large: "42px" };
+      sizes = { small: "28px", medium: "30px", large: "42px" };
       break;
     default:
       sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
@@ -357,7 +365,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
   return css`
     font-size: ${sizes.small};
 
-    @media (min-width: 600px) {
+    @media (min-width: 640px) {
       font-size: ${sizes.medium};
     }
 

@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   getCardSet,
   getStyle,
@@ -88,17 +88,45 @@ function CardSetDetail() {
     }
   }, [user, cardSetId]);
 
-  const handleNextCard = () => {
+  const handleNextCard = useCallback(() => {
     setCurrentCardIndex((prevIndex) =>
       prevIndex < cards.length - 1 ? prevIndex + 1 : prevIndex
     );
-  };
-
-  const handlePreviousCard = () => {
+  }, [cards.length]);
+  const handlePreviousCard = useCallback(() => {
     setCurrentCardIndex((prevIndex) =>
       prevIndex > 0 ? prevIndex - 1 : prevIndex
     );
-  };
+  }, []);
+
+  const handleSwitchCardWithKeyboard = useCallback(
+    (event) => {
+      // 檢查當前是否聚焦在輸入框或文本框中
+      const tagName = event.target.tagName.toLowerCase();
+      if (tagName === "input" || tagName === "textarea") {
+        return;
+      }
+
+      switch (event.key) {
+        case "ArrowLeft":
+          handlePreviousCard();
+          break;
+        case "ArrowRight":
+          handleNextCard();
+          break;
+        default:
+          return;
+      }
+    },
+    [handleNextCard, handlePreviousCard]
+  );
+  useEffect(() => {
+    window.addEventListener("keydown", handleSwitchCardWithKeyboard);
+
+    return () => {
+      window.removeEventListener("keydown", handleSwitchCardWithKeyboard);
+    };
+  }, [handleSwitchCardWithKeyboard]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -169,9 +197,23 @@ function CardSetDetail() {
         </ArrowIconContainer>
       </CardContainer>
       <CardSetDetailsWrapper>
-        <CardNumberWrapper>{`${currentCardIndex + 1} / ${
-          cards.length
-        }`}</CardNumberWrapper>
+        <MobileActionBar>
+          <MobileArrowIconContainer
+            disabled={currentCardIndex === 0}
+            onClick={handlePreviousCard}
+          >
+            <LeftArrowIcon />
+          </MobileArrowIconContainer>
+          <CardNumberWrapper>{`${currentCardIndex + 1} / ${
+            cards.length
+          }`}</CardNumberWrapper>
+          <MobileArrowIconContainer
+            disabled={currentCardIndex === cards.length - 1}
+            onClick={handleNextCard}
+          >
+            <RightArrowIcon />
+          </MobileArrowIconContainer>
+        </MobileActionBar>
         <ProgressBar>
           <Progress
             width={`${((currentCardIndex + 1) / cards.length) * 100}%`}
@@ -355,11 +397,15 @@ function CardSetDetail() {
 export default CardSetDetail;
 
 const Wrapper = styled.div`
+  background-color: white;
   margin: 80px auto;
   padding: 30px 20px;
   max-width: 1160px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+  @media only screen and (max-width: 639px) {
+    margin: 80px 8px;
+  }
 `;
 
 const TitleBar = styled.div`
@@ -368,11 +414,18 @@ const TitleBar = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  @media only screen and (max-width: 639px) {
+    width: 100%;
+    margin: 0px auto;
+  }
 `;
 
 const Title = styled.div`
   font-size: 32px;
   user-select: none;
+  @media only screen and (max-width: 639px) {
+    font-size: 28px;
+  }
 `;
 
 const StarContainer = styled.div`
@@ -399,11 +452,34 @@ const ArrowIconContainer = styled.div`
   justify-content: center;
   color: ${(props) => (props.disabled ? "#d8d6d6" : "black")};
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  @media only screen and (max-width: 639px) {
+    display: none;
+  }
+`;
+
+const MobileArrowIconContainer = styled.div`
+  flex-basis: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${(props) => (props.disabled ? "#d8d6d6" : "black")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  @media only screen and (min-width: 640px) {
+    display: none;
+  }
+`;
+
+const MobileActionBar = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const CardSetDetailsWrapper = styled.div`
-  width: 60%;
+  width: 100%;
   margin: 20px auto; /* 上下邊距 */
+  @media only screen and (min-width: 640px) {
+    width: 60%;
+  }
 `;
 
 const CardNumberWrapper = styled.div`
@@ -514,6 +590,9 @@ const GameOptionsWrapper = styled.div`
   align-items: center;
   justify-content: space-around;
   margin: 20px auto;
+  @media only screen and (max-width: 934px) {
+    gap: 12px;
+  }
 `;
 
 const GameOptionButton = styled.div`
@@ -534,6 +613,9 @@ const GameOptionButton = styled.div`
 
   &:active {
     transform: scale(0.98); /* 點擊時輕微縮小 */
+  }
+  @media only screen and (max-width: 934px) {
+    flex: 1;
   }
 `;
 
@@ -562,6 +644,9 @@ const SerialNumber = styled.p`
 const CardContentWrapper = styled.div`
   display: flex;
   flex-direction: row;
+  @media only screen and (max-width: 639px) {
+    flex-direction: column;
+  }
 `;
 
 const Side = styled.div`
@@ -576,6 +661,12 @@ const SideSplit = styled.div`
   border-left: 1px solid #c9c5c5;
   align-self: center;
   margin: 0px 30px;
+  @media only screen and (max-width: 639px) {
+    height: 0px;
+    width: 20%;
+    border-left: none;
+    margin: 20px 0px;
+  }
 `;
 
 const SideHeading = styled.p`
@@ -661,11 +752,7 @@ const renderFieldContent = (field, value) => {
 
     case "image":
       if (value && value.trim() !== "") {
-        return (
-          <ImageWrapper>
-            <Image src={value} alt={field.name} style={field.style} />
-          </ImageWrapper>
-        );
+        return <Image src={value} alt={field.name} $style={field.style} />;
       }
       return null;
 
@@ -717,11 +804,15 @@ const CardViewWrapper = styled.div`
   align-self: center;
   display: block;
   margin: 52px 0px;
-  width: 600px;
-  height: 400px;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  max-width: 600px;
   perspective: 1000px;
   transform-style: preserve-3d;
   cursor: pointer;
+  @media only screen and (max-width: 639px) {
+    margin: 32px 0px;
+  }
 `;
 
 const FlipCard = styled.div`
@@ -845,16 +936,10 @@ const FieldContainer = styled.div`
   user-select: none;
 `;
 
-// 用於顯示圖片的樣式
-const ImageWrapper = styled.div`
-  position: relative;
-  display: inline-block; // 讓 ImageWrapper 的大小與圖片保持一致
-`;
-
 const Image = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: ${(props) => props.style?.objectFit || "cover"};
+  width: 100%;
+  height: 100%;
+  object-fit: ${(props) => props.$style?.objectFit || "cover"};
   display: block;
 `;
 
@@ -867,8 +952,8 @@ CardContent.propTypes = {
         type: PropTypes.oneOf(["text", "image"]).isRequired,
         required: PropTypes.bool.isRequired,
         position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
         }).isRequired,
         style: PropTypes.shape({
           width: PropTypes.string.isRequired,
@@ -886,8 +971,8 @@ CardContent.propTypes = {
         type: PropTypes.oneOf(["text", "image"]).isRequired,
         required: PropTypes.bool.isRequired,
         position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
         }).isRequired,
         style: PropTypes.shape({
           width: PropTypes.string.isRequired,

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useUser } from "../../context/UserContext.jsx";
 import { useState } from "react";
 import { register, login } from "../../utils/api.js";
@@ -14,6 +14,7 @@ function Header() {
   const { user, setUser, loading } = useUser();
   const [searchInputValue, setSearchInputValue] = useState("");
   const [showMobileSearchBar, setShowMobileSearchBar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const navigate = useNavigate();
 
   const handleLogOut = async () => {
@@ -42,11 +43,22 @@ function Header() {
     setShowMobileSearchBar(false);
   };
 
+  const toggleSidebar = () => {
+    setShowSidebar((prevState) => !prevState);
+  };
+
   return (
     <Wrapper>
-      <Link to="/">
-        <LogoImg src={beccaLogo} alt="Logo" />
-      </Link>
+      <MenuLogoWrapper>
+        {!loading && user && (
+          <MobileMenuContainer onClick={toggleSidebar}>
+            <MobileMenu />
+          </MobileMenuContainer>
+        )}
+        <Link to="/">
+          <LogoImg src={beccaLogo} alt="Logo" />
+        </Link>
+      </MenuLogoWrapper>
       {showMobileSearchBar && (
         <MobileSearchSection>
           <SearchIcon />
@@ -104,7 +116,7 @@ function Header() {
               </ProfilePictureWrapper>
             </NavItemWrapper>
           </>
-        ) : !loading && !user ? (
+        ) : !loading && !user && !showMobileSearchBar ? (
           <LoginTrigger onClick={() => setShowLoginModal(true)}>
             Sign in
           </LoginTrigger>
@@ -113,6 +125,40 @@ function Header() {
       {showLoginModal && (
         <LoginModal onClose={() => setShowLoginModal(false)} />
       )}
+      {showSidebar && <Overlay onClick={toggleSidebar} />}
+      <Sidebar showSidebar={showSidebar}>
+        <SidebarContent>
+          <CloseSidebarButton onClick={toggleSidebar}>
+            <CloseIcon />
+          </CloseSidebarButton>
+          <MenuLogoWrapper>
+            <LogoImg src={beccaLogo} alt="Logo" />
+          </MenuLogoWrapper>
+          <NavLinkWrapper>
+            <StyledNavLink to="/user/me/profile" onClick={toggleSidebar}>
+              <HomeIcon />
+              <NavItemName>總覽</NavItemName>
+            </StyledNavLink>
+            <StyledNavLink to="/user/me/cardsets" onClick={toggleSidebar}>
+              <FolderOpenIcon />
+              <NavItemName>卡牌組</NavItemName>
+            </StyledNavLink>
+            <StyledNavLink to="/user/me/collection" onClick={toggleSidebar}>
+              <StarIcon />
+              <NavItemName>收藏</NavItemName>
+            </StyledNavLink>
+          </NavLinkWrapper>
+          <LogOutButton
+            onClick={() => {
+              handleLogOut();
+              toggleSidebar();
+            }}
+          >
+            <LogOutIcon />
+            <NavItemName>登出</NavItemName>
+          </LogOutButton>
+        </SidebarContent>
+      </Sidebar>
     </Wrapper>
   );
 }
@@ -125,23 +171,21 @@ const Wrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 10px 10px 30px;
+  padding: 10px 10px 10px 14px;
   height: 60px;
   width: 100%;
   background-color: #eff7ff;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @media only screen and (min-width: 640px) {
+    padding: 10px 10px 10px 20px;
+  }
 `;
 
 const LogoImg = styled.img`
   height: 36px;
   width: auto;
 `;
-
-// const LogoText = styled.h1`
-//   font-family: monospace;
-//   font-size: 24px;
-// `;
 
 const NavigateWrapper = styled.div`
   display: flex;
@@ -151,6 +195,39 @@ const NavigateWrapper = styled.div`
   gap: 12px;
 `;
 
+const MenuLogoWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+`;
+
+const MobileMenuContainer = styled.div`
+  display: flex;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  @media only screen and (min-width: 640px) {
+    display: none;
+  }
+`;
+
+const MobileMenu = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="24"
+    height="24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+    />
+  </svg>
+);
 const WelcomeMessage = styled.p`
   font-family: "Poppins", sans-serif;
   font-size: 16px;
@@ -584,3 +661,189 @@ const ErrorText = styled.p`
 LoginModal.propTypes = {
   onClose: PropTypes.func,
 };
+
+const Sidebar = styled.div`
+  position: fixed;
+  top: 0;
+  left: ${(props) => (props.showSidebar ? "0" : "-100%")};
+  width: 250px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease-in-out;
+  z-index: 200;
+  @media only screen and (min-width: 640px) {
+    display: none;
+  }
+`;
+
+const SidebarContent = styled.div`
+  padding: 10px 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const CloseSidebarButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+`;
+
+const NavLinkWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 120px;
+`;
+
+const StyledNavLink = styled(NavLink)`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 12px 0 12px;
+  height: 40px;
+  width: 100%;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: #636363;
+
+  &.active {
+    background-color: #c5e0ee;
+    border-radius: 6px;
+    color: rgb(52, 58, 109);
+  }
+
+  &:hover {
+    background-color: #cbdde689;
+  }
+
+  &.active:hover {
+    background-color: #c5e0ee;
+  }
+`;
+
+const NavItemName = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  margin-left: 12px;
+`;
+
+const FolderOpenIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"
+    />
+  </svg>
+);
+
+const HomeIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+    />
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+    />
+  </svg>
+);
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 150;
+  @media only screen and (min-width: 640px) {
+    display: none;
+  }
+`;
+
+const LogOutIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
+    />
+  </svg>
+);
+
+const LogOutButton = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  justify-content: flex-start;
+  padding: 0 12px 0 12px;
+  height: 40px;
+  width: 100%;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: #636363;
+  cursor: pointer;
+
+  &.active {
+    background-color: #c5e0ee;
+    border-radius: 6px;
+    color: rgb(52, 58, 109);
+  }
+
+  &:hover {
+    background-color: #cbdde689;
+  }
+
+  &.active:hover {
+    background-color: #c5e0ee;
+  }
+`;

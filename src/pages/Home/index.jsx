@@ -12,51 +12,40 @@ function Home() {
   const [template, setTemplate] = useState(null);
   const [style, setStyle] = useState(null);
   const [cards, setCards] = useState([]);
-  useEffect(() => {
-    const fetchCardSetData = async () => {
-      try {
-        const fetchedCardSetData = await getCardSet("PY5V20lv1O0LxwAJ9G0B");
-        if (!fetchedCardSetData) throw new Error("Card set not found");
+  // useEffect(() => {
+  //   const fetchCardSetData = async () => {
+  //     try {
+  //       const fetchedCardSetData = await getCardSet("PY5V20lv1O0LxwAJ9G0B");
+  //       if (!fetchedCardSetData) throw new Error("Card set not found");
 
-        setCardSetData(fetchedCardSetData);
+  //       setCardSetData(fetchedCardSetData);
 
-        const cardStyle = await getStyle(fetchedCardSetData.styleId);
-        setStyle(cardStyle);
+  //       const cardStyle = await getStyle(fetchedCardSetData.styleId);
+  //       setStyle(cardStyle);
 
-        const cardTemplate = await getTemplate(
-          fetchedCardSetData.fieldTemplateId
-        );
-        setTemplate(cardTemplate);
+  //       const cardTemplate = await getTemplate(
+  //         fetchedCardSetData.fieldTemplateId
+  //       );
+  //       setTemplate(cardTemplate);
 
-        const unorderedCards = await getCardsOfCardSet("PY5V20lv1O0LxwAJ9G0B");
+  //       const unorderedCards = await getCardsOfCardSet("PY5V20lv1O0LxwAJ9G0B");
 
-        // 根據 cardSetData.cardOrder 陣列中的順序重排卡片
-        const orderedCards = fetchedCardSetData.cardOrder
-          .map((cardId) =>
-            unorderedCards.find((card) => card.cardId === cardId)
-          )
-          .filter(Boolean); // 過濾掉可能未找到的卡片
+  //       // 根據 cardSetData.cardOrder 陣列中的順序重排卡片
+  //       const orderedCards = fetchedCardSetData.cardOrder
+  //         .map((cardId) =>
+  //           unorderedCards.find((card) => card.cardId === cardId)
+  //         )
+  //         .filter(Boolean); // 過濾掉可能未找到的卡片
 
-        setCards(orderedCards);
-      } catch (error) {
-        console.error("獲取卡牌組資料失敗：", error);
-      }
-    };
+  //       setCards(orderedCards);
+  //     } catch (error) {
+  //       console.error("獲取卡牌組資料失敗：", error);
+  //     }
+  //   };
 
-    fetchCardSetData();
-  }, []);
-  return (
-    <Wrapper>
-      <Notice>點擊可翻轉卡牌</Notice>
-      {cardSetData && style && template && cards && (
-        <CardContent
-          currentStyle={style}
-          currentTemplate={template}
-          currentCard={cards[0]}
-        />
-      )}
-    </Wrapper>
-  );
+  //   fetchCardSetData();
+  // }, []);
+  return <Wrapper></Wrapper>;
 }
 
 export default Home;

@@ -1,16 +1,28 @@
 import styled from "styled-components";
 function Footer() {
-  return <Wrapper>2024</Wrapper>;
+  return (
+    <Wrapper>
+      <FooterText>© BECCA 2024</FooterText>
+    </Wrapper>
+  );
 }
 
 export default Footer;
 
 const Wrapper = styled.div`
-  height: 60px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
   width: 100%;
   padding: 20px 15px;
   background-color: #eff7ff;
-  text-align: left;
-  position: relative; /* 確保有 position */
-  z-index: 99; /* 調整 z-index */
+  z-index: 99;
+`;
+
+const FooterText = styled.p`
+  font-family: "Raleway", sans-serif;
+  font-size: 14px;
+  user-select: none;
 `;

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   getGameDoc,
@@ -17,6 +17,7 @@ import { doc, collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../utils/firebaseConfig.js";
 import Matching from "./Matching";
 import MultipleChoices from "./MultipleChoices";
+import photoPlaceholder from "./images/photo-placeholder.jpg";
 
 function Game() {
   const { gameId } = useParams();
@@ -33,6 +34,7 @@ function Game() {
   const [hasJoinedGame, setHasJoinedGame] = useState(false);
   const [players, setPlayers] = useState([]); // 即時保存所有玩家資料
   const [participantId, setParticipantId] = useState(null); //目前玩家participantId
+  const navigate = useNavigate();
 
   const isJoining = useRef(false);
 
@@ -292,47 +294,64 @@ function Game() {
   ) {
     return <div>Loading...</div>;
   }
+  if (gameData.startedAt && !hasJoinedGame) {
+    alert("遊戲已開始，無法加入！");
+    navigate("/");
+  }
   return (
     <Wrapper>
       <QuizDescription>
-        <Title>
-          遊戲房：{gameData.roomName ? gameData.roomName : "無名稱"}
-        </Title>
+        <Lable>遊戲房</Lable>
+        <Title>{gameData.roomName ? gameData.roomName : "無名稱"}</Title>
+        <Lable>遊戲類型</Lable>
         <QuizTypeDescription>
-          {gameData.quizType === "matching" ? "配對小遊戲" : "選擇題小遊戲"}
+          {gameData.quizType === "matching" ? "配對遊戲" : "選擇題遊戲"}
         </QuizTypeDescription>
+        <Lable>時間限制</Lable>
         <QuizTypeDescription>
-          時間限制：{formatTimeLimit(gameData.timeLimit)}
+          {formatTimeLimit(gameData.timeLimit)}
         </QuizTypeDescription>
       </QuizDescription>
       {/* 分享按鈕和 QR 碼 */}
       {gameData.status === "waiting" && (
         <ShareContainer>
-          <ShareButton onClick={handleShareClick}>複製遊戲連結</ShareButton>
           <QRCodeSVG value={window.location.href} size={128} />
+          <ShareButton onClick={handleShareClick}>複製遊戲連結</ShareButton>
         </ShareContainer>
-      )}
-
-      {/* 未登入用戶名輸入框 */}
-      {!user && !hasJoinedGame && gameData.status === "waiting" && (
-        <JoinGameContainer>
-          <UsernameInput
-            type="text"
-            placeholder="輸入用戶名加入遊戲"
-            value={username}
-            onChange={handleUsernameChange}
-          />
-          <JoinButton onClick={handleJoinGame}>加入遊戲</JoinButton>
-        </JoinGameContainer>
       )}
       {/* 顯示目前的玩家列表 */}
       {gameData.status === "waiting" && (
         <PlayersList>
-          <PlayersTitle>目前玩家：</PlayersTitle>
-          {players.map((player, index) => (
-            <PlayerItem key={index}>{player.username}</PlayerItem>
-          ))}
+          <Lable>目前玩家</Lable>
+          <PlayersGridContainer>
+            {players.map((player, index) => (
+              <PlayerItem key={index}>
+                <ProfilePicture src={photoPlaceholder} />
+                <PlayerName> {player.username}</PlayerName>
+              </PlayerItem>
+            ))}
+          </PlayersGridContainer>
         </PlayersList>
+      )}
+      {/* 未登入用戶名輸入框 */}
+      {!user && !hasJoinedGame && gameData.status === "waiting" && (
+        <JoinGameContainer>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleJoinGame();
+            }}
+          >
+            <UsernameInput
+              type="text"
+              placeholder="輸入用戶名加入遊戲"
+              maxLength={10}
+              value={username}
+              onChange={handleUsernameChange}
+            />
+            <JoinButton type="submit">加入遊戲</JoinButton>
+          </form>
+        </JoinGameContainer>
       )}
       {gameData &&
         gameData.quizType === "matching" &&
@@ -366,11 +385,12 @@ function Game() {
 export default Game;
 
 const Wrapper = styled.div`
-  margin: 100px auto 120px auto;
-  padding: 30px 20px;
-  max-width: 1160px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  margin: 80px auto 100px auto;
+  padding: 10px 30px 40px 30px;
+  max-width: 960px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  background: linear-gradient(to bottom right, #f5f7fa, #cdddf3);
   display: flex;
   flex-direction: column;
 `;
@@ -380,39 +400,53 @@ const QuizDescription = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 60%;
-  margin: 32px auto;
+  width: 80%;
+  margin: 40px auto 10px auto;
+  padding: 20px;
+  border-radius: 12px;
   user-select: none;
 `;
 
-const Title = styled.p`
-  font-size: 24px;
-  margin-bottom: 16px;
+const Lable = styled.p`
+  font-size: 14px;
+  color: #555;
+`;
+
+const Title = styled.h2`
+  margin: 14px 0;
+  padding: 12px;
+  font-size: 28px;
+  text-align: center;
+  color: #313131;
 `;
 
 const QuizTypeDescription = styled.p`
-  font-size: 20px;
+  font-size: 22px;
+  color: #313131;
+  margin: 10px 0;
 `;
 
 const ShareContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 20px 0;
+  margin: 0 0 30px 0;
 `;
 
 const ShareButton = styled.button`
-  padding: 10px 20px;
-  background-color: #f59873;
+  padding: 10px 24px;
+  background-color: #ff8a5b;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-bottom: 10px;
-  font-size: 14px;
+  margin-top: 15px;
+  font-size: 16px;
+  transition: all 0.3s;
 
   &:hover {
-    background-color: #f89f7c;
+    background-color: #ff7043;
+    box-shadow: 0 4px 15px rgba(255, 112, 67, 0.3);
   }
 `;
 
@@ -420,55 +454,91 @@ const JoinGameContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 30px;
 `;
 
 const UsernameInput = styled.input`
-  padding: 10px;
-  margin-right: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 12px;
+  margin-right: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
   font-size: 16px;
+  outline: none;
+  transition: all 0.3s;
+
+  &:focus {
+    border-color: #adbce5;
+    box-shadow: 0 4px 10px rgba(173, 188, 229, 0.3);
+  }
 `;
 
 const JoinButton = styled.button`
-  padding: 10px 20px;
-  background-color: #adbce5;
+  padding: 8px 24px;
+  background-color: #62b6cb;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
 
   &:hover {
-    background-color: #215688;
+    background-color: #5a9cb1;
+    box-shadow: 0 4px 15px rgba(90, 156, 177, 0.3);
   }
 `;
 
 const PlayersList = styled.div`
-  margin-top: 30px;
+  margin-top: 40px;
   text-align: center;
+  width: 80%;
+  margin: 0 auto;
 `;
 
-const PlayersTitle = styled.h3`
-  font-size: 20px;
+const PlayersGridContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px; /* 減少項目之間的間距 */
+  margin: 10px auto;
+  width: 80%;
+
+  @media only screen and (max-width: 639px) {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  }
+`;
+const PlayerItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 10px;
 `;
 
-const PlayerItem = styled.div`
-  font-size: 16px;
-  margin-bottom: 5px;
+const ProfilePicture = styled.img`
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+const PlayerName = styled.p`
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
 `;
 
 const StartGameButton = styled.button`
-  padding: 10px 20px;
-  background-color: #adbce5;
+  padding: 12px 32px;
+  background-color: #36a2eb;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 12px;
   cursor: pointer;
+  font-size: 18px;
+  margin: 30px auto;
+  transition: all 0.3s;
 
   &:hover {
-    background-color: #215688;
+    background-color: #2b8ac6;
+    box-shadow: 0 4px 20px rgba(43, 138, 198, 0.3);
   }
-  margin: 0 auto;
 `;

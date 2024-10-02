@@ -431,7 +431,7 @@ const ButtonIconContainer = styled.div`
 `;
 
 const ImagePreview = styled.img`
-  height: 60px;
+  height: 100px;
   width: auto;
   object-fit: cover;
 `;

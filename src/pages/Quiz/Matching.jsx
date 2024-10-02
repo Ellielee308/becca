@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { useRef, useEffect, useState } from "react";
+import styled, { css } from "styled-components";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { updateQuiz } from "../../utils/api";
@@ -10,10 +10,8 @@ function Matching({ quizData, cardsData, template, style }) {
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [pairStatus, setPairStatus] = useState(null);
   const [isGameOver, setIsGameOver] = useState(false);
-  const [attempts, setAttempts] = useState(0); // 總配對次數
+  const [attempts, setAttempts] = useState(0);
   const [timer, setTimer] = useState(0);
-  // const cardRef = useRef(null);
-  // const [cardWidth, setCardWidth] = useState(0);
 
   useEffect(() => {
     if (quizData && cardsData.length > 0) {
@@ -33,12 +31,6 @@ function Matching({ quizData, cardsData, template, style }) {
       setRandomCardPairs(randomizedCardPairs);
     }
   }, [quizData, cardsData]);
-
-  // useEffect(() => {
-  //   if (cardRef.current) {
-  //     setCardWidth(cardRef.current.offsetWidth);
-  //   }
-  // }, []);
 
   useEffect(() => {
     let interval;
@@ -247,11 +239,7 @@ const renderFieldContent = (field, value) => {
 
     case "image":
       if (value && value.trim() !== "") {
-        return (
-          <ImageWrapper>
-            <Image src={value} alt={field.name} imageStyle={field.style} />
-          </ImageWrapper>
-        );
+        return <Image src={value} alt={field.name} $imageStyle={field.style} />;
       }
       return null;
 
@@ -263,41 +251,70 @@ const renderFieldContent = (field, value) => {
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
-  left: ${(props) => `${(props.currentposition.x / 600) * 100}%`};
-  top: ${(props) => `${(props.currentposition.y / 400) * 100}%`};
+  left: ${(props) => props.currentposition.x};
+  top: ${(props) => props.currentposition.y};
   justify-content: ${(props) => props.currentstyle.textAlign || "center"};
   align-items: center;
   width: ${(props) =>
-    props.currentstyle.width
-      ? `${(parseInt(props.currentstyle.width) / 600) * 100}%`
-      : "auto"};
+    props.currentstyle.width ? props.currentstyle.width : "auto"};
   height: ${(props) =>
-    props.currentstyle.height
-      ? `${(parseInt(props.currentstyle.height) / 400) * 100}%`
-      : "auto"};
-
-  /* font-size: ${(props) =>
-    props.currentstyle.fontSize
-      ? `${
-          (parseInt(props.currentstyle.fontSize) / 600) *
-          (props.actualCardWidth || 600) // 當寬度為 0 時使用默認寬度 600
-        }px`
-      : "inherit"}; */
+    props.currentstyle.height ? props.currentstyle.height : "auto"};
+  font-size: 14px;
+  @media (min-width: 640px) {
+    font-size: 16px;
+  }
+  @media (min-width: 1024px) {
+    font-size: 18px;
+  }
   font-weight: ${(props) => props.currentstyle.fontWeight || "normal"};
   color: ${(props) => props.currentstyle.color || "#333"};
   font-style: ${(props) => props.currentstyle.fontStyle || "normal"};
   user-select: none;
 `;
 
-const ImageWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-`;
+const getResponsiveFontSize = (fontSizeValue) => {
+  let sizes;
+
+  switch (fontSizeValue) {
+    case "xs":
+      sizes = { small: "8px", medium: "10px", large: "12px" };
+      break;
+    case "s":
+      sizes = { small: "12px", medium: "14px", large: "18px" };
+      break;
+    case "m":
+      sizes = { small: "16px", medium: "18px", large: "24px" };
+      break;
+    case "l":
+      sizes = { small: "20px", medium: "22px", large: "30px" };
+      break;
+    case "xl":
+      sizes = { small: "24px", medium: "26px", large: "36px" };
+      break;
+    case "2xl":
+      sizes = { small: "28px", medium: "30px", large: "42px" };
+      break;
+    default:
+      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+  }
+
+  return css`
+    font-size: ${sizes.small};
+
+    @media (min-width: 640px) {
+      font-size: ${sizes.medium};
+    }
+
+    @media (min-width: 1024px) {
+      font-size: ${sizes.large};
+    }
+  `;
+};
 
 const Image = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: ${(props) => props.$imageStyle?.objectFit || "cover"};
   display: block;
 `;
 
@@ -322,19 +339,21 @@ const CardGridWrapper = styled.div`
   gap: 16px;
   margin-top: 16px;
   width: 100%;
+  @media only screen and (max-width: 639px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
 `;
 
 const CardWrapper = styled.div`
   position: relative;
   width: 100%;
-  padding-top: calc(2 / 3 * 100%);
+  aspect-ratio: 3 / 2;
   background-color: ${(props) => props.$style.backgroundColor};
   opacity: ${(props) =>
-    props.$isMatched ? "0" : props.$isSelected ? "1" : "0.8"};
+    props.$isMatched ? "0" : props.$isSelected ? "1" : "0.7"};
   pointer-events: ${(props) =>
     props.$isMatched ? "none" : "auto"}; /* 配對後禁用互動 */
-
-  border-radius: ${(props) => props.$style.borderRadius};
   border-style: ${(props) => props.$style.borderStyle};
   border-width: ${(props) => props.$style.borderWidth};
   border-color: ${(props) => props.$style.borderColor};
