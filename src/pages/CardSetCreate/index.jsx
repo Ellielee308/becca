@@ -32,6 +32,9 @@ function CardSetCreate() {
   const [selectedTemplate, setSelectedTemplate] = useState({});
   const [showNewTemplateModal, setShowNewTemplateModal] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]);
+  const [cardContent, setCardContent] = useState([]);
+  const [suggestedTranslations, setSuggestedTranslations] = useState([]);
+  const navigate = useNavigate();
   const [cardSetData, setCardSetData] = useState({
     cardSetId: "",
     userId: "",
@@ -46,9 +49,6 @@ function CardSetCreate() {
     cardOrder: [],
     labelNames: [],
   });
-  const [cardContent, setCardContent] = useState([]);
-  const [suggestedTranslations, setSuggestedTranslations] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (
@@ -218,6 +218,7 @@ function CardSetCreate() {
     ]);
     setSelectedStyleOption({ value: styleId, label: newStyle.styleName });
     setSelectedStyle(newStyle);
+    setCardSetData({ ...cardSetData, styleId: styleId });
   };
 
   const handleCreateLabel = async (newLabel) => {
@@ -265,6 +266,12 @@ function CardSetCreate() {
       ...prevOptions,
       { value: fieldTemplateId, label: newTemplate.templateName },
     ]);
+    setSelectedTemplateOption({
+      value: fieldTemplateId,
+      label: newTemplate.templateName,
+    });
+    setSelectedTemplate(newTemplate);
+    setCardSetData({ ...cardSetData, fieldTemplateId: fieldTemplateId });
   };
 
   const handleSubmit = async (event) => {
@@ -515,7 +522,7 @@ function CardSetCreate() {
           onChange={handleTemplateChange}
           styles={selectStyles(invalidFields.includes("fieldTemplateId"))}
         />
-        {selectedTemplate.templateName && (
+        {selectedTemplate && selectedTemplate.templateName && (
           <TemplatePreview currentTemplate={selectedTemplate} />
         )}
         <InputLabel>預覽</InputLabel>
@@ -552,21 +559,6 @@ function CardSetCreate() {
           currentStyle={selectedStyle}
           onClose={() => {
             setShowNewTemplateModal(false);
-            const defaultTemplate = templateOptions.find(
-              (option) => option.value === "XWQvUaViTDuaBkbOu4Xp"
-            );
-
-            // 設置預設模板為選中的模板
-            if (defaultTemplate) {
-              setSelectedTemplateOption(defaultTemplate);
-              setSelectedTemplate(
-                allTemplates.find(
-                  (template) =>
-                    template.fieldTemplateId === "XWQvUaViTDuaBkbOu4Xp"
-                )
-              );
-            }
-            setCardSetData({ ...cardSetData, fieldTemplateId: "" });
           }}
           onTemplateAdded={handleTemplateAdded}
         />

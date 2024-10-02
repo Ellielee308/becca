@@ -28,7 +28,20 @@ function UserCardSets() {
       if (currentUserId) {
         // 獲取卡牌組和樣式資料
         const cardSets = await getUserAllCardSets(currentUserId);
-        setUserCardSets(cardSets);
+        const sortedCardSets = cardSets.sort((a, b) => {
+          if (a.createdAt && b.createdAt) {
+            const aTime = a.createdAt.toMillis
+              ? a.createdAt.toMillis()
+              : new Date(a.createdAt).getTime();
+            const bTime = b.createdAt.toMillis
+              ? b.createdAt.toMillis()
+              : new Date(b.createdAt).getTime();
+            return aTime - bTime;
+          }
+          return 0;
+        });
+
+        setUserCardSets(sortedCardSets);
 
         const cardStyles = await getUserCardStyles(currentUserId);
         setUserCardStyles(cardStyles);

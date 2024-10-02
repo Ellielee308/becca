@@ -69,7 +69,7 @@ const defaultBackgroundColors = [
 ];
 
 const NewStyleModal = ({ onClose, onStyleAdded }) => {
-  const { user, setUser } = useUser();
+  const { user } = useUser();
   const [style, setStyle] = useState({
     styleId: "",
     styleName: "",
@@ -125,7 +125,7 @@ const NewStyleModal = ({ onClose, onStyleAdded }) => {
   const handleRadiusChange = () => {
     setStyle({
       ...style,
-      borderRadius: style.borderRadius === "25px" ? "" : "25px", // 切換選取狀態
+      borderRadius: style.borderRadius === "25px" ? "" : "25px",
     });
   };
 

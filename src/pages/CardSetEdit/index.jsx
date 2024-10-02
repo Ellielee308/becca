@@ -56,6 +56,11 @@ function CardSetEdit() {
           const userCardStyles = await getUserCardStyles(user.userId);
           const userLabels = await getUserLabels(user.userId);
           const cardSetTemplate = await getTemplate(cardSet.fieldTemplateId);
+          const orderedCards = cardSet.cardOrder
+            .map((cardId) =>
+              cardsOfCardSet.find((card) => card.cardId === cardId)
+            )
+            .filter(Boolean);
 
           setCardSetData((prev) => ({
             ...prev,
@@ -107,7 +112,7 @@ function CardSetEdit() {
           );
           setSelectedStyle(selectedStyle || {});
           setTemplate(cardSetTemplate);
-          setCardContent(cardsOfCardSet);
+          setCardContent(orderedCards);
           console.log("卡牌組資料獲取成功！");
         } catch (error) {
           console.error("獲取卡牌資料失敗：", error);
