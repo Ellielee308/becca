@@ -105,7 +105,6 @@ function Header() {
         </MobileSearchTrigger>
         {!loading && user ? (
           <>
-            <WelcomeMessage>{`Welcome back, ${user.username}!`}</WelcomeMessage>
             <LinkToCardSetNew to="/cardset/new">
               <IconContainer>
                 <PlusIcon />
@@ -117,16 +116,37 @@ function Header() {
                   <ProfilePicture src={user.profilePicture} />
                 )}
                 <SubMenu>
-                  <StyledLink to="/user/me/profile">
-                    <SubMenuItem>用戶總覽</SubMenuItem>
-                  </StyledLink>
-                  <StyledLink to="/user/me/cardsets">
-                    <SubMenuItem>卡牌組</SubMenuItem>
-                  </StyledLink>
-                  <MobileLinkToCardSetNew to="/cardset/new">
-                    <SubMenuItem>新增卡牌組</SubMenuItem>
-                  </MobileLinkToCardSetNew>
-                  <SubMenuItem onClick={handleLogOut}>登出</SubMenuItem>
+                  <Profile>
+                    <SubMenuProfilePicture src={user.profilePicture} />
+                    <SubMenuProfileTextWrapper>
+                      <SubMenuUsername>{user.username}</SubMenuUsername>
+                      <SubMenuEmail>{user.email}</SubMenuEmail>
+                    </SubMenuProfileTextWrapper>
+                  </Profile>
+                  <NavWrapper>
+                    <StyledLink to="/user/me/profile">
+                      <SubMenuItem>
+                        <SubMenuHomeIcon />
+                        <p>用戶總覽</p>
+                      </SubMenuItem>
+                    </StyledLink>
+                    <StyledLink to="/user/me/cardsets">
+                      <SubMenuItem>
+                        <SubMenuFolderOpenIcon />
+                        <p>卡牌組</p>
+                      </SubMenuItem>
+                    </StyledLink>
+                    <MobileLinkToCardSetNew to="/cardset/new">
+                      <SubMenuItem>
+                        <SubMenuPlusIcon />
+                        <p>新增卡牌組</p>
+                      </SubMenuItem>
+                    </MobileLinkToCardSetNew>
+                  </NavWrapper>
+                  <SubMenuItem onClick={handleLogOut}>
+                    <SubMenuLogOutIcon />
+                    <p>登出</p>
+                  </SubMenuItem>
                 </SubMenu>
               </ProfilePictureWrapper>
             </NavItemWrapper>
@@ -319,13 +339,13 @@ const ProfilePictureWrapper = styled.div`
 
 const SubMenu = styled.div`
   position: absolute;
-  top: 120%; /* 放在頭像正下方 */
+  top: 132%; /* 放在頭像正下方 */
   right: 0;
   background-color: white;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 10px;
-  min-width: 150px;
+  min-width: 220px;
   opacity: 0;
   visibility: hidden;
   transform: translateY(10px); /* 初始狀態下稍微下移 */
@@ -333,13 +353,57 @@ const SubMenu = styled.div`
   z-index: 100;
 `;
 
+const Profile = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px 10px 10px 10px;
+  height: 100px;
+  border-bottom: 1px solid #e1e5f2;
+  cursor: default;
+`;
+
+const SubMenuProfilePicture = styled.img`
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+const SubMenuProfileTextWrapper = styled.div`
+  height: 100%;
+  width: 50%;
+  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+
+const SubMenuUsername = styled.p`
+  color: #22254c;
+  margin-bottom: 10px;
+`;
+const SubMenuEmail = styled.p`
+  font-size: 14px;
+  color: #626481;
+`;
+
 const SubMenuItem = styled.div`
+  color: #3e3e3f;
+  display: flex;
+  align-items: center;
   padding: 10px;
   cursor: pointer;
+  gap: 16px;
 
   &:hover {
     background-color: #f0f0f0;
   }
+`;
+
+const NavWrapper = styled.div`
+  padding: 4px 0;
+  border-bottom: 1px solid #e1e5f2;
+  margin-bottom: 4px;
 `;
 
 const StyledLink = styled(Link)`
@@ -708,7 +772,7 @@ const CloseSidebarButton = styled.button`
 const NavLinkWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin-top: 120px;
+  margin-top: 30px;
 `;
 
 const StyledNavLink = styled(NavLink)`
@@ -858,3 +922,75 @@ const LogOutButton = styled.div`
     background-color: #c5e0ee;
   }
 `;
+
+const SubMenuHomeIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="18"
+    height="18"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+    />
+  </svg>
+);
+
+const SubMenuFolderOpenIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="18"
+    height="18"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"
+    />
+  </svg>
+);
+
+const SubMenuPlusIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="18"
+    height="18"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 4.5v15m7.5-7.5h-15"
+    />
+  </svg>
+);
+
+const SubMenuLogOutIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="18"
+    height="18"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
+    />
+  </svg>
+);
