@@ -27,6 +27,7 @@ function CardSetDetail() {
   const [showCreateQuizModal, setShowCreateQuizModal] = useState(null);
   const [showCreateGameModal, setShowCreateGameModal] = useState(null);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [isCardListDisplayed, setIsCardListDisplayed] = useState(false);
   const { user } = useUser();
   useEffect(() => {
     const fetchCardSetData = async () => {
@@ -146,266 +147,281 @@ function CardSetDetail() {
     }
   };
 
+  const toggleCardListDisplay = () => {
+    setIsCardListDisplayed((prev) => !prev);
+  };
+
   if (!cardSetData || !cards || !ownerData) {
     return <div>Loading...</div>;
   }
   return (
-    <Wrapper>
-      {showCreateQuizModal && (
-        <CreateQuizModal
-          onClose={() => setShowCreateQuizModal(null)}
-          quizType={showCreateQuizModal}
-          cardSetId={cardSetId}
-          totalCardsNumber={cards.length}
-          cards={cards}
-        />
-      )}
-      {showCreateGameModal && (
-        <CreateGameModal
-          onClose={() => setShowCreateGameModal(null)}
-          quizType={showCreateGameModal}
-          cardSetId={cardSetId}
-          totalCardsNumber={cards.length}
-          cards={cards}
-        />
-      )}
-      <TitleBar>
-        <Title>{cardSetData.title}</Title>
-        <StarContainer onClick={handleToggleFavorite}>
-          {isFavorited ? <FilledStarIcon /> : <StarIcon />}
-        </StarContainer>
-      </TitleBar>
-      <CardContainer>
-        <ArrowIconContainer
-          disabled={currentCardIndex === 0}
-          onClick={handlePreviousCard}
-        >
-          <LeftArrowIcon />
-        </ArrowIconContainer>
-        {cardSetId && style && template && cards && (
-          <CardContent
-            currentStyle={style}
-            currentTemplate={template}
-            currentCard={cards[currentCardIndex]}
+    <Background>
+      <Wrapper>
+        {showCreateQuizModal && (
+          <CreateQuizModal
+            onClose={() => setShowCreateQuizModal(null)}
+            quizType={showCreateQuizModal}
+            cardSetId={cardSetId}
+            totalCardsNumber={cards.length}
+            cards={cards}
           />
         )}
-        <ArrowIconContainer
-          disabled={currentCardIndex === cards.length - 1}
-          onClick={handleNextCard}
-        >
-          <RightArrowIcon />
-        </ArrowIconContainer>
-      </CardContainer>
-      <CardSetDetailsWrapper>
-        <MobileActionBar>
-          <MobileArrowIconContainer
+        {showCreateGameModal && (
+          <CreateGameModal
+            onClose={() => setShowCreateGameModal(null)}
+            quizType={showCreateGameModal}
+            cardSetId={cardSetId}
+            totalCardsNumber={cards.length}
+            cards={cards}
+          />
+        )}
+        <TitleBar>
+          <Title>{cardSetData.title}</Title>
+          <StarContainer onClick={handleToggleFavorite}>
+            {isFavorited ? <FilledStarIcon /> : <StarIcon />}
+          </StarContainer>
+        </TitleBar>
+        <CardContainer>
+          <ArrowIconContainer
             disabled={currentCardIndex === 0}
             onClick={handlePreviousCard}
           >
             <LeftArrowIcon />
-          </MobileArrowIconContainer>
-          <CardNumberWrapper>{`${currentCardIndex + 1} / ${
-            cards.length
-          }`}</CardNumberWrapper>
-          <MobileArrowIconContainer
+          </ArrowIconContainer>
+          {cardSetId && style && template && cards && (
+            <CardContent
+              currentStyle={style}
+              currentTemplate={template}
+              currentCard={cards[currentCardIndex]}
+            />
+          )}
+          <ArrowIconContainer
             disabled={currentCardIndex === cards.length - 1}
             onClick={handleNextCard}
           >
             <RightArrowIcon />
-          </MobileArrowIconContainer>
-        </MobileActionBar>
-        <ProgressBar>
-          <Progress
-            width={`${((currentCardIndex + 1) / cards.length) * 100}%`}
-          />
-        </ProgressBar>
-        <ActionWrapper>
-          <LabelWrapper>
-            <LabelIconContainer>
-              <LabelIcon />
-            </LabelIconContainer>
-            <LabelNameContainer>
-              {cardSetData.labels.length > 0 ? (
-                cardSetData.labels.map((label, index) => (
-                  <LabelName key={index}>
-                    {label.name}
-                    {index < cardSetData.labels.length - 1 && ", "}
-                  </LabelName>
-                ))
-              ) : (
-                <LabelName>無標籤</LabelName>
+          </ArrowIconContainer>
+        </CardContainer>
+        <CardSetDetailsWrapper>
+          <MobileActionBar>
+            <MobileArrowIconContainer
+              disabled={currentCardIndex === 0}
+              onClick={handlePreviousCard}
+            >
+              <LeftArrowIcon />
+            </MobileArrowIconContainer>
+            <CardNumberWrapper>{`${currentCardIndex + 1} / ${
+              cards.length
+            }`}</CardNumberWrapper>
+            <MobileArrowIconContainer
+              disabled={currentCardIndex === cards.length - 1}
+              onClick={handleNextCard}
+            >
+              <RightArrowIcon />
+            </MobileArrowIconContainer>
+          </MobileActionBar>
+          <ProgressBar>
+            <Progress
+              width={`${((currentCardIndex + 1) / cards.length) * 100}%`}
+            />
+          </ProgressBar>
+          <ActionWrapper>
+            <LabelWrapper>
+              <LabelIconContainer>
+                <LabelIcon />
+              </LabelIconContainer>
+              <LabelNameContainer>
+                {cardSetData.labels.length > 0 ? (
+                  cardSetData.labels.map((label, index) => (
+                    <LabelName key={index}>
+                      {label.name}
+                      {index < cardSetData.labels.length - 1 && ", "}
+                    </LabelName>
+                  ))
+                ) : (
+                  <LabelName>無標籤</LabelName>
+                )}
+              </LabelNameContainer>
+            </LabelWrapper>
+          </ActionWrapper>
+          <InformationWrapper>
+            <ProfilePictureWrapper>
+              {cardSetData && ownerData && ownerData.profilePicture && (
+                <ProfilePicture src={ownerData.profilePicture} />
               )}
-            </LabelNameContainer>
-          </LabelWrapper>
-        </ActionWrapper>
-        <InformationWrapper>
-          <ProfilePictureWrapper>
-            {cardSetData && ownerData && ownerData.profilePicture && (
-              <ProfilePicture src={ownerData.profilePicture} />
-            )}
-          </ProfilePictureWrapper>
-          <DescriptionWrapper>
-            <AuthorName>{`作者： ${ownerData.username}`}</AuthorName>
-            <Description>{cardSetData.description}</Description>
-          </DescriptionWrapper>
-        </InformationWrapper>
-        <hr />
-        <SectionTitleWrapper>
-          <PuzzleIcon />
-          <SectionTitle>測驗</SectionTitle>
-        </SectionTitleWrapper>
-        <GameOptionsWrapper>
-          <GameOptionButton
-            onClick={() => {
-              if (!user) {
-                alert("會員才能創建測驗，請先登入！");
-                return;
-              }
-              if (cards.length < 4) {
-                alert("至少要有四張字卡才能進行配對測驗！");
-                return;
-              }
-              setShowCreateQuizModal("matching");
-            }}
-          >
-            配對題
-          </GameOptionButton>
-          <GameOptionButton
-            onClick={() => {
-              if (!user) {
-                alert("會員才能創建測驗，請先登入！");
-                return;
-              }
-              if (cards.length < 4) {
-                alert("至少要有四張字卡才能進行選擇題測驗！");
-                return;
-              }
-              setShowCreateQuizModal("multipleChoices");
-            }}
-          >
-            選擇題
-          </GameOptionButton>
-        </GameOptionsWrapper>
-        <SectionTitleWrapper>
-          <MultiplePlayersIcon />
-          <SectionTitle>多人遊戲</SectionTitle>
-        </SectionTitleWrapper>
-        <GameOptionsWrapper>
-          <GameOptionButton
-            $isGame
-            onClick={() => {
-              if (!user) {
-                alert("會員才能創建遊戲，請先登入！");
-                return;
-              }
-              if (cards.length < 4) {
-                alert("至少要有四張字卡才能進行配對遊戲！");
-                return;
-              }
-              setShowCreateGameModal("matching");
-            }}
-          >
-            配對題
-          </GameOptionButton>
-          <GameOptionButton
-            $isGame
-            onClick={() => {
-              if (!user) {
-                alert("會員才能創建遊戲，請先登入！");
-                return;
-              }
-              if (cards.length < 4) {
-                alert("至少要有四張字卡才能進行選擇題遊戲！");
-                return;
-              }
-              setShowCreateGameModal("multipleChoices");
-            }}
-          >
-            選擇題
-          </GameOptionButton>
-        </GameOptionsWrapper>
-        <hr />
-        <SectionTitleWrapper>
-          <ListIcon />
-          <SectionTitle>{`所有字卡  (${cards.length})`}</SectionTitle>
-        </SectionTitleWrapper>
-        <ListSection>
-          {cards.map((card, index) => (
-            <CardWrapper key={card.cardId}>
-              <SerialNumber>{index + 1}</SerialNumber>
-              <CardContentWrapper>
-                <Side>
-                  <SideHeading>正面</SideHeading>
-                  {template.frontFields.map((frontField, index) => {
-                    if (frontField.type === "text") {
-                      return (
-                        <TextWrapper key={index}>
-                          {card.frontFields[index].value}
-                        </TextWrapper>
-                      );
-                    } else if (frontField.type === "image") {
-                      if (
-                        card.frontFields[index]?.value &&
-                        card.frontFields[index].value.trim() !== ""
-                      ) {
-                        return (
-                          <ImagePreview
-                            key={index}
-                            src={card.frontFields[index].value}
-                            alt={frontField.name}
-                          />
-                        );
-                      }
-                    }
-                  })}
-                </Side>
-                <SideSplit />
-                <Side>
-                  <SideHeading>背面</SideHeading>
-                  {template.backFields.map((backField, index) => {
-                    if (backField.type === "text") {
-                      return (
-                        <TextWrapper key={index}>
-                          {card.backFields[index].value}
-                        </TextWrapper>
-                      );
-                    } else if (backField.type === "image") {
-                      if (
-                        card.backFields[index]?.value &&
-                        card.backFields[index].value.trim() !== ""
-                      ) {
-                        return (
-                          <ImagePreview
-                            key={index}
-                            src={card.backFields[index].value}
-                            alt={backField.name}
-                          />
-                        );
-                      }
-                    }
-                  })}
-                </Side>
-              </CardContentWrapper>
-            </CardWrapper>
-          ))}
-        </ListSection>
-      </CardSetDetailsWrapper>
-    </Wrapper>
+            </ProfilePictureWrapper>
+            <DescriptionWrapper>
+              <AuthorName>{`作者： ${ownerData.username}`}</AuthorName>
+              <Description>{cardSetData.description}</Description>
+            </DescriptionWrapper>
+          </InformationWrapper>
+          <hr />
+          <SectionTitleWrapper>
+            <PuzzleIcon />
+            <SectionTitle>測驗</SectionTitle>
+          </SectionTitleWrapper>
+          <GameOptionsWrapper>
+            <GameOptionButton
+              onClick={() => {
+                if (!user) {
+                  alert("會員才能創建測驗，請先登入！");
+                  return;
+                }
+                if (cards.length < 4) {
+                  alert("至少要有四張字卡才能進行配對測驗！");
+                  return;
+                }
+                setShowCreateQuizModal("matching");
+              }}
+            >
+              配對題
+            </GameOptionButton>
+            <GameOptionButton
+              onClick={() => {
+                if (!user) {
+                  alert("會員才能創建測驗，請先登入！");
+                  return;
+                }
+                if (cards.length < 4) {
+                  alert("至少要有四張字卡才能進行選擇題測驗！");
+                  return;
+                }
+                setShowCreateQuizModal("multipleChoices");
+              }}
+            >
+              選擇題
+            </GameOptionButton>
+          </GameOptionsWrapper>
+          <SectionTitleWrapper>
+            <MultiplePlayersIcon />
+            <SectionTitle>多人遊戲</SectionTitle>
+          </SectionTitleWrapper>
+          <GameOptionsWrapper>
+            <GameOptionButton
+              $isGame
+              onClick={() => {
+                if (!user) {
+                  alert("會員才能創建遊戲，請先登入！");
+                  return;
+                }
+                if (cards.length < 4) {
+                  alert("至少要有四張字卡才能進行配對遊戲！");
+                  return;
+                }
+                setShowCreateGameModal("matching");
+              }}
+            >
+              配對題
+            </GameOptionButton>
+            <GameOptionButton
+              $isGame
+              onClick={() => {
+                if (!user) {
+                  alert("會員才能創建遊戲，請先登入！");
+                  return;
+                }
+                if (cards.length < 4) {
+                  alert("至少要有四張字卡才能進行選擇題遊戲！");
+                  return;
+                }
+                setShowCreateGameModal("multipleChoices");
+              }}
+            >
+              選擇題
+            </GameOptionButton>
+          </GameOptionsWrapper>
+          <hr />
+          <SectionTitleWrapper>
+            <ListIcon />
+            <SectionTitle>{`所有字卡  (${cards.length})`}</SectionTitle>
+            <SpreadArrowContainer onClick={toggleCardListDisplay}>
+              {isCardListDisplayed ? <ArrowUp /> : <ArrowDown />}
+            </SpreadArrowContainer>
+          </SectionTitleWrapper>
+          {isCardListDisplayed && (
+            <ListSection>
+              {cards.map((card, index) => (
+                <CardWrapper key={card.cardId}>
+                  <SerialNumber>{index + 1}</SerialNumber>
+                  <CardContentWrapper>
+                    <Side>
+                      <SideHeading>正面</SideHeading>
+                      {template.frontFields.map((frontField, index) => {
+                        if (frontField.type === "text") {
+                          return (
+                            <TextWrapper key={index}>
+                              {card.frontFields[index].value}
+                            </TextWrapper>
+                          );
+                        } else if (frontField.type === "image") {
+                          if (
+                            card.frontFields[index]?.value &&
+                            card.frontFields[index].value.trim() !== ""
+                          ) {
+                            return (
+                              <ImagePreview
+                                key={index}
+                                src={card.frontFields[index].value}
+                                alt={frontField.name}
+                              />
+                            );
+                          }
+                        }
+                      })}
+                    </Side>
+                    <SideSplit />
+                    <Side>
+                      <SideHeading>背面</SideHeading>
+                      {template.backFields.map((backField, index) => {
+                        if (backField.type === "text") {
+                          return (
+                            <TextWrapper key={index}>
+                              {card.backFields[index].value}
+                            </TextWrapper>
+                          );
+                        } else if (backField.type === "image") {
+                          if (
+                            card.backFields[index]?.value &&
+                            card.backFields[index].value.trim() !== ""
+                          ) {
+                            return (
+                              <ImagePreview
+                                key={index}
+                                src={card.backFields[index].value}
+                                alt={backField.name}
+                              />
+                            );
+                          }
+                        }
+                      })}
+                    </Side>
+                  </CardContentWrapper>
+                </CardWrapper>
+              ))}
+            </ListSection>
+          )}
+        </CardSetDetailsWrapper>
+      </Wrapper>
+    </Background>
   );
 }
 
 export default CardSetDetail;
 
+const Background = styled.div`
+  background-color: #eff7ff;
+  width: 100%;
+  height: fit-content;
+  padding: 80px 14px;
+`;
+
 const Wrapper = styled.div`
   background-color: white;
-  margin: 80px auto;
+  margin: 0 auto;
   padding: 30px 20px;
   max-width: 1160px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  @media only screen and (max-width: 639px) {
-    margin: 80px 8px;
-  }
 `;
 
 const TitleBar = styled.div`
@@ -624,6 +640,16 @@ const ListSection = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 15px;
+`;
+
+const SpreadArrowContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  width: 24px;
+  margin-left: 8px;
+  cursor: pointer;
 `;
 
 const CardWrapper = styled.div`
@@ -1156,6 +1182,42 @@ const MultiplePlayersIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
+    />
+  </svg>
+);
+
+const ArrowDown = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m19.5 8.25-7.5 7.5-7.5-7.5"
+    />
+  </svg>
+);
+
+const ArrowUp = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m4.5 15.75 7.5-7.5 7.5 7.5"
     />
   </svg>
 );

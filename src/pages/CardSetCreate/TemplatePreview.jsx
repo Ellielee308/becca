@@ -72,25 +72,32 @@ const Wrapper = styled.div`
   margin: 20px 0px;
   padding: 35px 0px;
   border: 1px solid #c2c2c2;
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   min-height: 250px;
   border-radius: 8px;
 `;
 
-const Heading = styled.p`
+const Heading = styled.div`
   font-size: 24px;
-  margin-bottom: 45px;
-  margin-left: 30px;
+  margin: 0 30px 45px 30px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
 `;
 
 const RequiredNotice = styled.span`
   font-size: 12px;
+  margin-top: 8px;
 `;
 
 const SideWrapper = styled.div`
   margin-top: 20px;
   display: flex;
   flex-direction: row;
+  @media only screen and (max-width: 559px) {
+    flex-direction: column;
+  }
 `;
 
 const Side = styled.div`
@@ -103,7 +110,15 @@ const Side = styled.div`
 
 const SideSplit = styled.div`
   height: 80px;
-  border-left: 1px solid black;
+  border-left: 1px solid #c9c5c5;
+  align-self: center;
+  margin: 0px 30px;
+  @media only screen and (max-width: 559px) {
+    height: 0px;
+    width: 20%;
+    border-left: none;
+    margin: 20px 0px;
+  }
 `;
 
 const SideHeading = styled.p`
@@ -119,6 +134,8 @@ const TextInput = styled.input`
 const TextWrapper = styled.div`
   min-height: 30px; /* 最小高度 */
   border: 1px solid #c1c0c0;
+  border-radius: 4px;
+  padding: 0 4px;
   font-size: 14px;
   line-height: 30px;
   color: ${(props) => (props.$isRequired ? "red" : "rgb(84, 84, 84)")};

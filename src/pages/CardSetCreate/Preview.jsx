@@ -154,9 +154,10 @@ const getResponsiveFontSize = (fontSizeValue) => {
 const Wrapper = styled.div`
   align-self: center;
   display: block;
-  margin: 52px 0px;
-  width: 600px;
-  height: 400px;
+  margin: 32px 0px;
+  max-width: 600px;
+  width: 100%;
+  aspect-ratio: 3 / 2;
   perspective: 1000px;
   transform-style: preserve-3d;
   cursor: pointer;

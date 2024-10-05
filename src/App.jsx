@@ -8,9 +8,16 @@ const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
   }
-  body {
-    font-family: "Noto Sans TC", sans-serif;
+  @font-face {
+    font-family: 'TaiwanPearl-Regular';
+    src: url('/src/assets/TaiwanPearl-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
   }
+  body {
+    font-family:  "Noto Sans TC", sans-serif; 
+  }
+
   a {
     text-decoration: none; 
     color: inherit; 

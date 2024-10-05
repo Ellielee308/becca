@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { Link, NavLink } from "react-router-dom";
 import { useUser } from "../../context/UserContext.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { register, login } from "../../utils/api.js";
 import PropTypes from "prop-types";
 import { signOut } from "firebase/auth";
@@ -16,6 +16,21 @@ function Header() {
   const [showMobileSearchBar, setShowMobileSearchBar] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const navigate = useNavigate();
+  const [opacity, setOpacity] = useState(1);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY; // 滾動的垂直距離
+      const newOpacity = Math.max(1 - scrollY / 300, 0.8); // 設定透明度，最小值為0.5
+      setOpacity(newOpacity);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll); // 清除滾動事件監聽器
+    };
+  }, []);
 
   const handleLogOut = async () => {
     try {
@@ -48,7 +63,7 @@ function Header() {
   };
 
   return (
-    <Wrapper>
+    <Wrapper style={{ background: `rgba(255, 255, 255, ${opacity})` }}>
       <MenuLogoWrapper>
         {!loading && user && (
           <MobileMenuContainer onClick={toggleSidebar}>
@@ -174,9 +189,11 @@ const Wrapper = styled.div`
   padding: 10px 10px 10px 14px;
   height: 60px;
   width: 100%;
-  background-color: #eff7ff;
+  background: rgba(255, 255, 255, 1);
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+  border-bottom: 1px solid #e6e3e1;
+  transition: background 0.2s ease-in-out; /* 讓透明度變化更加平滑 */
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   @media only screen and (min-width: 640px) {
     padding: 10px 10px 10px 20px;
   }
@@ -229,7 +246,6 @@ const MobileMenu = () => (
   </svg>
 );
 const WelcomeMessage = styled.p`
-  font-family: "Poppins", sans-serif;
   font-size: 16px;
   margin-right: 8px;
   user-select: none;
@@ -279,12 +295,6 @@ const LoginTrigger = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 1s ease;
-
-  &:hover {
-    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-  }
-
   &:active {
     transform: translateY(1px);
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
@@ -359,7 +369,7 @@ const SearchSection = styled.div`
   flex-direction: row;
   height: 40px;
   align-items: center;
-  background-color: #d9dce2;
+  background-color: #eff0f1;
   border-radius: 12px;
   padding: 0 20px 0 20px;
   @media only screen and (max-width: 639px) {
@@ -374,6 +384,7 @@ const SearchInput = styled.input`
   font-size: 16px;
   line-height: 40px;
   background-color: transparent;
+  font-family: "TaiwanPearl-Regular";
   &:focus {
     outline: none;
   }
@@ -420,7 +431,7 @@ const MobileSearchSection = styled.div`
   width: 96%;
   z-index: 101;
   align-items: center;
-  background-color: #d9dce2;
+  background-color: #eff0f1;
   border-radius: 12px;
   padding: 0 10px 0 20px;
   @media only screen and (min-width: 640px) {

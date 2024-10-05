@@ -1,21 +1,49 @@
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
+import { useUser } from "../../context/UserContext.jsx";
+import { auth } from "../../utils/firebaseConfig.js";
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
 
 function Sidebar() {
+  const { setUser } = useUser();
+  const navigate = useNavigate();
+
+  const handleLogOut = async () => {
+    try {
+      await signOut(auth);
+      console.log("用戶登出");
+      setUser(null); // 清除用戶狀態，更新 UI
+      navigate("/"); // 重定向到首頁
+    } catch (error) {
+      console.error("登出失敗:", error.message);
+    }
+  };
+
   return (
     <Wrapper>
-      <StyledNavLink to="/user/me/profile">
-        <HomeIcon />
-        <NavItemName>總覽</NavItemName>
-      </StyledNavLink>
-      <StyledNavLink to="/user/me/cardsets">
-        <FolderOpenIcon />
-        <NavItemName>卡牌組</NavItemName>
-      </StyledNavLink>
-      <StyledNavLink to="/user/me/collection">
-        <StarIcon />
-        <NavItemName>收藏</NavItemName>
-      </StyledNavLink>
+      <NavLinkWrapper>
+        <StyledNavLink to="/user/me/profile">
+          <HomeIcon />
+          <NavItemName>總覽</NavItemName>
+        </StyledNavLink>
+        <StyledNavLink to="/user/me/cardsets">
+          <FolderOpenIcon />
+          <NavItemName>卡牌組</NavItemName>
+        </StyledNavLink>
+        <StyledNavLink to="/user/me/collection">
+          <StarIcon />
+          <NavItemName>收藏</NavItemName>
+        </StyledNavLink>
+      </NavLinkWrapper>
+      <LogOutButton
+        onClick={() => {
+          handleLogOut();
+        }}
+      >
+        <LogOutIcon />
+        <NavItemName>登出</NavItemName>
+      </LogOutButton>
     </Wrapper>
   );
 }
@@ -26,14 +54,14 @@ const Wrapper = styled.div`
   position: fixed;
   top: 60px;
   left: 0;
-  padding: 80px 0 20px 0;
   display: flex;
   flex-direction: column;
+  padding: 80px 0 80px 0;
   background-color: #f0f4fa;
   min-height: calc(100vh - 60px);
   width: 180px;
   align-items: center;
-  gap: 4px;
+
   z-index: 5;
 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
@@ -50,6 +78,14 @@ const Wrapper = styled.div`
   @media only screen and (max-width: 639px) {
     display: none;
   }
+`;
+
+const NavLinkWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  gap: 4px;
 `;
 const StyledNavLink = styled(NavLink)`
   display: flex;
@@ -83,6 +119,35 @@ const NavItemName = styled.div`
   align-items: center;
   justify-content: start;
   margin-left: 12px;
+`;
+
+const LogOutButton = styled.div`
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 12px 0 12px;
+  height: 40px;
+  width: 80%;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: #636363;
+  cursor: pointer;
+
+  &.active {
+    background-color: #c5e0ee;
+    border-radius: 6px;
+    color: rgb(52, 58, 109);
+  }
+
+  &:hover {
+    background-color: #cbdde689;
+  }
+
+  &.active:hover {
+    background-color: #c5e0ee;
+  }
 `;
 
 const FolderOpenIcon = () => (
@@ -135,6 +200,24 @@ const StarIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+    />
+  </svg>
+);
+
+const LogOutIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="20"
+    height="20"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
     />
   </svg>
 );

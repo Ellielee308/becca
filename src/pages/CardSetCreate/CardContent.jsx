@@ -264,8 +264,8 @@ CardContent.propTypes = {
         type: PropTypes.oneOf(["text", "image"]).isRequired,
         required: PropTypes.bool.isRequired,
         position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
         }).isRequired,
         style: PropTypes.shape({
           width: PropTypes.string.isRequired,
@@ -283,8 +283,8 @@ CardContent.propTypes = {
         type: PropTypes.oneOf(["text", "image"]).isRequired,
         required: PropTypes.bool.isRequired,
         position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
         }).isRequired,
         style: PropTypes.shape({
           width: PropTypes.string.isRequired,
@@ -310,7 +310,8 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   margin: 20px 0px;
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   gap: 20px;
 `;
 
@@ -318,7 +319,8 @@ const CardWrapper = styled.div`
   margin: 20px 0px;
   padding: 35px 0px;
   border: 1px solid #c2c2c2;
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   min-height: 180px;
   border-radius: 8px;
 `;
@@ -344,6 +346,9 @@ const SideWrapper = styled.div`
   margin-top: 20px;
   display: flex;
   flex-direction: row;
+  @media only screen and (max-width: 559px) {
+    flex-direction: column;
+  }
 `;
 
 const Side = styled.div`
@@ -357,6 +362,12 @@ const Side = styled.div`
 const SideSplit = styled.div`
   height: 80px;
   border-left: 1px solid #c2c2c2;
+  @media only screen and (max-width: 559px) {
+    height: 0px;
+    width: 20%;
+    border-left: none;
+    margin: 20px 0px;
+  }
 `;
 
 const SideHeading = styled.p`
@@ -367,12 +378,14 @@ const SideHeading = styled.p`
 const TextInput = styled.input`
   height: 30px;
   border: solid 1px #c1c0c0;
+  border-radius: 4px;
   width: 100%;
 `;
 
 const NewCardWrapper = styled.div`
   border: 1px solid #c2c2c2;
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   height: 180px;
   display: flex;
   align-items: center;
