@@ -11,6 +11,7 @@ import searchSVG from "./images/search.svg";
 import customizeSVG from "./images/customize.svg";
 
 function Home() {
+  const { user, loading } = useUser();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("english");
   const [allCardSets, setAllCardSets] = useState({});
@@ -105,7 +106,7 @@ function Home() {
     }
   }, [selectedLanguage, allCardSets, allStyles]);
 
-  if (!cardSetData || !styleData) {
+  if (!cardSetData || !styleData || loading) {
     return <div>Loading...</div>;
   }
   return (
@@ -119,9 +120,13 @@ function Home() {
           Backed by Cards, <br /> Boosted by BECCA.
         </BannerText>
         <ButtonGroup>
-          <SignUpButton onClick={() => setShowLoginModal(true)}>
-            免費註冊
-          </SignUpButton>
+          {user ? (
+            <WelcomeText>{`歡迎回來，${user.username}！`}</WelcomeText>
+          ) : (
+            <SignUpButton onClick={() => setShowLoginModal(true)}>
+              免費註冊
+            </SignUpButton>
+          )}
           <CallToActionButton>
             <Link to="/cardset/new">+ 創建自己的記憶卡牌組</Link>
           </CallToActionButton>
@@ -255,7 +260,10 @@ const IntroductionSection = styled.div`
   justify-content: center;
   padding: 0 60px 30px 60px;
   background-color: #eff7ff;
-  height: 340px;
+  height: calc(100vh - 60px);
+  @media only screen and (min-width: 1440px) {
+    height: 60vh;
+  }
 `;
 
 const BannerTextChinese = styled.div`
@@ -280,7 +288,6 @@ const SignUpButton = styled.div`
   justify-content: center;
   align-items: center;
   height: 40px;
-  margin-top: 12px;
   width: fit-content;
   padding: 10px 14px;
   border-radius: 8px;
@@ -295,7 +302,6 @@ const CallToActionButton = styled.div`
   justify-content: center;
   align-items: center;
   height: 40px;
-  margin-top: 12px;
   width: fit-content;
   padding: 10px 14px;
   border-radius: 8px;
@@ -306,6 +312,14 @@ const CallToActionButton = styled.div`
 
 const ButtonGroup = styled.div`
   display: flex;
+  align-items: center;
+  margin-top: 12px;
+`;
+
+const WelcomeText = styled.div`
+  user-select: none;
+  margin-right: 12px;
+  color: #22254c;
 `;
 
 const SectionTitle = styled.div`
