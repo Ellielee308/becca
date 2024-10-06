@@ -228,7 +228,7 @@ const Wrapper = styled.div`
   min-height: 100vh;
   background-color: #fff;
   @media only screen and (max-width: 639px) {
-    padding: 0;
+    padding: 20px;
   }
   @media only screen and (min-width: 640px) and (max-width: 1023px) {
     margin-left: 60px;

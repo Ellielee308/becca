@@ -412,16 +412,30 @@ const Background = styled.div`
   background-color: #eff7ff;
   width: 100%;
   height: fit-content;
-  padding: 80px 14px;
+  padding: 60px 14px;
+  @media only screen and (min-width: 640px) {
+    display: flex;
+  }
+`;
+
+const SideMenu = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const Wrapper = styled.div`
-  background-color: white;
+  /* background-color: white; */
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 20px 20px;
   max-width: 1160px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
   border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  @media only screen and (min-width: 640px) {
+    width: 1160px;
+    padding: 0px 20px;
+  }
 `;
 
 const TitleBar = styled.div`
@@ -656,6 +670,7 @@ const CardWrapper = styled.div`
   padding: 20px 30px;
   width: 100%;
   min-height: 180px;
+  background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   display: flex;
@@ -670,6 +685,7 @@ const SerialNumber = styled.p`
 const CardContentWrapper = styled.div`
   display: flex;
   flex-direction: row;
+
   @media only screen and (max-width: 639px) {
     flex-direction: column;
   }
@@ -829,7 +845,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
 const CardViewWrapper = styled.div`
   align-self: center;
   display: block;
-  margin: 52px 0px;
+  margin: 32px 0px;
   width: 100%;
   aspect-ratio: 3 / 2;
   max-width: 600px;

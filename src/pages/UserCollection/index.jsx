@@ -84,7 +84,7 @@ function UserCollection() {
           })}
       </CardGridWrapper>
       {userCollection && userCollection.length === 0 && (
-        <div>目前沒有收藏的卡牌組，可以透過搜尋找到更多卡牌組哦！</div>
+        <div>目前沒有收藏的卡牌組，可以透過上方的搜尋框找到更多卡牌組哦！</div>
       )}
     </Wrapper>
   );

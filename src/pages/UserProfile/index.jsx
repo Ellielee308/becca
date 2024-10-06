@@ -158,7 +158,7 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   @media only screen and (max-width: 639px) {
-    padding: 0;
+    padding: 0 0 20px 0;
     width: 100%;
   }
 `;
