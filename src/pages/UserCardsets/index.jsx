@@ -224,9 +224,9 @@ function UserCardSets() {
 export default UserCardSets;
 
 const Wrapper = styled.div`
-  margin-top: 80px;
-  padding: 0 80px;
+  padding: 80px 80px;
   min-height: 100vh;
+  background-color: #fff;
   @media only screen and (max-width: 639px) {
     padding: 0;
   }
@@ -262,6 +262,7 @@ const CardContainer = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   transition: box-shadow 0.3s ease;
+  background-color: #fff;
 
   &:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);

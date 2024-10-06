@@ -22,7 +22,6 @@ const Container = styled.div`
 
 const Content = styled.div`
   margin-left: 10vw;
-  padding: 20px;
   width: 90vw;
   @media only screen and (max-width: 639px) {
     margin-left: 0;

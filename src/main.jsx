@@ -5,7 +5,6 @@ import App from "./App.jsx";
 import Layout from "./components/Layout.jsx";
 import Home from "./pages/Home";
 import UserProfile from "./pages/UserProfile";
-import UserAnalytics from "./pages/UserAnalytics";
 import UserCardSets from "./pages/UserCardSets";
 import CardSetDetail from "./pages/CardSetDetail";
 import CardSetCreate from "./pages/CardSetCreate";
@@ -33,7 +32,6 @@ createRoot(document.getElementById("root")).render(
               }
             >
               <Route path="profile" element={<UserProfile />} />
-              <Route path="analytics" element={<UserAnalytics />} />
               <Route path="cardsets" element={<UserCardSets />} />
               <Route path="collection" element={<UserCollection />} />
             </Route>

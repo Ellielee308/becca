@@ -20,14 +20,7 @@ function SearchResult() {
         const searchResults = await search(keyword);
         if (searchResults.length > 0) {
           console.log("搜尋結果：", searchResults);
-          if (user && user.userId) {
-            const filteredSearchResults = searchResults.filter(
-              (result) => result.userId !== user.userId
-            );
-            setSearchResults(filteredSearchResults);
-          } else {
-            setSearchResults(searchResults);
-          }
+          setSearchResults(searchResults);
         } else {
           console.log("查無搜尋結果");
         }

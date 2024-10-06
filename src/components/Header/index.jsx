@@ -265,14 +265,6 @@ const MobileMenu = () => (
     />
   </svg>
 );
-const WelcomeMessage = styled.p`
-  font-size: 16px;
-  margin-right: 8px;
-  user-select: none;
-  @media only screen and (max-width: 1023px) {
-    display: none;
-  }
-`;
 
 const IconContainer = styled.div`
   height: 36px;
@@ -356,7 +348,7 @@ const SubMenu = styled.div`
 const Profile = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px 10px 10px 10px;
+  padding: 0px 10px 10px 10px;
   height: 100px;
   border-bottom: 1px solid #e1e5f2;
   cursor: default;
