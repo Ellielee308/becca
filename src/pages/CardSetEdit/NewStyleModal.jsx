@@ -4,7 +4,7 @@ import Select from "react-select";
 import { useEffect, useState } from "react";
 import { TwitterPicker } from "react-color";
 import { useUser } from "../../context/UserContext.jsx";
-
+import { message } from "antd";
 import borderRadiusIcon from "./images/borderRadius.png";
 import borderThicknessIcon from "./images/lineThickness.png";
 import borderColorIcon from "./images/borderColorIcon.png";
@@ -68,7 +68,7 @@ const defaultBackgroundColors = [
   "#E8F5E9", // LightGreen
 ];
 
-const NewStyleModal = ({ onClose, onStyleAdded }) => {
+const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
   const { user } = useUser();
   const [style, setStyle] = useState({
     styleId: "",
@@ -84,6 +84,7 @@ const NewStyleModal = ({ onClose, onStyleAdded }) => {
   });
 
   const [invalidStyleName, setInvalidStyleName] = useState(false);
+  const [existedStyleName, setExistedStyleName] = useState(false);
 
   const [colorPickerVisible, setColorPickerVisible] = useState({
     borderColor: false,
@@ -94,6 +95,8 @@ const NewStyleModal = ({ onClose, onStyleAdded }) => {
     useState(false);
 
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
+
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -169,146 +172,197 @@ const NewStyleModal = ({ onClose, onStyleAdded }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setInvalidStyleName(false);
+    setExistedStyleName(false);
+
     if (style.styleName === "") {
+      message.error("請填入樣式名稱");
       setInvalidStyleName(true);
+      return;
+    } else if (styleNames.includes(style.styleName)) {
+      setExistedStyleName(true);
+      message.error("樣式名稱已存在，請使用其他名稱！");
+      setInvalidStyleName(false);
       return;
     } else {
       setInvalidStyleName(false);
       try {
+        // 顯示 loading 訊息
+        messageApi.open({
+          type: "loading",
+          content: "儲存中，請稍候...",
+          duration: 0,
+        });
+
         const newStyleId = await saveCardStyle({
           ...style,
           userId: user.userId,
         });
-        alert("儲存樣式成功！");
-        onStyleAdded(style, newStyleId);
-        onClose();
+
+        // 隱藏 loading 狀態
+        messageApi.destroy();
+
+        // 儲存成功，顯示 success 訊息
+        messageApi.open({
+          type: "success",
+          content: "儲存成功！",
+          duration: 2, // 延遲 2 秒自動隱藏
+        });
+
+        // 延遲關閉表單
+        setTimeout(() => {
+          onStyleAdded(style, newStyleId);
+          onClose();
+        }, 2000);
       } catch (error) {
         console.error("儲存樣式失敗：", error);
-        alert("儲存樣式失敗，請再試一次。");
+
+        // 隱藏 loading 狀態
+        messageApi.destroy();
+
+        // 儲存失敗，顯示 error 訊息
+        messageApi.open({
+          type: "error",
+          content: "儲存失敗，請再試一次。",
+          duration: 3, // 顯示 3 秒的錯誤訊息
+        });
       }
     }
   };
 
   return (
-    <ModalWrapper onClick={closeAllPickers}>
-      <ModalContent onClick={closeAllPickers}>
-        <Heading>新增樣式</Heading>
-        <CloseIcon onClick={onClose}>×</CloseIcon>
-        <Form onSubmit={handleSubmit}>
-          <Label htmlFor="styleName">樣式名稱</Label>
-          <StyleNameInput
-            id="styleName"
-            onChange={(e) => setStyle({ ...style, styleName: e.target.value })}
-          />
-          {invalidStyleName && (
-            <InvalidFieldNotice>請填入樣式名稱</InvalidFieldNotice>
-          )}
-          <StyleOptionsWrapper>
-            <Select
-              options={borderStyleOptions}
-              onChange={handleBorderStyleChange}
-              styles={SelectBorderStyles}
-              //   value={borderStyleOptions.find(
-              //     (option) => option.value === style.borderStyle
-              //   )} // 設定選擇器的值
-              placeholder="邊框樣式"
+    <>
+      {contextHolder}
+      <ModalWrapper onClick={closeAllPickers}>
+        <ModalContent onClick={closeAllPickers}>
+          <Heading>
+            <EditIcon />
+            <p>新增樣式</p>
+          </Heading>
+          <CloseIcon onClick={onClose}>×</CloseIcon>
+          <Form onSubmit={handleSubmit}>
+            <Label htmlFor="styleName">樣式名稱</Label>
+            <StyleNameInput
+              id="styleName"
+              onChange={(e) =>
+                setStyle({ ...style, styleName: e.target.value })
+              }
             />
-            <ColorGroup>
-              <RadiusIconWrapper
-                isSelected={style.borderRadius !== ""}
-                onClick={handleRadiusChange}
-              >
-                <IconImage src={borderRadiusIcon} />
-              </RadiusIconWrapper>
-              <BorderStyleIconWrapper
-                onClick={handleOpenBorderWidthMenu}
-                isDisabled={style.borderStyle === "none"}
-              >
-                <IconImage src={borderThicknessIcon} />
-              </BorderStyleIconWrapper>
-              <BorderStyleIconWrapper
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleColorIconClick(e, "borderColor");
-                }}
-                isDisabled={style.borderStyle === "none"}
-              >
-                <IconImage src={borderColorIcon} />
-              </BorderStyleIconWrapper>
-              <IconWrapper
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleColorIconClick(e, "backgroundColor");
-                }}
-              >
-                <IconImage src={backgroundColorIcon} />
-              </IconWrapper>
-            </ColorGroup>
-            <Select
-              options={fontOptions}
-              onChange={handleFontChange}
-              styles={SelectFont}
-              value={fontOptions.find(
-                (option) => option.value === style.fontFamily
-              )}
-              placeholder="字體"
-            />
-            <Select
-              options={animationOptions}
-              onChange={handleAnimationChange}
-              styles={SelectFont}
-              value={animationOptions.find(
-                (option) => option.value === style.animation
-              )}
-              placeholder="動畫效果"
-            />
-          </StyleOptionsWrapper>
-          <Card currentStyle={style} />
-          {borderWidthPickerVisible && (
-            <PickerContainer
-              top={pickerPosition.top}
-              left={pickerPosition.left}
-              onClick={(e) => e.stopPropagation()}
-            >
+            {invalidStyleName && (
+              <InvalidFieldNotice>請填入樣式名稱</InvalidFieldNotice>
+            )}
+            {existedStyleName && (
+              <InvalidFieldNotice>
+                樣式名稱已存在，請使用其他名稱！
+              </InvalidFieldNotice>
+            )}
+            <StyleOptionsWrapper>
               <Select
-                options={borderWidthOptions}
-                onChange={handleBorderWidthChange}
-                value={borderWidthOptions.find(
-                  (option) => option.value === style.borderWidth
-                )} // 設定選擇器的值
+                options={borderStyleOptions}
+                onChange={handleBorderStyleChange}
+                styles={SelectBorderStyles}
+                //   value={borderStyleOptions.find(
+                //     (option) => option.value === style.borderStyle
+                //   )} // 設定選擇器的值
+                placeholder="邊框樣式"
               />
-            </PickerContainer>
-          )}
-          {/* TwitterPicker 懸浮容器 */}
-          {style.borderStyle !== "none" && colorPickerVisible.borderColor && (
-            <PickerContainer
-              top={pickerPosition.top}
-              left={pickerPosition.left}
-            >
-              <TwitterPicker
-                color={style.borderColor}
-                onChange={(color) => handleColorChange(color, "borderColor")}
+              <ColorGroup>
+                <RadiusIconWrapper
+                  isSelected={style.borderRadius !== ""}
+                  onClick={handleRadiusChange}
+                >
+                  <IconImage src={borderRadiusIcon} />
+                </RadiusIconWrapper>
+                <BorderStyleIconWrapper
+                  onClick={handleOpenBorderWidthMenu}
+                  isDisabled={style.borderStyle === "none"}
+                >
+                  <IconImage src={borderThicknessIcon} />
+                </BorderStyleIconWrapper>
+                <BorderStyleIconWrapper
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleColorIconClick(e, "borderColor");
+                  }}
+                  isDisabled={style.borderStyle === "none"}
+                >
+                  <IconImage src={borderColorIcon} />
+                </BorderStyleIconWrapper>
+                <IconWrapper
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleColorIconClick(e, "backgroundColor");
+                  }}
+                >
+                  <IconImage src={backgroundColorIcon} />
+                </IconWrapper>
+              </ColorGroup>
+              <Select
+                options={fontOptions}
+                onChange={handleFontChange}
+                styles={SelectFont}
+                value={fontOptions.find(
+                  (option) => option.value === style.fontFamily
+                )}
+                placeholder="字體"
               />
-            </PickerContainer>
-          )}
-          {colorPickerVisible.backgroundColor && (
-            <PickerContainer
-              top={pickerPosition.top}
-              left={pickerPosition.left}
-            >
-              <TwitterPicker
-                color={style.backgroundColor}
-                onChange={(color) =>
-                  handleColorChange(color, "backgroundColor")
-                }
-                colors={defaultBackgroundColors}
+              <Select
+                options={animationOptions}
+                onChange={handleAnimationChange}
+                styles={SelectAnimation}
+                value={animationOptions.find(
+                  (option) => option.value === style.animation
+                )}
+                placeholder="動畫效果"
               />
-            </PickerContainer>
-          )}
-          <SaveButton type="submit" value="儲存樣式" />
-        </Form>
-      </ModalContent>
-    </ModalWrapper>
+            </StyleOptionsWrapper>
+            <Card currentStyle={style} />
+            {borderWidthPickerVisible && (
+              <PickerContainer
+                top={pickerPosition.top}
+                left={pickerPosition.left}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Select
+                  options={borderWidthOptions}
+                  onChange={handleBorderWidthChange}
+                  value={borderWidthOptions.find(
+                    (option) => option.value === style.borderWidth
+                  )} // 設定選擇器的值
+                />
+              </PickerContainer>
+            )}
+            {/* TwitterPicker 懸浮容器 */}
+            {style.borderStyle !== "none" && colorPickerVisible.borderColor && (
+              <PickerContainer
+                top={pickerPosition.top}
+                left={pickerPosition.left}
+              >
+                <TwitterPicker
+                  color={style.borderColor}
+                  onChange={(color) => handleColorChange(color, "borderColor")}
+                />
+              </PickerContainer>
+            )}
+            {colorPickerVisible.backgroundColor && (
+              <PickerContainer
+                top={pickerPosition.top}
+                left={pickerPosition.left}
+              >
+                <TwitterPicker
+                  color={style.backgroundColor}
+                  onChange={(color) =>
+                    handleColorChange(color, "backgroundColor")
+                  }
+                  colors={defaultBackgroundColors}
+                />
+              </PickerContainer>
+            )}
+            <SaveButton type="submit" value="儲存樣式" />
+          </Form>
+        </ModalContent>
+      </ModalWrapper>
+    </>
   );
 };
 
@@ -345,6 +399,12 @@ const ModalContent = styled.div`
 const Heading = styled.h3`
   font-size: 20px;
   margin-bottom: 30px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #3d5a80;
 `;
 
 const CloseIcon = styled.p`
@@ -394,6 +454,11 @@ const StyleOptionsWrapper = styled.div`
   height: 50px;
   width: 100%;
   border: solid 1px #f3f3f3;
+  @media only screen and (max-width: 939px) {
+    flex-wrap: wrap;
+    gap: 4px;
+    height: fit-content;
+  }
 `;
 
 const ColorGroup = styled.div`
@@ -471,6 +536,18 @@ const SelectFont = {
     zIndex: 1000, // 選單的 z-index，以防止被其他元素遮蓋
   }),
 };
+
+const SelectAnimation = {
+  control: (baseStyles) => ({
+    ...baseStyles,
+    width: "180px",
+  }),
+  menu: (provided) => ({
+    ...provided,
+    zIndex: 1000, // 選單的 z-index，以防止被其他元素遮蓋
+  }),
+};
+
 const PickerContainer = styled.div`
   position: fixed; /* 懸浮在其他元素上 */
   top: ${({ top }) => top}px;
@@ -479,10 +556,37 @@ const PickerContainer = styled.div`
 `;
 
 const SaveButton = styled.input`
-  margin-top: 30px;
-  width: 100px;
-  height: 40px;
-  font-size: 16px;
+  margin-top: 8px;
+  padding: 0 14px;
   align-self: center;
-  font-size: "Noto Sans TC", sans-serif;
+  min-width: 128px;
+  height: 45px;
+  font-size: 16px;
+  line-height: 16px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: white;
+  /* background: linear-gradient(to right, #63b3ed, #4299e1); 漸層的天藍色 */
+  background-color: #3d5a80;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
 `;
+
+const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="24"
+    height="24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+    />
+  </svg>
+);

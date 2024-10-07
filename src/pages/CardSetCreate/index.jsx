@@ -16,7 +16,7 @@ import {
   uploadCardSetWithCards,
   getUserLabels,
 } from "../../utils/api.js";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ConfigProvider, Steps, message, Result } from "antd";
 
 const customTheme = {
@@ -44,7 +44,6 @@ function CardSetCreate() {
   const [invalidFields, setInvalidFields] = useState([]);
   const [cardContent, setCardContent] = useState([]);
   const [suggestedTranslations, setSuggestedTranslations] = useState([]);
-  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
   const [newCardSetId, setNewCardSetId] = useState("");
@@ -716,9 +715,9 @@ function CardSetCreate() {
                   <GoToCardSetLink to={`/cardset/${newCardSetId}`}>
                     前往卡牌組
                   </GoToCardSetLink>
-                  <ContinueAddingButton to={"/user/me/cardsets"}>
+                  <GoToMyCardSetsLink to={"/user/me/cardsets"}>
                     我的卡牌組頁面
-                  </ContinueAddingButton>
+                  </GoToMyCardSetsLink>
                 </ResultButtonGroup>
               </ResultWrapper>
             </>
@@ -1035,7 +1034,7 @@ const GoToCardSetLink = styled(Link)`
 `;
 
 // 灰色的「繼續新增牌組」按鈕
-const ContinueAddingButton = styled(Link)`
+const GoToMyCardSetsLink = styled(Link)`
   width: 140px;
   height: 36px;
   font-size: 16px;

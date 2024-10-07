@@ -79,7 +79,7 @@ const Wrapper = styled.div`
   background-color: #fafafa;
 `;
 
-const Heading = styled.p`
+const Heading = styled.div`
   font-size: 24px;
   margin: 0 30px 45px 30px;
   display: flex;
@@ -152,7 +152,7 @@ const ImagePreviewWrapper = styled.div`
 `;
 const ImageFieldName = styled.p`
   font-size: 14px;
-  color: ${(props) => (props.$isRequired ? "red" : "#636262")};
+  color: ${(props) => (props.$isRequired ? "#ff6f61" : "#636262")};
 `;
 
 const ImagePreview = styled.img`

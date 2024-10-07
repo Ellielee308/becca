@@ -18,8 +18,8 @@ import TemplatePreview from "../CardSetEdit/TemplatePreview.jsx";
 import CardContent from "../CardSetEdit/CardContent.jsx";
 import NewStyleModal from "../CardSetEdit/NewStyleModal.jsx";
 import { languageOptions } from "./options.js";
-import { useNavigate } from "react-router-dom";
-import { ConfigProvider, Steps } from "antd";
+import { Link } from "react-router-dom";
+import { ConfigProvider, Steps, message, Result } from "antd";
 
 const customTheme = {
   token: {
@@ -32,7 +32,7 @@ const customTheme = {
 
 function CardSetEdit() {
   const { cardSetId } = useParams();
-  const { user } = useUser();
+  const { user, loading } = useUser();
   const [labelOptions, setLabelOptions] = useState([]);
   const [allStyles, setAllStyles] = useState([]);
   const [styleOptions, setStyleOptions] = useState([]);
@@ -43,7 +43,7 @@ function CardSetEdit() {
   const [deletedCards, setDeletedCards] = useState([]); // 存儲要刪除的卡片 ID
   const [showNewStyleModal, setShowNewStyleModal] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]);
-  const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage();
   const [step, setStep] = useState(0);
   const [cardSetData, setCardSetData] = useState({
     cardSetId: "",
@@ -296,7 +296,7 @@ function CardSetEdit() {
 
     // 檢查卡片內容的有效性
     if (cardContent.length < 1) {
-      alert("字卡至少需要一張！");
+      messageApi.warning("字卡至少需要一張！");
       return;
     }
 
@@ -308,7 +308,7 @@ function CardSetEdit() {
             !cardContent[y].frontFields[i] ||
             cardContent[y].frontFields[i].value.trim() === ""
           ) {
-            alert("卡片有必填項未填！");
+            messageApi.error("卡片有必填項未填！");
             return;
           }
         }
@@ -322,7 +322,7 @@ function CardSetEdit() {
             !cardContent[y].backFields[i] ||
             cardContent[y].backFields[i].value.trim() === ""
           ) {
-            alert("卡片有必填項未填！");
+            messageApi.error("卡片有必填項未填！");
             return;
           }
         }
@@ -331,24 +331,32 @@ function CardSetEdit() {
 
     // 最終提交邏輯
     try {
+      messageApi.loading({
+        content: "提交中，請稍候...",
+        duration: 0, // 持續顯示，直到手動關閉
+      });
       await updateCardSetWithNewCards(
         cardSetData,
         cardContent,
         user.userId,
         deletedCards
       );
-      alert("卡牌組更新成功！");
-      navigate(`/cardset/${cardSetId}`);
+      messageApi.destroy(); // 隱藏 loading
+      messageApi.success("卡牌組編輯成功！");
+      setStep(2); // 移動到第 3 步顯示結果
     } catch (error) {
       console.error("更新過程出現錯誤：", error);
-      alert("更新失敗，請重試。");
+      messageApi.destroy(); // 隱藏 loading
+      messageApi.error("編輯失敗，請重試。");
     }
   };
 
-  if (!user || !labelOptions || !allStyles) return <div>Loading...</div>;
+  if (!user || loading || !labelOptions || !allStyles)
+    return <div>Loading...</div>;
 
   return (
     <ConfigProvider theme={customTheme}>
+      {contextHolder}
       <Background>
         <Wrapper>
           {step === 0 && (
@@ -391,6 +399,7 @@ function CardSetEdit() {
                     value={cardSetData.title}
                     $isInvalid={invalidFields.includes("title")}
                     id="title"
+                    placeholder="請輸入標題"
                   />
                   <InputLabel htmlFor="description">簡介</InputLabel>
                   <Textarea
@@ -402,6 +411,7 @@ function CardSetEdit() {
                     }
                     value={cardSetData.description}
                     id="description"
+                    placeholder="請輸入簡介"
                   />
                   <InputLabel>
                     目的
@@ -464,6 +474,7 @@ function CardSetEdit() {
                         styles={selectionStyle(
                           invalidFields.includes("learningLanguage")
                         )}
+                        placeholder="請選擇語言"
                       />
                       <InputLabel>
                         背面字卡顯示的語言
@@ -484,12 +495,17 @@ function CardSetEdit() {
                         styles={selectionStyle(
                           invalidFields.includes("learningLanguage")
                         )}
+                        placeholder="請選擇語言"
                       />
                     </>
                   )}
                   <InputLabel>
                     隱私
-                    <RequiredNotice></RequiredNotice>
+                    <RequiredNotice>
+                      {`*${
+                        invalidFields.includes("visibility") ? " 必選項" : ""
+                      }`}
+                    </RequiredNotice>
                   </InputLabel>
                   <RadioWrapper>
                     <InputRadio
@@ -548,6 +564,7 @@ function CardSetEdit() {
                       });
                     }}
                     onCreateOption={handleCreateLabel}
+                    placeholder="請輸入或選擇標籤"
                   />
                   <InputLabel>
                     樣式<RequiredNotice>*</RequiredNotice>
@@ -637,15 +654,51 @@ function CardSetEdit() {
                   <Submit type="submit" value="儲存" />
                 </ButtonGroup>
               </Form>
-              {showNewStyleModal && (
-                <NewStyleModal
-                  onClose={() => {
-                    setShowNewStyleModal(false);
-                  }}
-                  onStyleAdded={handleStyleAdded}
-                />
-              )}
             </>
+          )}
+          {step === 2 && (
+            <>
+              <HeadingContainer>
+                <Heading>
+                  <EditIcon />
+                  <p>編輯卡牌組</p>
+                </Heading>
+              </HeadingContainer>
+              <Steps
+                current={step}
+                items={[
+                  {
+                    title: "基本資料",
+                  },
+                  {
+                    title: "字卡內容",
+                  },
+                  {
+                    title: "完成編輯卡牌組",
+                  },
+                ]}
+              />
+              <ResultWrapper>
+                <Result status="success" title="成功編輯牌組！" />
+                <ResultButtonGroup>
+                  <GoToCardSetLink to={`/cardset/${cardSetId}`}>
+                    前往卡牌組
+                  </GoToCardSetLink>
+                  <GoToMyCardSetsLink to={"/user/me/cardsets"}>
+                    我的卡牌組頁面
+                  </GoToMyCardSetsLink>
+                </ResultButtonGroup>
+              </ResultWrapper>
+            </>
+          )}
+          {showNewStyleModal && styleOptions && (
+            <NewStyleModal
+              onClose={() => {
+                setShowNewStyleModal(false);
+              }}
+              onStyleAdded={handleStyleAdded}
+              styleNames={styleOptions.map((option) => option.label)}
+            />
           )}
         </Wrapper>
       </Background>
@@ -892,5 +945,77 @@ const UpperPreviousStepButton = styled.div`
   cursor: pointer;
   @media only screen and (max-width: 639px) {
     display: none;
+  }
+`;
+
+const ResultWrapper = styled.div`
+  height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ResultButtonGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-top: 32px;
+  width: 360px;
+  justify-content: space-around;
+  @media only screen and (max-width: 549px) {
+    width: 80%;
+  }
+`;
+
+const GoToCardSetLink = styled(Link)`
+  width: 140px;
+  height: 36px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: white;
+  background-color: #3d5a80;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  user-select: none;
+  cursor: pointer;
+  text-decoration: none; // 移除連結預設的下劃線
+  @media only screen and (max-width: 479px) {
+    font-size: 14px;
+  }
+`;
+
+const GoToMyCardSetsLink = styled(Link)`
+  width: 140px;
+  height: 36px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: #666; // 灰色文字
+  background-color: #e0e0e0; // 淺灰色背景
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  user-select: none;
+  cursor: pointer;
+  margin-left: 16px; // 為了和「前往卡牌組」按鈕分開
+  text-decoration: none; // 移除按鈕樣式中的下劃線
+  &:hover {
+    background-color: #d3d3d3; // hover 時的背景顏色
+  }
+  &:active {
+    background-color: #c0c0c0; // active 時的背景顏色
+  }
+  @media only screen and (max-width: 479px) {
+    font-size: 14px;
   }
 `;
