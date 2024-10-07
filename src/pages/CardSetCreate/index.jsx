@@ -16,8 +16,8 @@ import {
   uploadCardSetWithCards,
   getUserLabels,
 } from "../../utils/api.js";
-import { useNavigate } from "react-router-dom";
-import { ConfigProvider, Steps } from "antd";
+import { useNavigate, Link } from "react-router-dom";
+import { ConfigProvider, Steps, message, Result } from "antd";
 
 const customTheme = {
   token: {
@@ -46,6 +46,8 @@ function CardSetCreate() {
   const [suggestedTranslations, setSuggestedTranslations] = useState([]);
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [newCardSetId, setNewCardSetId] = useState("");
   const [cardSetData, setCardSetData] = useState({
     cardSetId: "",
     userId: "",
@@ -323,7 +325,7 @@ function CardSetCreate() {
     event.preventDefault();
     // 檢查卡片內容的有效性
     if (cardContent.length < 1) {
-      alert("字卡至少需要一張！");
+      messageApi.warning("字卡至少需要一張！");
       return;
     }
 
@@ -335,7 +337,7 @@ function CardSetCreate() {
             !cardContent[y].frontFields[i] ||
             cardContent[y].frontFields[i].value.trim() === ""
           ) {
-            alert("卡片有必填項未填！");
+            messageApi.error("卡片有必填項未填！");
             return;
           }
         }
@@ -349,7 +351,7 @@ function CardSetCreate() {
             !cardContent[y].backFields[i] ||
             cardContent[y].backFields[i].value.trim() === ""
           ) {
-            alert("卡片有必填項未填！");
+            messageApi.error("卡片有必填項未填！");
             return;
           }
         }
@@ -357,16 +359,24 @@ function CardSetCreate() {
     }
 
     try {
+      messageApi.loading({
+        content: "提交中，請稍候...",
+        duration: 0, // 持續顯示，直到手動關閉
+      });
       const newCardSetId = await uploadCardSetWithCards(
         cardSetData,
         cardContent,
         user.userId
       );
-      alert("卡牌組提交成功！");
-      navigate(`/cardset/${newCardSetId}`);
+      setNewCardSetId(newCardSetId);
+      // 成功，顯示成功訊息並進入 step 3
+      messageApi.destroy(); // 隱藏 loading
+      messageApi.success("卡牌組提交成功！");
+      setStep(2); // 移動到第 3 步顯示結果
     } catch (error) {
+      messageApi.destroy(); // 隱藏 loading
+      messageApi.error("儲存失敗，請重試。");
       console.error("儲存過程出現錯誤：", error);
-      alert("儲存失敗，請重試。");
     }
   };
 
@@ -375,6 +385,7 @@ function CardSetCreate() {
 
   return (
     <ConfigProvider theme={customTheme}>
+      {contextHolder}
       <Background>
         <Wrapper>
           {step === 0 && (
@@ -677,6 +688,41 @@ function CardSetCreate() {
               </Form>
             </>
           )}
+          {step === 2 && (
+            <>
+              <HeadingContainer>
+                <Heading>
+                  <EditIcon />
+                  <p>新增卡牌組</p>
+                </Heading>
+              </HeadingContainer>
+              <Steps
+                current={step}
+                items={[
+                  {
+                    title: "基本資料",
+                  },
+                  {
+                    title: "字卡內容",
+                  },
+                  {
+                    title: "完成新增卡牌組",
+                  },
+                ]}
+              />
+              <ResultWrapper>
+                <Result status="success" title="成功新增牌組！" />
+                <ResultButtonGroup>
+                  <GoToCardSetLink to={`/cardset/${newCardSetId}`}>
+                    前往卡牌組
+                  </GoToCardSetLink>
+                  <ContinueAddingButton to={"/user/me/cardsets"}>
+                    我的卡牌組頁面
+                  </ContinueAddingButton>
+                </ResultButtonGroup>
+              </ResultWrapper>
+            </>
+          )}
           {showNewStyleModal && styleOptions && (
             <NewStyleModal
               onClose={() => {
@@ -943,5 +989,78 @@ const UpperPreviousStepButton = styled.div`
   cursor: pointer;
   @media only screen and (max-width: 639px) {
     display: none;
+  }
+`;
+
+const ResultWrapper = styled.div`
+  height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ResultButtonGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-top: 32px;
+  width: 360px;
+  justify-content: space-around;
+  @media only screen and (max-width: 549px) {
+    width: 80%;
+  }
+`;
+
+const GoToCardSetLink = styled(Link)`
+  width: 140px;
+  height: 36px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: white;
+  background-color: #3d5a80;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  user-select: none;
+  cursor: pointer;
+  text-decoration: none; // 移除連結預設的下劃線
+  @media only screen and (max-width: 479px) {
+    font-size: 14px;
+  }
+`;
+
+// 灰色的「繼續新增牌組」按鈕
+const ContinueAddingButton = styled(Link)`
+  width: 140px;
+  height: 36px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: #666; // 灰色文字
+  background-color: #e0e0e0; // 淺灰色背景
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  user-select: none;
+  cursor: pointer;
+  margin-left: 16px; // 為了和「前往卡牌組」按鈕分開
+  text-decoration: none; // 移除按鈕樣式中的下劃線
+  &:hover {
+    background-color: #d3d3d3; // hover 時的背景顏色
+  }
+  &:active {
+    background-color: #c0c0c0; // active 時的背景顏色
+  }
+  @media only screen and (max-width: 479px) {
+    font-size: 14px;
   }
 `;
