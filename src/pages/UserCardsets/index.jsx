@@ -7,6 +7,7 @@ import {
   getUserCardStyles,
   deleteCardSet,
 } from "../../utils/api.js";
+import { Modal, message } from "antd";
 
 function UserCardSets() {
   const { user } = useUser();
@@ -16,6 +17,7 @@ function UserCardSets() {
   const [styleMap, setStyleMap] = useState(null);
   const [visibleMenuCardSetId, setVisibleMenuCardSetId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     if (user) {
@@ -90,36 +92,42 @@ function UserCardSets() {
       navigator.clipboard
         .writeText(copyText)
         .then(() => {
-          alert("已複製分享連結！");
+          message.success("已複製分享連結！");
         })
         .catch((error) => {
           console.error("無法複製分享連結：", error);
+          message.error("複製失敗，請重試"); // 顯示錯誤信息
         });
     } else {
       console.error("無法複製分享連結：沒有clipboard API");
+      message.error("瀏覽器不支援複製功能！");
     }
   }
 
   async function handleDeleteCardSet(cardSetId) {
     if (isDeleting) return;
-    const confirmation = confirm("刪除卡牌組後無法復原，確定刪除嗎？");
-    if (confirmation) {
-      try {
-        setIsDeleting(true);
-        await deleteCardSet(cardSetId);
-        alert("已刪除卡牌。");
-        setUserCardSets((prev) =>
-          prev.filter((set) => set.cardSetId !== cardSetId)
-        );
-      } catch (error) {
-        console.error("刪除卡牌組失敗：", error);
-        alert("刪除卡牌失敗，請稍後再試！");
-      } finally {
-        setIsDeleting(false); // 無論成功與否都重置刪除狀態
-      }
-    }
-  }
 
+    Modal.confirm({
+      title: "刪除卡牌組後無法復原，確定刪除嗎？",
+      okText: "確定",
+      cancelText: "取消",
+      onOk: async () => {
+        try {
+          setIsDeleting(true);
+          await deleteCardSet(cardSetId);
+          message.success("已刪除卡牌。");
+          setUserCardSets((prev) =>
+            prev.filter((set) => set.cardSetId !== cardSetId)
+          );
+        } catch (error) {
+          console.error("刪除卡牌組失敗：", error);
+          message.error("刪除卡牌失敗，請稍後再試！");
+        } finally {
+          setIsDeleting(false); // 無論成功與否都重置刪除狀態
+        }
+      },
+    });
+  }
   if (!currentUserId || !userCardSets || !userCardStyles || !styleMap) {
     return <div>Loading...</div>;
   }
