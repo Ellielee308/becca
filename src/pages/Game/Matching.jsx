@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
 import { serverTimestamp } from "firebase/firestore";
+import goldenMedal from "./images/MedalGolden.png";
+import silverMedal from "./images/MedalSilver.png";
+import bronzedMedal from "./images/MedalBronze.png";
 
 function Matching({
   gameData,
@@ -465,13 +468,24 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
         )}
         {gameStatus === "completed" && (
           <>
-            <RankingTitle>✨排行榜✨</RankingTitle>
+            <RankingTitle>🎖️ 排行榜 ✨</RankingTitle>
             {isLoading ? (
               <p>加載中...</p>
             ) : (
               <RankingList>
                 {rankings.map((player, index) => (
                   <RankingItem key={index} $rank={index + 1}>
+                    <MedalImgContainer>
+                      {index === 0 && (
+                        <MedalImg src={goldenMedal} alt="Golden Medal" />
+                      )}
+                      {index === 1 && (
+                        <SilverMedalImg src={silverMedal} alt="Silver Medal" />
+                      )}
+                      {index === 2 && (
+                        <BronzeMedalImg src={bronzedMedal} alt="Bronze Medal" />
+                      )}
+                    </MedalImgContainer>
                     <RankColumn>{`第${index + 1}名`}</RankColumn>
                     <NameColumn>{player.username}</NameColumn>
                     <ScoreColumn>{`${
@@ -528,10 +542,15 @@ const ModalContent = styled.div`
 const WaitingWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 20px;
 `;
 const RankingTitle = styled.h2`
   font-size: 20px;
+  font-family: "Noto Sans TC", sans-serif;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+  font-weight: 500;
+  color: #3d5a80;
 `;
 
 const RankingList = styled.ul`
@@ -547,18 +566,30 @@ const RankingItem = styled.li`
   margin: 8px 0;
   height: 36px;
   border-radius: 8px;
-  padding: 0 16px;
-  background-color: ${(props) => {
-    if (props.$rank === 1) {
-      return "#ffd700";
-    } else if (props.$rank === 2) {
-      return "#c0c0c0";
-    } else if (props.$rank === 3) {
-      return "#cd7f32";
-    } else {
-      return "#92a3fd";
-    }
-  }};
+  padding: 0 16px 0 4px;
+  background-color: #efeefc;
+`;
+
+const MedalImgContainer = styled.div`
+  width: 10%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const MedalImg = styled.img`
+  width: 100%;
+  height: auto;
+`;
+
+const SilverMedalImg = styled.img`
+  width: 90%;
+  height: auto;
+`;
+const BronzeMedalImg = styled.img`
+  width: 80%;
+  height: auto;
 `;
 
 const RankColumn = styled.span`
@@ -572,7 +603,7 @@ const NameColumn = styled.span`
 `;
 
 const ScoreColumn = styled.span`
-  width: 20%;
+  width: 10%;
   text-align: center;
 `;
 
@@ -588,19 +619,11 @@ const CloseButton = styled.button`
   padding: 12px 25px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #92a3fd, #adbce5);
+  background-color: #3d5a80;
   color: white;
   font-size: 16px;
   font-family: "Noto Sans TC", sans-serif;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* 增加過渡效果使變化更柔和 */
-
-  &:hover {
-    background: linear-gradient(135deg, #8292f1, #9bb0eb);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  }
 
   &:active {
     transform: translateY(0);
@@ -616,21 +639,3 @@ GameEndModal.propTypes = {
   attempts: PropTypes.number,
   isGameOver: PropTypes.bool,
 };
-
-const TrophyIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0"
-    />
-  </svg>
-);

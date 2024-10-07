@@ -18,6 +18,7 @@ import { db } from "../../utils/firebaseConfig.js";
 import Matching from "./Matching";
 import MultipleChoices from "./MultipleChoices";
 import photoPlaceholder from "./images/photo-placeholder.jpg";
+import { message } from "antd";
 
 function Game() {
   const { gameId } = useParams();
@@ -34,6 +35,7 @@ function Game() {
   const [hasJoinedGame, setHasJoinedGame] = useState(false);
   const [players, setPlayers] = useState([]); // 即時保存所有玩家資料
   const [participantId, setParticipantId] = useState(null); //目前玩家participantId
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
   const isJoining = useRef(false);
@@ -213,8 +215,13 @@ function Game() {
     if (navigator.clipboard) {
       navigator.clipboard
         .writeText(window.location.href)
-        .then(() => alert("已複製分享連結！"))
-        .catch((err) => console.error("複製分享連結失敗：", err));
+        .then(() => {
+          message.success("已複製分享連結！");
+        })
+        .catch((err) => {
+          console.error("複製分享連結失敗：", err);
+          message.error("複製分享連結失敗，請稍後再試！");
+        });
     }
   };
 
@@ -224,7 +231,7 @@ function Game() {
 
   const handleJoinGame = async () => {
     if (!username.trim()) {
-      alert("請輸入用戶名來加入遊戲！");
+      message.warning("請輸入用戶名來加入遊戲！");
       return;
     }
 
@@ -233,8 +240,10 @@ function Game() {
       setHasJoinedGame(true);
       setParticipantId(participantId);
       console.log(`玩家 "${username}" 加入遊戲，ID：${participantId}！`);
+      message.success(`玩家 "${username}" 已成功加入遊戲！`);
     } catch (error) {
       console.error("加入遊戲失敗：", error);
+      message.error("加入遊戲失敗，請稍後再試！");
     }
   };
 
@@ -249,7 +258,7 @@ function Game() {
         console.error("無法開始遊戲：", error);
       }
     } else {
-      alert("只有房主才能開始遊戲，並且遊戲必須處於等待狀態");
+      message.warning("只有房主才能開始遊戲，且遊戲必須處於等待狀態");
     }
   };
 
@@ -300,6 +309,7 @@ function Game() {
   }
   return (
     <Wrapper>
+      {contextHolder}
       <QuizDescription>
         <Lable>遊戲房</Lable>
         <Title>{gameData.roomName ? gameData.roomName : "無名稱"}</Title>
@@ -376,7 +386,7 @@ function Game() {
           />
         )}
       {isGameHost && gameData.status === "waiting" && (
-        <StartGameButton onClick={handleStartGame}>開始遊戲</StartGameButton>
+        <StartGameButton onClick={handleStartGame}>開始遊戲⚡</StartGameButton>
       )}
     </Wrapper>
   );
@@ -385,14 +395,16 @@ function Game() {
 export default Game;
 
 const Wrapper = styled.div`
-  margin: 80px auto 100px auto;
+  margin: 80px auto 60px auto;
   padding: 10px 30px 40px 30px;
   max-width: 960px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  /* box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); */
   border-radius: 16px;
   background: linear-gradient(to bottom right, #f5f7fa, #cdddf3);
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-height: calc(100vh - 100px);
 `;
 
 const QuizDescription = styled.div`
@@ -443,10 +455,10 @@ const ShareButton = styled.button`
   margin-top: 15px;
   font-size: 16px;
   transition: all 0.3s;
-
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  font-weight: 500;
   &:hover {
     background-color: #ff7043;
-    box-shadow: 0 4px 15px rgba(255, 112, 67, 0.3);
   }
 `;
 
@@ -481,6 +493,8 @@ const JoinButton = styled.button`
   cursor: pointer;
   font-size: 16px;
   transition: all 0.3s;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  font-weight: 500;
 
   &:hover {
     background-color: #5a9cb1;
@@ -522,23 +536,26 @@ const ProfilePicture = styled.img`
 
 const PlayerName = styled.p`
   margin-top: 10px;
-  font-size: 14px;
+  font-size: 16px;
   text-align: center;
+  font-weight: 500;
+  color: #3d5a80;
 `;
 
 const StartGameButton = styled.button`
-  padding: 12px 32px;
+  padding: 12px 22px 12px 32px;
   background-color: #36a2eb;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 18px;
   margin: 30px auto;
   transition: all 0.3s;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  font-weight: 500;
 
   &:hover {
     background-color: #2b8ac6;
-    box-shadow: 0 4px 20px rgba(43, 138, 198, 0.3);
   }
 `;

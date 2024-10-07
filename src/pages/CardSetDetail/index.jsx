@@ -602,6 +602,7 @@ const ProfilePicture = styled.img`
   width: 64px;
   border-radius: 50%;
   object-fit: cover;
+  border: 1px solid #fff;
 `;
 
 const SectionTitleWrapper = styled.div`

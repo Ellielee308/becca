@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
 import { serverTimestamp } from "firebase/firestore";
+import goldenMedal from "./images/MedalGolden.png";
+import silverMedal from "./images/MedalSilver.png";
+import bronzedMedal from "./images/MedalBronze.png";
 
 function MultipleChoices({
   gameData,
@@ -501,13 +504,24 @@ const GameEndModal = ({
         )}
         {gameStatus === "completed" && (
           <>
-            <RankingTitle>✨排行榜✨</RankingTitle>
+            <RankingTitle>🎖️ 排行榜 ✨</RankingTitle>
             {isLoading ? (
               <p>加載中...</p>
             ) : (
               <RankingList>
                 {rankings.map((player, index) => (
                   <RankingItem key={index} $rank={index + 1}>
+                    <MedalImgContainer>
+                      {index === 0 && (
+                        <MedalImg src={goldenMedal} alt="Golden Medal" />
+                      )}
+                      {index === 1 && (
+                        <SilverMedalImg src={silverMedal} alt="Silver Medal" />
+                      )}
+                      {index === 2 && (
+                        <BronzeMedalImg src={bronzedMedal} alt="Bronze Medal" />
+                      )}
+                    </MedalImgContainer>
                     <RankColumn>{`第${index + 1}名`}</RankColumn>
                     <NameColumn>{player.username}</NameColumn>
                     <ScoreColumn>{`${
@@ -564,12 +578,16 @@ const ModalContent = styled.div`
 const WaitingWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 20px;
 `;
 const RankingTitle = styled.h2`
   font-size: 20px;
+  font-family: "Noto Sans TC", sans-serif;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+  font-weight: 500;
+  color: #3d5a80;
 `;
-
 const RankingList = styled.ul`
   margin-top: 16px;
   list-style: none;
@@ -580,21 +598,33 @@ const RankingItem = styled.li`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 10px 0;
+  margin: 8px 0;
   height: 36px;
   border-radius: 8px;
-  padding: 0 16px;
-  background-color: ${(props) => {
-    if (props.$rank === 1) {
-      return "#ffd700";
-    } else if (props.$rank === 2) {
-      return "#c0c0c0";
-    } else if (props.$rank === 3) {
-      return "#cd7f32";
-    } else {
-      return "#92a3fd";
-    }
-  }};
+  padding: 0 16px 0 4px;
+  background-color: #efeefc;
+`;
+
+const MedalImgContainer = styled.div`
+  width: 10%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const MedalImg = styled.img`
+  width: 100%;
+  height: auto;
+`;
+
+const SilverMedalImg = styled.img`
+  width: 90%;
+  height: auto;
+`;
+const BronzeMedalImg = styled.img`
+  width: 80%;
+  height: auto;
 `;
 
 const RankColumn = styled.span`
@@ -608,7 +638,7 @@ const NameColumn = styled.span`
 `;
 
 const ScoreColumn = styled.span`
-  width: 20%;
+  width: 10%;
   text-align: center;
 `;
 
@@ -624,19 +654,11 @@ const CloseButton = styled.button`
   padding: 12px 25px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #92a3fd, #adbce5);
+  background-color: #3d5a80;
   color: white;
   font-size: 16px;
   font-family: "Noto Sans TC", sans-serif;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* 增加過渡效果使變化更柔和 */
-
-  &:hover {
-    background: linear-gradient(135deg, #8292f1, #9bb0eb);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  }
 
   &:active {
     transform: translateY(0);
