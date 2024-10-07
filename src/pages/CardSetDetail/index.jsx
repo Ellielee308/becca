@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useEffect, useState, useCallback } from "react";
 import {
@@ -256,81 +256,83 @@ function CardSetDetail() {
             </DescriptionWrapper>
           </InformationWrapper>
           <hr />
-          <SectionTitleWrapper>
-            <PuzzleIcon />
-            <SectionTitle>測驗</SectionTitle>
-          </SectionTitleWrapper>
-          <GameOptionsWrapper>
-            <GameOptionButton
-              onClick={() => {
-                if (!user) {
-                  alert("會員才能創建測驗，請先登入！");
-                  return;
-                }
-                if (cards.length < 4) {
-                  alert("至少要有四張字卡才能進行配對測驗！");
-                  return;
-                }
-                setShowCreateQuizModal("matching");
-              }}
-            >
-              配對題
-            </GameOptionButton>
-            <GameOptionButton
-              onClick={() => {
-                if (!user) {
-                  alert("會員才能創建測驗，請先登入！");
-                  return;
-                }
-                if (cards.length < 4) {
-                  alert("至少要有四張字卡才能進行選擇題測驗！");
-                  return;
-                }
-                setShowCreateQuizModal("multipleChoices");
-              }}
-            >
-              選擇題
-            </GameOptionButton>
-          </GameOptionsWrapper>
-          <SectionTitleWrapper>
-            <MultiplePlayersIcon />
-            <SectionTitle>多人遊戲</SectionTitle>
-          </SectionTitleWrapper>
-          <GameOptionsWrapper>
-            <GameOptionButton
-              $isGame
-              onClick={() => {
-                if (!user) {
-                  alert("會員才能創建遊戲，請先登入！");
-                  return;
-                }
-                if (cards.length < 4) {
-                  alert("至少要有四張字卡才能進行配對遊戲！");
-                  return;
-                }
-                setShowCreateGameModal("matching");
-              }}
-            >
-              配對題
-            </GameOptionButton>
-            <GameOptionButton
-              $isGame
-              onClick={() => {
-                if (!user) {
-                  alert("會員才能創建遊戲，請先登入！");
-                  return;
-                }
-                if (cards.length < 4) {
-                  alert("至少要有四張字卡才能進行選擇題遊戲！");
-                  return;
-                }
-                setShowCreateGameModal("multipleChoices");
-              }}
-            >
-              選擇題
-            </GameOptionButton>
-          </GameOptionsWrapper>
-          <hr />
+          <EvaluationSection>
+            <SectionTitleWrapper>
+              <PuzzleIcon />
+              <SectionTitle>測驗</SectionTitle>
+            </SectionTitleWrapper>
+            <GameOptionsWrapper>
+              <GameOptionButton
+                onClick={() => {
+                  if (!user) {
+                    alert("會員才能創建測驗，請先登入！");
+                    return;
+                  }
+                  if (cards.length < 4) {
+                    alert("至少要有四張字卡才能進行配對測驗！");
+                    return;
+                  }
+                  setShowCreateQuizModal("matching");
+                }}
+              >
+                配對題
+              </GameOptionButton>
+              <GameOptionButton
+                onClick={() => {
+                  if (!user) {
+                    alert("會員才能創建測驗，請先登入！");
+                    return;
+                  }
+                  if (cards.length < 4) {
+                    alert("至少要有四張字卡才能進行選擇題測驗！");
+                    return;
+                  }
+                  setShowCreateQuizModal("multipleChoices");
+                }}
+              >
+                選擇題
+              </GameOptionButton>
+            </GameOptionsWrapper>
+            <SectionTitleWrapper>
+              <MultiplePlayersIcon />
+              <SectionTitle>多人遊戲</SectionTitle>
+            </SectionTitleWrapper>
+            <GameOptionsWrapper>
+              <GameOptionButton
+                $isGame
+                onClick={() => {
+                  if (!user) {
+                    alert("會員才能創建遊戲，請先登入！");
+                    return;
+                  }
+                  if (cards.length < 4) {
+                    alert("至少要有四張字卡才能進行配對遊戲！");
+                    return;
+                  }
+                  setShowCreateGameModal("matching");
+                }}
+              >
+                配對題
+              </GameOptionButton>
+              <GameOptionButton
+                $isGame
+                onClick={() => {
+                  if (!user) {
+                    alert("會員才能創建遊戲，請先登入！");
+                    return;
+                  }
+                  if (cards.length < 4) {
+                    alert("至少要有四張字卡才能進行選擇題遊戲！");
+                    return;
+                  }
+                  setShowCreateGameModal("multipleChoices");
+                }}
+              >
+                選擇題
+              </GameOptionButton>
+            </GameOptionsWrapper>
+            <hr />
+          </EvaluationSection>
           <SectionTitleWrapper>
             <ListIcon />
             <SectionTitle>{`所有字卡  (${cards.length})`}</SectionTitle>
@@ -402,6 +404,21 @@ function CardSetDetail() {
           )}
         </CardSetDetailsWrapper>
       </Wrapper>
+      <SideMenu>
+        <SideMenuTitle>練習一下吧！</SideMenuTitle>
+        <SideMenuSectionTitle>
+          <PuzzleIcon />
+          <p>測驗</p>
+        </SideMenuSectionTitle>
+        <SideMenuQuiz>配對測驗</SideMenuQuiz>
+        <SideMenuQuiz>選擇題測驗</SideMenuQuiz>
+        <SideMenuSectionTitle>
+          <MultiplePlayersIcon />
+          <p>多人遊戲</p>
+        </SideMenuSectionTitle>
+        <SideMenuGame>配對遊戲</SideMenuGame>
+        <SideMenuGame>選擇題遊戲</SideMenuGame>
+      </SideMenu>
     </Background>
   );
 }
@@ -409,18 +426,15 @@ function CardSetDetail() {
 export default CardSetDetail;
 
 const Background = styled.div`
+  position: relative;
   background-color: #eff7ff;
   width: 100%;
   height: fit-content;
   padding: 60px 14px;
   @media only screen and (min-width: 640px) {
     display: flex;
+    justify-content: center;
   }
-`;
-
-const SideMenu = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 const Wrapper = styled.div`
@@ -435,6 +449,7 @@ const Wrapper = styled.div`
   @media only screen and (min-width: 640px) {
     width: 1160px;
     padding: 0px 20px;
+    margin: 0;
   }
 `;
 
@@ -453,6 +468,8 @@ const TitleBar = styled.div`
 const Title = styled.div`
   font-size: 32px;
   user-select: none;
+  font-family: "Noto Sans TC", sans-serif;
+  color: "#3d5a80";
   @media only screen and (max-width: 639px) {
     font-size: 28px;
   }
@@ -476,12 +493,24 @@ const CardContainer = styled.div`
 `;
 
 const ArrowIconContainer = styled.div`
-  flex-basis: 60px;
+  flex-basis: 45px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${(props) => (props.disabled ? "#d8d6d6" : "black")};
+  color: ${(props) =>
+    props.disabled ? "#aaa" : "#fff"}; // 使用亮色作為文字顏色
+  background: ${(props) =>
+    props.disabled ? "#d8d6d6" : "#3d5a80"}; // 深色背景來增加對比
+  border-radius: 50%;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  transition: all 0.3s;
+
+  &:hover {
+    background: ${(props) =>
+      props.disabled ? "#d8d6d6" : "#293a50"}; // 增加深色在 hover 時的效果
+  }
+
   @media only screen and (max-width: 639px) {
     display: none;
   }
@@ -650,6 +679,12 @@ const GameOptionButton = styled.div`
   }
 `;
 
+const EvaluationSection = styled.div`
+  @media only screen and (min-width: 1024px) {
+    display: none;
+  }
+`;
+
 const ListSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -728,6 +763,102 @@ const ImagePreview = styled.img`
   height: 80px;
   width: auto;
   margin: 0 auto;
+`;
+
+const SideMenu = styled.div`
+  position: sticky;
+  top: 80px;
+  display: flex;
+  flex-direction: column;
+  width: 20%;
+  padding: 24px;
+  height: fit-content;
+  background-color: #f9f9f9;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  @media only screen and (max-width: 1023px) {
+    display: none; // 隱藏側邊選單於小螢幕
+  }
+  @media only screen and (min-width: 1440px) {
+    width: 278px;
+  }
+`;
+
+const SideMenuTitle = styled.h3`
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 24px;
+  color: #2c3e50;
+`;
+
+const SideMenuSectionTitle = styled.p`
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 16px;
+  color: #34495e;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+`;
+
+const SideMenuQuiz = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  height: 56px;
+  padding: 14px 18px;
+  margin: 0 auto 16px auto;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+  background-color: #3498db; // 使用明亮的藍色來提高視覺吸引力
+  transition: all 0.3s;
+  text-align: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #2980b9; // 當用戶懸停時，變為深藍色
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const SideMenuGame = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  height: 56px;
+  padding: 14px 18px;
+  margin: 0 auto 16px auto;
+  border-radius: 10px;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  background-color: #f39c12; // 使用暖橙色來突出多人遊戲部分
+  transition: all 0.3s;
+  text-align: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e67e22; // 當用戶懸停時，變為較深的橙色
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 `;
 
 function CardContent({ currentStyle, currentTemplate, currentCard }) {
