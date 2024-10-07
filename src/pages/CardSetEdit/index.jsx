@@ -133,6 +133,10 @@ function CardSetEdit() {
     fetchCardSetData();
   }, [user, cardSetId]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
+
   const handleStyleChange = (selectedOption) => {
     if (selectedOption.value === "newStyle") {
       setShowNewStyleModal(true); // 當選擇「新增樣式…」時顯示 Modal

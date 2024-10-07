@@ -11,6 +11,10 @@ function UserCollection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const fetchUserCollection = async () => {
       try {
         if (user && user.userId) {

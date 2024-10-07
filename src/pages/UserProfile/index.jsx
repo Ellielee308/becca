@@ -18,6 +18,10 @@ function UserProfile() {
   const [newProfilePicture, setNewProfilePicture] = useState(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (user) {
       const fetchCounts = async () => {
         const cardSetCountPromise = getUserCardSetCount(user.userId);

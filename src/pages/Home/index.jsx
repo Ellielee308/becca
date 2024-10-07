@@ -101,6 +101,10 @@ function Home() {
   }, []);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (allCardSets[selectedLanguage] && allStyles[selectedLanguage]) {
       setCardSetData(allCardSets[selectedLanguage]);
       setStyleData(allStyles[selectedLanguage]);

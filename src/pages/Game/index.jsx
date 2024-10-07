@@ -128,6 +128,10 @@ function Game() {
 
     fetchGameData();
   }, [gameId, user, loading, joinGame, hasJoinedGame]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   // 監聽遊戲中的玩家列表變化
   useEffect(() => {
     if (gameId) {

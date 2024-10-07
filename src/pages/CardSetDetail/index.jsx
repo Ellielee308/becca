@@ -102,6 +102,10 @@ function CardSetDetail() {
     );
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleSwitchCardWithKeyboard = useCallback(
     (event) => {
       // 檢查當前是否聚焦在輸入框或文本框中

@@ -9,6 +9,10 @@ function SearchResult() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     // 每次開始新搜尋時，重置搜尋結果和 loading 狀態
     setSearchResults([]);
     setLoading(true);

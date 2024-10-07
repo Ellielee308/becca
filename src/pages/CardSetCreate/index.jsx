@@ -63,6 +63,10 @@ function CardSetCreate() {
   });
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
+
+  useEffect(() => {
     if (
       selectedTemplate &&
       selectedTemplate.frontFields &&

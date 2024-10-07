@@ -20,6 +20,10 @@ function Quiz() {
   const [template, setTemplate] = useState(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const fetchQuizData = async () => {
       if (!quizId) return;
 

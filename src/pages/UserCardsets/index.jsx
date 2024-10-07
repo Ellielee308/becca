@@ -26,6 +26,10 @@ function UserCardSets() {
   }, [user]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const fetchCardSets = async () => {
       if (currentUserId) {
         // 獲取卡牌組和樣式資料

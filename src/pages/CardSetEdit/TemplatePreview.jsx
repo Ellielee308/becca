@@ -90,6 +90,7 @@ const Heading = styled.div`
 const RequiredNotice = styled.span`
   font-size: 12px;
   margin-top: 8px;
+  color: #ff6f61;
 `;
 
 const SideWrapper = styled.div`
