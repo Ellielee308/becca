@@ -2,7 +2,7 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 import { useEffect, useState, useRef } from "react";
 import { register, login } from "../../utils/api.js";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext.jsx";
 import { getCardSet, getStyle } from "../../utils/api";
 import quizSVG from "./images/quiz.svg";
@@ -19,6 +19,7 @@ function Home() {
   const [cardSetData, setCardSetData] = useState([]);
   const [styleData, setStyleData] = useState({});
   const carouselRef = useRef(null);
+  const navigate = useNavigate();
 
   const exploreData = {
     english: [
@@ -127,8 +128,16 @@ function Home() {
               免費註冊
             </SignUpButton>
           )}
-          <CallToActionButton>
-            <Link to="/cardset/new">+ 創建自己的記憶卡牌組</Link>
+          <CallToActionButton
+            onClick={() => {
+              if (user) {
+                navigate("/cardset/new"); // 如果已登入，導航到創建卡牌組的頁面
+              } else {
+                setShowLoginModal(true); // 如果未登入，顯示登入 Modal
+              }
+            }}
+          >
+            + 創建自己的記憶卡牌組
           </CallToActionButton>
         </ButtonGroup>
       </IntroductionSection>
@@ -260,7 +269,7 @@ const IntroductionSection = styled.div`
   justify-content: center;
   padding: 0 60px 30px 60px;
   background-color: #eff7ff;
-  height: calc(100vh - 60px);
+  height: 400px;
   @media only screen and (min-width: 1440px) {
     height: 60vh;
   }
