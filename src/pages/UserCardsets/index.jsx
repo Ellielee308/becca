@@ -165,14 +165,14 @@ function UserCardSets() {
                         <LabelIconContainer>
                           <PublicIcon />
                         </LabelIconContainer>
-                        <LabelName>公開</LabelName>
+                        <PrivacyName>公開</PrivacyName>
                       </>
                     ) : (
                       <>
                         <LabelIconContainer>
                           <PrivateIcon />
                         </LabelIconContainer>
-                        <LabelName>私人</LabelName>
+                        <PrivacyName>私人</PrivacyName>
                       </>
                     )}
                   </LabelWrapper>
@@ -183,13 +183,18 @@ function UserCardSets() {
                     <LabelNameContainer>
                       {cardSet.labels.length > 0 ? (
                         cardSet.labels.map((label, index) => (
-                          <LabelName key={label.labelId}>
-                            {label.name}
-                            {index < cardSet.labels.length - 1 && ", "}
-                          </LabelName>
+                          <Link
+                            key={label.labelId}
+                            to={`/search/${label.name}`}
+                          >
+                            <LabelName>
+                              {label.name}
+                              {index < cardSet.labels.length - 1 && ", "}
+                            </LabelName>
+                          </Link>
                         ))
                       ) : (
-                        <LabelName>無標籤</LabelName>
+                        <NoLabelName>無標籤</NoLabelName>
                       )}
                     </LabelNameContainer>
                     <MoreActionsContainer
@@ -337,7 +342,25 @@ const LabelNameContainer = styled.div`
   flex-direction: row;
 `;
 
+const PrivacyName = styled.span`
+  white-space: pre;
+  color: gray;
+  font-size: 14px;
+`;
+
 const LabelName = styled.span`
+  white-space: pre;
+  color: gray;
+  font-size: 14px;
+  cursor: pointer; // 指針變成手型
+  transition: color 0.3s ease; // 增加過渡效果
+
+  &:hover {
+    color: #3d5a80; // 修改為更顯眼的顏色，與網站主題一致
+  }
+`;
+
+const NoLabelName = styled.span`
   white-space: pre;
   color: gray;
   font-size: 14px;

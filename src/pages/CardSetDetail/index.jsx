@@ -15,6 +15,7 @@ import {
 import CreateQuizModal from "./CreateQuizModal";
 import CreateGameModal from "./CreateGameModal";
 import { useUser } from "../../context/UserContext.jsx";
+import { message } from "antd";
 
 function CardSetDetail() {
   const { cardSetId } = useParams();
@@ -28,6 +29,7 @@ function CardSetDetail() {
   const [showCreateGameModal, setShowCreateGameModal] = useState(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isCardListDisplayed, setIsCardListDisplayed] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
   const { user } = useUser();
   useEffect(() => {
     const fetchCardSetData = async () => {
@@ -131,19 +133,22 @@ function CardSetDetail() {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      alert("會員才能使用收藏功能，請登入！");
+      message.warning("會員才能使用收藏功能，請登入！");
       return;
     }
     try {
       if (isFavorited) {
         await unfavoriteCardSet(user.userId, cardSetId);
         setIsFavorited(false);
+        message.success("已取消收藏");
       } else {
         await favoriteCardSet(user.userId, cardSetId);
         setIsFavorited(true);
+        message.success("已加入收藏");
       }
     } catch (error) {
       console.error("切換收藏狀態失敗：", error);
+      message.error("操作失敗，請稍後再試");
     }
   };
 
@@ -156,6 +161,7 @@ function CardSetDetail() {
   }
   return (
     <Background>
+      {contextHolder}
       <Wrapper>
         {showCreateQuizModal && (
           <CreateQuizModal
@@ -233,13 +239,15 @@ function CardSetDetail() {
               <LabelNameContainer>
                 {cardSetData.labels.length > 0 ? (
                   cardSetData.labels.map((label, index) => (
-                    <LabelName key={index}>
-                      {label.name}
-                      {index < cardSetData.labels.length - 1 && ", "}
-                    </LabelName>
+                    <Link key={index} to={`/search/${label.name}`}>
+                      <LabelName>
+                        {label.name}
+                        {index < cardSetData.labels.length - 1 && ", "}
+                      </LabelName>
+                    </Link>
                   ))
                 ) : (
-                  <LabelName>無標籤</LabelName>
+                  <NoLabelName>無標籤</NoLabelName>
                 )}
               </LabelNameContainer>
             </LabelWrapper>
@@ -265,11 +273,11 @@ function CardSetDetail() {
               <GameOptionButton
                 onClick={() => {
                   if (!user) {
-                    alert("會員才能創建測驗，請先登入！");
+                    message.warning("會員才能創建測驗，請先登入！");
                     return;
                   }
                   if (cards.length < 4) {
-                    alert("至少要有四張字卡才能進行配對測驗！");
+                    message.warning("至少要有四張字卡才能進行配對測驗！");
                     return;
                   }
                   setShowCreateQuizModal("matching");
@@ -280,11 +288,11 @@ function CardSetDetail() {
               <GameOptionButton
                 onClick={() => {
                   if (!user) {
-                    alert("會員才能創建測驗，請先登入！");
+                    message.warning("會員才能創建測驗，請先登入！");
                     return;
                   }
                   if (cards.length < 4) {
-                    alert("至少要有四張字卡才能進行選擇題測驗！");
+                    message.warning("至少要有四張字卡才能進行選擇題測驗！");
                     return;
                   }
                   setShowCreateQuizModal("multipleChoices");
@@ -302,11 +310,11 @@ function CardSetDetail() {
                 $isGame
                 onClick={() => {
                   if (!user) {
-                    alert("會員才能創建遊戲，請先登入！");
+                    message.warning("會員才能創建遊戲，請先登入！");
                     return;
                   }
                   if (cards.length < 4) {
-                    alert("至少要有四張字卡才能進行配對遊戲！");
+                    message.warning("至少要有四張字卡才能進行配對遊戲！");
                     return;
                   }
                   setShowCreateGameModal("matching");
@@ -318,11 +326,11 @@ function CardSetDetail() {
                 $isGame
                 onClick={() => {
                   if (!user) {
-                    alert("會員才能創建遊戲，請先登入！");
+                    message.warning("會員才能創建遊戲，請先登入！");
                     return;
                   }
                   if (cards.length < 4) {
-                    alert("至少要有四張字卡才能進行選擇題遊戲！");
+                    message.warning("至少要有四張字卡才能進行選擇題遊戲！");
                     return;
                   }
                   setShowCreateGameModal("multipleChoices");
@@ -410,14 +418,70 @@ function CardSetDetail() {
           <PuzzleIcon />
           <p>測驗</p>
         </SideMenuSectionTitle>
-        <SideMenuQuiz>配對測驗</SideMenuQuiz>
-        <SideMenuQuiz>選擇題測驗</SideMenuQuiz>
+        <SideMenuQuiz
+          onClick={() => {
+            if (!user) {
+              message.warning("會員才能創建測驗，請先登入！");
+              return;
+            }
+            if (cards.length < 4) {
+              message.warning("至少要有四張字卡才能進行配對測驗！");
+              return;
+            }
+            setShowCreateQuizModal("matching");
+          }}
+        >
+          配對測驗
+        </SideMenuQuiz>
+        <SideMenuQuiz
+          onClick={() => {
+            if (!user) {
+              message.warning("會員才能創建測驗，請先登入！");
+              return;
+            }
+            if (cards.length < 4) {
+              message.warning("至少要有四張字卡才能進行選擇題測驗！");
+              return;
+            }
+            setShowCreateQuizModal("multipleChoices");
+          }}
+        >
+          選擇題測驗
+        </SideMenuQuiz>
         <SideMenuSectionTitle>
           <MultiplePlayersIcon />
           <p>多人遊戲</p>
         </SideMenuSectionTitle>
-        <SideMenuGame>配對遊戲</SideMenuGame>
-        <SideMenuGame>選擇題遊戲</SideMenuGame>
+        <SideMenuGame
+          onClick={() => {
+            if (!user) {
+              message.warning("會員才能創建遊戲，請先登入！");
+              return;
+            }
+            if (cards.length < 4) {
+              message.warning("至少要有四張字卡才能進行配對遊戲！");
+              return;
+            }
+            setShowCreateGameModal("matching");
+          }}
+        >
+          配對遊戲
+        </SideMenuGame>
+        <SideMenuGame
+          onClick={() => {
+            if (!user) {
+              message.warning("會員才能創建遊戲，請先登入！");
+              return;
+            }
+            if (cards.length < 4) {
+              message.warning("至少要有四張字卡才能進行選擇題遊戲！");
+              return;
+            }
+            setShowCreateGameModal("multipleChoices");
+          }}
+        >
+          選擇題遊戲
+        </SideMenuGame>
       </SideMenu>
     </Background>
   );
@@ -587,6 +651,18 @@ const LabelNameContainer = styled.div`
 `;
 
 const LabelName = styled.span`
+  white-space: pre;
+  color: gray;
+  font-size: 14px;
+  cursor: pointer; // 指針變成手型
+  transition: color 0.3s ease; // 增加過渡效果
+
+  &:hover {
+    color: #3d5a80; // 修改為更顯眼的顏色，與網站主題一致
+  }
+`;
+
+const NoLabelName = styled.span`
   white-space: pre;
   color: gray;
   font-size: 14px;

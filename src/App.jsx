@@ -10,12 +10,12 @@ const GlobalStyle = createGlobalStyle`
   }
   @font-face {
     font-family: 'TaiwanPearl-Regular';
-    src: url('/src/assets/TaiwanPearl-Regular.ttf') format('truetype');
+    src: url('/assets/TaiwanPearl-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
   body {
-    font-family:  "Noto Sans TC", sans-serif; 
+    font-family: 'TaiwanPearl-Regular', "Noto Sans TC", sans-serif; 
   }
 
   a {
