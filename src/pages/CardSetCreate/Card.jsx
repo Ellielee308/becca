@@ -33,12 +33,18 @@ Card.propTypes = {
 const Wrapper = styled.div`
   align-self: center;
   display: block;
-  margin: 52px 0px;
+  margin: 32px 0px;
   width: 600px;
   height: 400px;
   perspective: 1000px;
   transform-style: preserve-3d;
   cursor: pointer;
+  @media only screen and (max-width: 939px) {
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 3 / 2;
+    height: auto;
+  }
 `;
 
 const FlipCard = styled.div`

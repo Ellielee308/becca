@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import PropTypes from "prop-types";
 import { useState } from "react";
 import imageIcon from "./images/photo.png";
@@ -16,8 +16,8 @@ export default function Preview({ currentStyle, currentTemplate }) {
           {currentTemplate.frontFields.map((field, index) => (
             <FieldContainer
               key={index}
-              style={field.style}
-              position={field.position}
+              $style={field.style}
+              $position={field.position}
             >
               {renderFieldContent(field)}
             </FieldContainer>
@@ -27,8 +27,8 @@ export default function Preview({ currentStyle, currentTemplate }) {
           {currentTemplate.backFields.map((field, index) => (
             <FieldContainer
               key={index}
-              style={field.style}
-              position={field.position}
+              $style={field.style}
+              $position={field.position}
             >
               {renderFieldContent(field)}
             </FieldContainer>
@@ -112,12 +112,52 @@ const renderFieldContent = (field) => {
   }
 };
 
+const getResponsiveFontSize = (fontSizeValue) => {
+  let sizes;
+
+  switch (fontSizeValue) {
+    case "xs":
+      sizes = { small: "8px", medium: "10px", large: "12px" };
+      break;
+    case "s":
+      sizes = { small: "12px", medium: "14px", large: "18px" };
+      break;
+    case "m":
+      sizes = { small: "16px", medium: "18px", large: "24px" };
+      break;
+    case "l":
+      sizes = { small: "20px", medium: "22px", large: "30px" };
+      break;
+    case "xl":
+      sizes = { small: "24px", medium: "26px", large: "36px" };
+      break;
+    case "2xl":
+      sizes = { small: "29px", medium: "30px", large: "42px" };
+      break;
+    default:
+      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+  }
+
+  return css`
+    font-size: ${sizes.small};
+
+    @media (min-width: 600px) {
+      font-size: ${sizes.medium};
+    }
+
+    @media (min-width: 1024px) {
+      font-size: ${sizes.large};
+    }
+  `;
+};
+
 const Wrapper = styled.div`
   align-self: center;
   display: block;
-  margin: 52px 0px;
-  width: 600px;
-  height: 400px;
+  margin: 32px 0px;
+  max-width: 600px;
+  width: 100%;
+  aspect-ratio: 3 / 2;
   perspective: 1000px;
   transform-style: preserve-3d;
   cursor: pointer;
@@ -227,42 +267,42 @@ const BackCard = styled.div`
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
-  justify-content: ${(props) => props.style.textAlign || "center"};
+  justify-content: ${(props) => props.$style.textAlign || "center"};
   align-items: center;
   ${(props) =>
-    props.style &&
-    `
-    width: ${props.style.width};
-    height: ${props.style.height};
-    font-size: ${props.style.fontSize};
-    font-weight: ${props.style.fontWeight};
-    color: ${props.style.color};
-    background-color: ${props.style.backgroundColor};
-  `};
-  left: ${(props) => props.position?.x || "0"}px;
-  top: ${(props) => props.position?.y || "0"}px;
+    props.$style &&
+    css`
+      width: ${props.$style.width};
+      height: ${props.$style.height};
+      font-weight: ${props.$style.fontWeight};
+      color: ${props.$style.color};
+      font-style: ${props.$style.fontStyle};
+      ${getResponsiveFontSize(props.$style.fontSize)};
+    `}
+  left: ${(props) => props.$position?.x};
+  top: ${(props) => props.$position?.y};
+  user-select: none;
 `;
-
 // 用於顯示圖片的樣式
 const ImageWrapper = styled.div`
   position: relative;
-  display: inline-block;
+  display: inline-block; // 讓 ImageWrapper 的大小與圖片保持一致
 `;
 
 const ImageName = styled.p`
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 50%; // 垂直居中
+  left: 50%; // 水平居中
+  transform: translate(-50%, -50%); // 將元素的中心點移動到其容器的中心
   margin: 0;
-  padding: 8px 16px;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 8px 16px; // 內邊距讓文字不緊貼邊框
+  background-color: rgba(0, 0, 0, 0.5); // 半透明的黑色背景
+  color: white; // 文字顏色為白色
+  border-radius: 4px; // 圓角邊框
+  font-size: 14px; // 文字大小
   text-align: center;
-  width: fit-content;
-  pointer-events: none;
+  width: fit-content; // 讓內容決定寬度
+  pointer-events: none; // 讓名稱不影響圖片的點擊操作
 `;
 
 const Image = styled.img`

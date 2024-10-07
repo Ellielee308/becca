@@ -677,12 +677,13 @@ function CardSetCreate() {
               </Form>
             </>
           )}
-          {showNewStyleModal && (
+          {showNewStyleModal && styleOptions && (
             <NewStyleModal
               onClose={() => {
                 setShowNewStyleModal(false);
               }}
               onStyleAdded={handleStyleAdded}
+              styleNames={styleOptions.map((option) => option.label)}
             />
           )}
           {showNewTemplateModal && (
@@ -692,6 +693,7 @@ function CardSetCreate() {
                 setShowNewTemplateModal(false);
               }}
               onTemplateAdded={handleTemplateAdded}
+              templateNames={templateOptions.map((option) => option.label)}
             />
           )}
         </Wrapper>

@@ -4,6 +4,9 @@ import PropTypes from "prop-types";
 import Select from "react-select";
 import { Rnd } from "react-rnd";
 import imageIcon from "./images/photo.png";
+import { message } from "antd";
+import { Input } from "antd";
+const { TextArea } = Input;
 import {
   TrashIcon,
   BoldIcon,
@@ -41,12 +44,19 @@ const fontSizeOptions = [
     label: "2XL",
   },
 ];
-const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
+const NewTemplateModal = ({
+  currentStyle,
+  onClose,
+  onTemplateAdded,
+  templateNames,
+}) => {
   const [invalidTemplateName, setInvalidTemplateName] = useState(false);
+  const [existedTemplateName, setExistedTemplateName] = useState(false);
   const [isAddFieldModalOpen, setIsAddFieldModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState(null);
   const { user } = useUser();
   const cardRef = useRef(null);
+  const [messageApi, contextHolder] = message.useMessage();
   const [newTemplateData, setNewTemplateData] = useState({
     fieldTemplateId: "", //自動生成
     templateName: "",
@@ -151,18 +161,25 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
   };
 
   const handleSubmit = async () => {
+    setInvalidTemplateName(false);
+    setExistedTemplateName(false);
+    if (newTemplateData.templateName.trim() === "") {
+      message.error("請填入模板名稱");
+      setInvalidTemplateName(true);
+      return;
+    }
+    if (templateNames.includes(newTemplateData.templateName)) {
+      setExistedTemplateName(true);
+      message.error("模板名稱已存在，請使用其他名稱！");
+      return;
+    }
     if (
       newTemplateData.frontFields.length < 1 ||
       newTemplateData.backFields.length < 1
     ) {
-      alert("正反面至少都需要有一個欄位！");
+      message.error("正反面至少都需要有一個欄位！");
       return;
     }
-    if (newTemplateData.templateName.trim() === "") {
-      setInvalidTemplateName(true);
-      return;
-    }
-    setInvalidTemplateName(false);
 
     // 取得 CardWrapper 的大小
     const cardRect = cardRef.current.getBoundingClientRect();
@@ -203,213 +220,258 @@ const NewTemplateModal = ({ currentStyle, onClose, onTemplateAdded }) => {
     };
 
     try {
+      messageApi.open({
+        type: "loading",
+        content: "儲存中...",
+        duration: 0, // 使 loading 狀態持續，直到手動銷毀
+      });
       const newTemplateId = await saveCardTemplate({
         ...updatedTemplateData,
         userId: user.userId,
       });
-      alert("儲存樣式成功！");
-      onTemplateAdded(updatedTemplateData, newTemplateId);
-      onClose();
+      // 成功後顯示成功訊息並關閉 modal
+      messageApi.destroy(); // 關閉 loading 訊息
+      // 儲存成功，顯示 success 訊息
+      messageApi.open({
+        type: "success",
+        content: "儲存成功！",
+        duration: 2, // 延遲 2 秒自動隱藏
+      });
+      // 延遲關閉表單
+      setTimeout(() => {
+        onTemplateAdded(updatedTemplateData, newTemplateId);
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error("儲存樣式失敗：", error.message);
-      alert("儲存樣式失敗，請再試一次。");
+      // 失敗後顯示錯誤訊息
+      messageApi.destroy(); // 關閉 loading 訊息
+      messageApi.open({
+        type: "error",
+        content: "儲存失敗，請再試一次。",
+        duration: 3, // 顯示 3 秒的錯誤訊息
+      });
     }
   };
 
   return (
-    <ModalWrapper>
-      <ModalContent>
-        <Heading>新增模板</Heading>
-        <CloseIcon onClick={onClose}>×</CloseIcon>
-        <EditAreaWrapper>
-          <Label>模板名稱</Label>
-          <TemplateNameInput
-            onChange={(e) =>
-              setNewTemplateData({
-                ...newTemplateData,
-                templateName: e.target.value,
-              })
-            }
-          />
-          {invalidTemplateName && (
-            <InvalidFieldNotice>請填入模板名稱</InvalidFieldNotice>
-          )}
-          <SideFieldList>
-            <SideField>
-              <Label>正面</Label>
-              <FieldList>
-                <Label>No.</Label>
-                <Label>欄位名稱</Label>
-                <Label>類型</Label>
-                <Label>是否為必填</Label>
-                <Label>刪除</Label>
-                {newTemplateData.frontFields.map((frontField, index) => (
-                  <React.Fragment key={index}>
-                    <p>{index + 1}.</p>
-                    <FieldNameInput
-                      type="text"
-                      value={frontField.name}
-                      onChange={(e) =>
-                        handleFieldUpdate("frontFields", index, {
-                          name: e.target.value,
-                        })
-                      }
-                    />
-                    <p>{frontField.type === "text" ? "文字" : "圖片"}</p>
-                    <p>{frontField.required ? "是" : "否"}</p>
-                    <TrashIconContainer
-                      onClick={() => handleDeleteField("frontFields", index)}
-                    >
-                      <TrashIcon />
-                    </TrashIconContainer>
-                  </React.Fragment>
-                ))}
-              </FieldList>
-            </SideField>
-            <SideFieldListSplit />
-            <SideField>
-              <Label>背面</Label>
-              <FieldList>
-                <Label>No.</Label>
-                <Label>欄位名稱</Label>
-                <Label>類型</Label>
-                <Label>是否為必填</Label>
-                <Label>刪除</Label>
-                {newTemplateData.backFields.map((backField, index) => (
-                  <React.Fragment key={index}>
-                    <p>{index + 1}.</p>
-                    <FieldNameInput
-                      type="text"
-                      value={backField.name}
-                      onChange={(e) =>
-                        handleFieldUpdate("backFields", index, {
-                          name: e.target.value,
-                        })
-                      }
-                    />
-                    <p>{backField.type === "text" ? "文字" : "圖片"}</p>
-                    <p>{backField.required ? "是" : "否"}</p>
-                    <TrashIconContainer
-                      onClick={() => handleDeleteField("backFields", index)}
-                    >
-                      <TrashIcon />
-                    </TrashIconContainer>
-                  </React.Fragment>
-                ))}
-              </FieldList>
-            </SideField>
-          </SideFieldList>
-          <AddFieldButton onClick={() => setIsAddFieldModalOpen(true)}>
-            新增欄位
-          </AddFieldButton>
-          <Label>預覽</Label>
-          <FlipButton onClick={handleFlip}>翻轉</FlipButton>
-          {selectedField && selectedField.fieldType !== "image" ? (
-            <TextStyleEditor
-              field={newTemplateData[selectedField.side][selectedField.index]}
-              onUpdate={(updatedField) =>
-                handleFieldUpdate(
-                  selectedField.side,
-                  selectedField.index,
-                  updatedField
-                )
+    <>
+      {contextHolder}
+      <ModalWrapper>
+        <ModalContent>
+          <Heading>
+            <EditIcon />
+            <p>新增模板</p>
+          </Heading>
+          <CloseIcon onClick={onClose}>×</CloseIcon>
+          <EditAreaWrapper>
+            <LabelName>模板名稱</LabelName>
+            <TemplateNameInput
+              onChange={(e) =>
+                setNewTemplateData({
+                  ...newTemplateData,
+                  templateName: e.target.value,
+                })
               }
             />
-          ) : (
-            <TextStyleEditorPlaceholder>
-              點選文字進一步編輯
-            </TextStyleEditorPlaceholder>
+            {invalidTemplateName && (
+              <InvalidFieldNotice>請填入模板名稱</InvalidFieldNotice>
+            )}
+            {existedTemplateName && (
+              <InvalidFieldNotice>
+                模板名稱已存在，請使用其他名稱！
+              </InvalidFieldNotice>
+            )}
+            <SideFieldList>
+              <SideField>
+                <FieldHeading>正面</FieldHeading>
+                <FieldList>
+                  <FieldHeader>No.</FieldHeader>
+                  <FieldHeader>欄位名稱</FieldHeader>
+                  <FieldHeader>類型</FieldHeader>
+                  <FieldHeader>是否為必填</FieldHeader>
+                  <FieldHeader>刪除</FieldHeader>
+                  {newTemplateData.frontFields.map((frontField, index) => (
+                    <React.Fragment key={index}>
+                      <FieldIndex>{index + 1}.</FieldIndex>
+                      <TextArea
+                        autoSize
+                        value={frontField.name}
+                        onChange={(e) =>
+                          handleFieldUpdate("frontFields", index, {
+                            name: e.target.value,
+                          })
+                        }
+                      />
+                      <FieldType>
+                        {frontField.type === "text" ? "文字" : "圖片"}
+                      </FieldType>
+                      <FieldRequired>
+                        {frontField.required ? "是" : "否"}
+                      </FieldRequired>
+                      <TrashIconContainer
+                        onClick={() => handleDeleteField("frontFields", index)}
+                      >
+                        <TrashIcon />
+                      </TrashIconContainer>
+                    </React.Fragment>
+                  ))}
+                </FieldList>
+              </SideField>
+              <SideField>
+                <FieldHeading>背面</FieldHeading>
+                <FieldList>
+                  <FieldHeader>No.</FieldHeader>
+                  <FieldHeader>欄位名稱</FieldHeader>
+                  <FieldHeader>類型</FieldHeader>
+                  <FieldHeader>是否為必填</FieldHeader>
+                  <FieldHeader>刪除</FieldHeader>
+                  {newTemplateData.backFields.map((backField, index) => (
+                    <React.Fragment key={index}>
+                      <FieldIndex>{index + 1}.</FieldIndex>
+                      <TextArea
+                        autoSize
+                        value={backField.name}
+                        onChange={(e) =>
+                          handleFieldUpdate("backFields", index, {
+                            name: e.target.value,
+                          })
+                        }
+                      />
+                      <FieldType>
+                        {backField.type === "text" ? "文字" : "圖片"}
+                      </FieldType>
+                      <FieldRequired>
+                        {backField.required ? "是" : "否"}
+                      </FieldRequired>
+                      <TrashIconContainer
+                        onClick={() => handleDeleteField("backFields", index)}
+                      >
+                        <TrashIcon />
+                      </TrashIconContainer>
+                    </React.Fragment>
+                  ))}
+                </FieldList>
+              </SideField>
+            </SideFieldList>
+            <AddFieldButton onClick={() => setIsAddFieldModalOpen(true)}>
+              新增欄位
+            </AddFieldButton>
+            <Label>預覽</Label>
+            <FlipButton onClick={handleFlip}>翻轉</FlipButton>
+            {selectedField && selectedField.fieldType !== "image" ? (
+              <TextStyleEditor
+                field={newTemplateData[selectedField.side][selectedField.index]}
+                onUpdate={(updatedField) =>
+                  handleFieldUpdate(
+                    selectedField.side,
+                    selectedField.index,
+                    updatedField
+                  )
+                }
+              />
+            ) : (
+              <TextStyleEditorPlaceholder>
+                可拖曳移動位置或點選文字進一步編輯
+              </TextStyleEditorPlaceholder>
+            )}
+            <CardWrapper ref={cardRef}>
+              <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
+                <FrontCard isFlipped={isFlipped} currentStyle={currentStyle}>
+                  {newTemplateData.frontFields.map((field, index) => (
+                    <Rnd
+                      key={index}
+                      size={{
+                        width: field.style.width,
+                        height: field.style.height,
+                      }}
+                      position={{ x: field.position.x, y: field.position.y }}
+                      onClick={() =>
+                        handleFieldClick("frontFields", index, field.type)
+                      } // 追蹤點擊事件
+                      onDragStop={(e, d) => {
+                        handleFieldDrag("frontFields", index, {
+                          x: d.x,
+                          y: d.y,
+                        });
+                        handleFieldClick("frontFields", index, field.type); // 拖曳後選取
+                      }}
+                      onResizeStop={(e, direction, ref, delta, position) => {
+                        handleFieldResize("frontFields", index, {
+                          width: ref.style.width,
+                          height: ref.style.height,
+                        });
+                        handleFieldClick("frontFields", index, field.type); // 調整大小後選取
+                      }}
+                      bounds="parent"
+                    >
+                      <FieldContainer
+                        style={field.style}
+                        isSelected={
+                          selectedField &&
+                          selectedField.side === "frontFields" &&
+                          selectedField.index === index
+                        }
+                      >
+                        {renderFieldContent(field)}
+                      </FieldContainer>
+                    </Rnd>
+                  ))}
+                </FrontCard>
+                <BackCard isFlipped={isFlipped} currentStyle={currentStyle}>
+                  {newTemplateData.backFields.map((field, index) => (
+                    <Rnd
+                      key={index}
+                      size={{
+                        width: field.style.width,
+                        height: field.style.height,
+                      }}
+                      position={{ x: field.position.x, y: field.position.y }}
+                      onClick={() =>
+                        handleFieldClick("backFields", index, field.type)
+                      } // 追蹤點擊事件
+                      onDragStop={(e, d) => {
+                        handleFieldDrag("backFields", index, {
+                          x: d.x,
+                          y: d.y,
+                        });
+                        handleFieldClick("backFields", index, field.type); // 拖曳後選取
+                      }}
+                      onResizeStop={(e, direction, ref, delta, position) => {
+                        handleFieldResize("backFields", index, {
+                          width: ref.style.width,
+                          height: ref.style.height,
+                        });
+                        handleFieldClick("backFields", index, field.type); // 調整大小後選取
+                      }}
+                      bounds="parent"
+                    >
+                      <FieldContainer
+                        style={field.style}
+                        isSelected={
+                          selectedField &&
+                          selectedField.side === "backFields" &&
+                          selectedField.index === index
+                        }
+                      >
+                        {renderFieldContent(field)}
+                      </FieldContainer>
+                    </Rnd>
+                  ))}
+                </BackCard>
+              </FlipCard>
+            </CardWrapper>
+          </EditAreaWrapper>
+          <SaveButton onClick={handleSubmit}>儲存模板</SaveButton>
+          {isAddFieldModalOpen && (
+            <AddFieldModal
+              onClose={() => setIsAddFieldModalOpen(false)}
+              onSave={handleAddField}
+            />
           )}
-          <CardWrapper ref={cardRef}>
-            <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
-              <FrontCard isFlipped={isFlipped} currentStyle={currentStyle}>
-                {newTemplateData.frontFields.map((field, index) => (
-                  <Rnd
-                    key={index}
-                    size={{
-                      width: field.style.width,
-                      height: field.style.height,
-                    }}
-                    position={{ x: field.position.x, y: field.position.y }}
-                    onClick={() =>
-                      handleFieldClick("frontFields", index, field.type)
-                    } // 追蹤點擊事件
-                    onDragStop={(e, d) => {
-                      handleFieldDrag("frontFields", index, { x: d.x, y: d.y });
-                      handleFieldClick("frontFields", index, field.type); // 拖曳後選取
-                    }}
-                    onResizeStop={(e, direction, ref, delta, position) => {
-                      handleFieldResize("frontFields", index, {
-                        width: ref.style.width,
-                        height: ref.style.height,
-                      });
-                      handleFieldClick("frontFields", index, field.type); // 調整大小後選取
-                    }}
-                    bounds="parent"
-                  >
-                    <FieldContainer
-                      style={field.style}
-                      isSelected={
-                        selectedField &&
-                        selectedField.side === "frontFields" &&
-                        selectedField.index === index
-                      }
-                    >
-                      {renderFieldContent(field)}
-                    </FieldContainer>
-                  </Rnd>
-                ))}
-              </FrontCard>
-              <BackCard isFlipped={isFlipped} currentStyle={currentStyle}>
-                {newTemplateData.backFields.map((field, index) => (
-                  <Rnd
-                    key={index}
-                    size={{
-                      width: field.style.width,
-                      height: field.style.height,
-                    }}
-                    position={{ x: field.position.x, y: field.position.y }}
-                    onClick={() =>
-                      handleFieldClick("backFields", index, field.type)
-                    } // 追蹤點擊事件
-                    onDragStop={(e, d) => {
-                      handleFieldDrag("backFields", index, { x: d.x, y: d.y });
-                      handleFieldClick("backFields", index, field.type); // 拖曳後選取
-                    }}
-                    onResizeStop={(e, direction, ref, delta, position) => {
-                      handleFieldResize("backFields", index, {
-                        width: ref.style.width,
-                        height: ref.style.height,
-                      });
-                      handleFieldClick("backFields", index, field.type); // 調整大小後選取
-                    }}
-                    bounds="parent"
-                  >
-                    <FieldContainer
-                      style={field.style}
-                      isSelected={
-                        selectedField &&
-                        selectedField.side === "backFields" &&
-                        selectedField.index === index
-                      }
-                    >
-                      {renderFieldContent(field)}
-                    </FieldContainer>
-                  </Rnd>
-                ))}
-              </BackCard>
-            </FlipCard>
-          </CardWrapper>
-        </EditAreaWrapper>
-        <SaveButton onClick={handleSubmit}>儲存模板</SaveButton>
-        {isAddFieldModalOpen && (
-          <AddFieldModal
-            onClose={() => setIsAddFieldModalOpen(false)}
-            onSave={handleAddField}
-          />
-        )}
-      </ModalContent>
-    </ModalWrapper>
+        </ModalContent>
+      </ModalWrapper>
+    </>
   );
 };
 
@@ -480,6 +542,11 @@ const getResponsiveFontSize = (fontSizeValue) => {
     }
   `;
 };
+
+const LabelName = styled.label`
+  font-size: 16px;
+`;
+
 const Label = styled.label`
   font-size: 16px;
 `;
@@ -491,7 +558,7 @@ const InvalidFieldNotice = styled.p`
 `;
 
 const TemplateNameInput = styled.input`
-  margin: 8px 10px 15px 2px;
+  margin-top: 8px;
   height: 28px;
   padding: 0px 5px;
   border: solid 1px #c1c0c0;
@@ -528,7 +595,13 @@ const ModalContent = styled.div`
 
 const Heading = styled.h3`
   font-size: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #3d5a80;
 `;
 
 const CloseIcon = styled.p`
@@ -554,6 +627,12 @@ const CardWrapper = styled.div`
   height: 400px;
   perspective: 1000px;
   transform-style: preserve-3d;
+  @media only screen and (max-width: 939px) {
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 3 / 2;
+    height: auto;
+  }
 `;
 
 const FlipCard = styled.div`
@@ -673,31 +752,78 @@ const ImageExample = styled.img`
 const SideFieldList = styled.div`
   display: flex;
   flex-direction: row;
-  margin-bottom: 40px;
+  margin: 12px 0 20px 0;
+  height: fit-content;
+  gap: 16px;
+  @media only screen and (max-width: 939px) {
+    flex-direction: column;
+  }
 `;
-
 const SideField = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
+  background-color: #f8f8f8; // 柔和的背景色
+  padding: 16px;
+  border-radius: 8px; // 圓角
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // 增加陰影
 `;
 
+const FieldHeading = styled.h4`
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+`;
 const FieldList = styled.div`
   display: grid;
-  grid-template-columns: 1fr 2fr 2fr 2fr 1fr;
+  grid-template-columns: 1fr 4fr 2fr 3fr 1fr;
   grid-row-gap: 10px;
+  align-items: center;
 `;
 
-const SideFieldListSplit = styled.div`
-  border-left: 1px solid gray;
-  height: 80px;
-  margin-right: 5px;
+const FieldHeader = styled.p`
+  font-size: 14px;
+  font-weight: 600;
+  color: #3d5a80;
+  text-align: center;
+`;
+
+const FieldIndex = styled.p`
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+`;
+
+const FieldType = styled.p`
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+`;
+
+const FieldRequired = styled.p`
+  font-size: 14px;
+  color: ${(props) => (props.required ? "#ff4d4f" : "#555")};
+  text-align: center;
+`;
+
+const TrashIconContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #ff4d4f; // 鮮豔紅色來顯示刪除圖標
+  transition: transform 0.3s;
+
+  &:hover {
+    transform: scale(1.1);
+    color: #d32f2f; // hover 時讓顏色更深
+  }
 `;
 
 const FlipButton = styled.div`
   background-color: rgb(221, 216, 216);
   margin-top: 15px;
-  width: 60px;
+  width: 80px;
   height: 25px;
   border-radius: 4px;
   line-height: 25px;
@@ -707,33 +833,37 @@ const FlipButton = styled.div`
 `;
 
 const SaveButton = styled.div`
-  background-color: #ddd8d8;
-  width: 120px;
-  height: 25px;
-  line-height: 25px;
-  border-radius: 4px;
-  text-align: center;
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px auto 0 auto;
+  align-self: center;
+  width: 128px;
+  height: 45px;
+  font-size: 16px;
+  line-height: 16px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: white;
+  background-color: #3d5a80;
+  border-radius: 8px;
   cursor: pointer;
-`;
-
-const FieldNameInput = styled.input`
-  width: 95%;
 `;
 
 const AddFieldButton = styled.div`
-  background-color: #f3c5c5;
+  background-color: #cce5ff; /* 淺藍色，符合主題 */
+  color: #003366; /* 深藍色文字，提升可讀性 */
   width: 120px;
-  height: 25px;
-  line-height: 25px;
+  height: 30px;
+  line-height: 30px;
   border-radius: 4px;
   text-align: center;
   margin: 0 auto;
   cursor: pointer;
-`;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 
-const TrashIconContainer = styled.div`
-  cursor: pointer;
+  &:hover {
+    box-shadow: 0px 4px 8px rgba(0, 0, 102, 0.2); /* 添加陰影效果以增強互動性 */
+  }
 `;
 
 // 用於顯示圖片的樣式
@@ -857,6 +987,10 @@ const TextStyleWrapper = styled.div`
   padding: 4px;
   background-color: rgba(0, 0, 0, 0.3); // 半透明的黑色背景
   width: fit-content;
+  gap: 2px;
+  @media only screen and (max-width: 939px) {
+    margin-top: 8px;
+  }
 `;
 
 const TextStyleIconContainer = styled.div`
@@ -865,7 +999,7 @@ const TextStyleIconContainer = styled.div`
   align-items: center;
   width: 28px;
   height: 28px;
-  border: ${(props) => (props.isSelected ? "2px solid #1b1a1a" : "none")};
+  border: ${(props) => (props.isSelected ? "1px solid #2c2b2b" : "none")};
   background-color: ${(props) =>
     props.isSelected ? "#c7c6c6" : "transparent"};
   border-radius: ${(props) => (props.isSelected ? "5px" : "none")};
@@ -891,12 +1025,18 @@ const fontSizeDropDownStyle = {
 
 // AddNewFieldModal
 const AddFieldModal = ({ onClose, onSave }) => {
-  const [fieldName, setFieldName] = useState("");
+  const [fieldName, setFieldName] = useState("新欄位");
   const [fieldType, setFieldType] = useState("text"); // 預設為文字
   const [fieldSide, setFieldSide] = useState("frontFields"); // 預設為正面
   const [isRequired, setIsRequired] = useState(false);
+  const [invalidFieldName, setInvalidFieldName] = useState(false);
 
   const handleSave = () => {
+    if (fieldName.trim() === "") {
+      setInvalidFieldName(true);
+      return;
+    }
+
     const newField = {
       name: fieldName,
       type: fieldType,
@@ -919,51 +1059,54 @@ const AddFieldModal = ({ onClose, onSave }) => {
               objectFit: "contain",
             },
     };
-    if (fieldName === "") {
-      alert("欄位名稱為必填！");
-      return;
-    }
 
     onSave(newField, fieldSide);
     onClose();
   };
 
   return (
-    <AddFieldModalContent>
-      <h3>新增欄位</h3>
-      <CloseIcon onClick={onClose}>×</CloseIcon>
-      <Label>欄位名稱</Label>
-      <NewFieldNameInput
-        type="text"
-        value={fieldName}
-        onChange={(e) => setFieldName(e.target.value)}
-      />
-      <Label>新增在哪一面？</Label>
-      <NewFieldSelect
-        value={fieldSide}
-        onChange={(e) => setFieldSide(e.target.value)}
-      >
-        <option value="frontFields">正面</option>
-        <option value="backFields">背面</option>
-      </NewFieldSelect>
-      <Label>欄位類型</Label>
-      <NewFieldSelect
-        value={fieldType}
-        onChange={(e) => setFieldType(e.target.value)}
-      >
-        <option value="text">文字</option>
-        <option value="image">圖片</option>
-      </NewFieldSelect>
-      <IsRequiredWrapper>
-        <Label>是否為必填</Label>
-        <input
-          type="checkbox"
-          checked={isRequired}
-          onChange={() => setIsRequired(!isRequired)}
+    <>
+      <Overlay onClick={onClose} />
+      <AddFieldModalContent>
+        <AddFieldHeading>新增欄位</AddFieldHeading>
+        <CloseIcon onClick={onClose}>×</CloseIcon>
+        <Label>欄位名稱</Label>
+        <TextArea
+          autoSize
+          value={fieldName}
+          onChange={(e) => setFieldName(e.target.value)}
+          style={{
+            fontSize: "14px",
+            borderColor: invalidFieldName ? "#ff6f61" : "#d9d9d9", // 根據狀態設置框線顏色
+          }}
         />
-      </IsRequiredWrapper>
-      <SaveButton onClick={handleSave}>儲存欄位</SaveButton>
-    </AddFieldModalContent>
+        <Label>新增在哪一面？</Label>
+        <NewFieldSelect
+          value={fieldSide}
+          onChange={(e) => setFieldSide(e.target.value)}
+        >
+          <option value="frontFields">正面</option>
+          <option value="backFields">背面</option>
+        </NewFieldSelect>
+        <Label>欄位類型</Label>
+        <NewFieldSelect
+          value={fieldType}
+          onChange={(e) => setFieldType(e.target.value)}
+        >
+          <option value="text">文字</option>
+          <option value="image">圖片</option>
+        </NewFieldSelect>
+        <IsRequiredWrapper>
+          <Label>是否為必填</Label>
+          <input
+            type="checkbox"
+            checked={isRequired}
+            onChange={() => setIsRequired(!isRequired)}
+          />
+        </IsRequiredWrapper>
+        <SaveButton onClick={handleSave}>儲存欄位</SaveButton>
+      </AddFieldModalContent>
+    </>
   );
 };
 
@@ -971,6 +1114,17 @@ AddFieldModal.propTypes = {
   onClose: PropTypes.func,
   onSave: PropTypes.func,
 };
+
+// Overlay 遮罩層
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.1); // 半透明黑色遮罩
+  z-index: 2000;
+`;
 
 const AddFieldModalContent = styled.div`
   display: flex;
@@ -982,11 +1136,23 @@ const AddFieldModalContent = styled.div`
   left: 20%;
   padding: 40px;
   width: 60%;
-  height: 35%;
+  height: fit-content;
   border-radius: 8px;
-  border: 1px solid gray;
   background: aliceblue;
   overflow-y: auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  @media only screen and (max-width: 939px) {
+    width: 90%; // 讓它在小螢幕中更加自適應
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); // 將元件置於螢幕正中央
+  }
+`;
+
+const AddFieldHeading = styled.h3`
+  font-size: 20px;
+  font-weight: 500;
 `;
 
 const NewFieldNameInput = styled.input`
@@ -994,7 +1160,10 @@ const NewFieldNameInput = styled.input`
 `;
 
 const NewFieldSelect = styled.select`
-  height: 28px;
+  height: 30px;
+  border-radius: 8px;
+  border-color: #d9d9d9;
+  font-size: "Noto Sans TC", sans-serif;
 `;
 
 const IsRequiredWrapper = styled.div`
@@ -1004,3 +1173,21 @@ const IsRequiredWrapper = styled.div`
   align-items: center;
   height: 28px;
 `;
+
+const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="24"
+    height="24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+    />
+  </svg>
+);
