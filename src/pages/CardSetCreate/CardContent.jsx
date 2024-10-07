@@ -1,7 +1,9 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
-import { DragIcon, TrashIcon, PlusIcon } from "./icon";
+import { TrashIcon, PlusIcon } from "./icon";
 import { uploadImageToStorage, translateText } from "../../utils/api";
+import { Input } from "antd";
+const { TextArea } = Input;
 
 export default function CardContent({
   currentTemplate,
@@ -116,7 +118,8 @@ export default function CardContent({
                     (frontField, index) => {
                       if (frontField.type === "text") {
                         return (
-                          <TextInput
+                          <TextArea
+                            autoSize
                             key={index}
                             placeholder={frontField.name}
                             value={card.frontFields[index]?.value || ""}
@@ -183,7 +186,8 @@ export default function CardContent({
                     if (backField.type === "text") {
                       return (
                         <div key={index}>
-                          <TextInput
+                          <TextArea
+                            autoSize
                             placeholder={backField.name}
                             value={card.backFields[index]?.value || ""}
                             onChange={(e) =>
@@ -319,6 +323,7 @@ const CardWrapper = styled.div`
   margin: 20px 0px;
   padding: 35px 0px;
   border: 1px solid #c2c2c2;
+  background-color: #fff;
   width: 100%;
   max-width: 600px;
   min-height: 180px;

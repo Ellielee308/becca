@@ -76,6 +76,7 @@ const Wrapper = styled.div`
   max-width: 600px;
   min-height: 250px;
   border-radius: 8px;
+  background-color: #fafafa;
 `;
 
 const Heading = styled.div`
@@ -124,6 +125,7 @@ const SideSplit = styled.div`
 const SideHeading = styled.p`
   font-size: 18px;
   margin-bottom: 12px;
+  font-weight: 500;
 `;
 
 const TextInput = styled.input`
@@ -138,7 +140,7 @@ const TextWrapper = styled.div`
   padding: 0 4px;
   font-size: 14px;
   line-height: 30px;
-  color: ${(props) => (props.$isRequired ? "red" : "rgb(84, 84, 84)")};
+  color: ${(props) => (props.$isRequired ? "#ff6f61" : "rgb(84, 84, 84)")};
   background-color: rgba(239, 239, 239, 0.3);
   user-select: none;
 `;
@@ -150,7 +152,7 @@ const ImagePreviewWrapper = styled.div`
 `;
 const ImageFieldName = styled.p`
   font-size: 14px;
-  color: ${(props) => (props.$isRequired ? "red" : "#636262")};
+  color: ${(props) => (props.$isRequired ? "#ff6f61" : "#636262")};
 `;
 
 const ImagePreview = styled.img`

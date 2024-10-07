@@ -213,7 +213,7 @@ const Number = styled.div`
   border-radius: 50px; /* 使其更圓潤 */
   color: #ffffff;
   padding: 6px 14px;
-  font-size: 16px;
+  font-size: 14px;
 `;
 
 const LabelIcon = () => (

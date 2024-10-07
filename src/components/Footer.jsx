@@ -24,7 +24,7 @@ const Wrapper = styled.div`
   padding: 18px 15px 10px;
   background-color: #3d5a80; /* 使用主題色作為背景色 */
   color: #ffffff; /* 白色文字與深色背景形成對比 */
-  z-index: 4;
+  z-index: 6;
 `;
 
 const FooterText = styled.p`

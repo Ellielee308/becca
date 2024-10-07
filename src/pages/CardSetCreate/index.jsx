@@ -17,6 +17,16 @@ import {
   getUserLabels,
 } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
+import { ConfigProvider, Steps } from "antd";
+
+const customTheme = {
+  token: {
+    colorPrimary: "#3d5a80",
+    borderRadius: 8,
+    fontFamily: "'TaiwanPearl-Regular', 'Noto Sans TC', sans-serif;",
+    fontSize: 16,
+  },
+};
 
 function CardSetCreate() {
   const { user, loading } = useUser();
@@ -35,6 +45,7 @@ function CardSetCreate() {
   const [cardContent, setCardContent] = useState([]);
   const [suggestedTranslations, setSuggestedTranslations] = useState([]);
   const navigate = useNavigate();
+  const [step, setStep] = useState(0);
   const [cardSetData, setCardSetData] = useState({
     cardSetId: "",
     userId: "",
@@ -274,7 +285,8 @@ function CardSetCreate() {
     setCardSetData({ ...cardSetData, fieldTemplateId: fieldTemplateId });
   };
 
-  const handleSubmit = async (event) => {
+  // 處理第一步提交
+  const handleFirstStepSubmit = (event) => {
     event.preventDefault();
     let newInvalidFields = [];
 
@@ -301,17 +313,24 @@ function CardSetCreate() {
     }
 
     setInvalidFields(newInvalidFields);
-    if (newInvalidFields.length > 0) return;
-    //檢查卡牌組是否至少有一張
+    if (newInvalidFields.length === 0) {
+      setStep(1); // 若沒有錯誤，進入第二步
+    }
+  };
+
+  // 處理卡片內容提交
+  const handleFinalSubmit = async (event) => {
+    event.preventDefault();
+    // 檢查卡片內容的有效性
     if (cardContent.length < 1) {
       alert("字卡至少需要一張！");
       return;
     }
-    // 檢驗正面是否必填格都有填
+
+    // 檢查每張卡片的必填欄位
     for (let i = 0; i < selectedTemplate.frontFields.length; i++) {
       if (selectedTemplate.frontFields[i].required === true) {
         for (let y = 0; y < cardContent.length; y++) {
-          // 檢查前端卡片的對應欄位是否有值
           if (
             !cardContent[y].frontFields[i] ||
             cardContent[y].frontFields[i].value.trim() === ""
@@ -322,11 +341,10 @@ function CardSetCreate() {
         }
       }
     }
-    // 檢驗背面是否必填格都有填
+
     for (let i = 0; i < selectedTemplate.backFields.length; i++) {
       if (selectedTemplate.backFields[i].required === true) {
         for (let y = 0; y < cardContent.length; y++) {
-          // 檢查背面卡片的對應欄位是否有值
           if (
             !cardContent[y].backFields[i] ||
             cardContent[y].backFields[i].value.trim() === ""
@@ -337,7 +355,7 @@ function CardSetCreate() {
         }
       }
     }
-    //真正的提交邏輯
+
     try {
       const newCardSetId = await uploadCardSetWithCards(
         cardSetData,
@@ -356,233 +374,329 @@ function CardSetCreate() {
     return <div>Loading...</div>;
 
   return (
-    <Background>
-      <Wrapper>
-        <Heading>新增卡牌組</Heading>
-        <Form onSubmit={handleSubmit}>
-          <CardSetInfo>
-            <InputLabel htmlFor="title">
-              標題<RequiredNotice>*</RequiredNotice>
-            </InputLabel>
-            <Input
-              type="text"
-              onChange={(e) =>
-                setCardSetData({ ...cardSetData, title: e.target.value })
-              }
-              $isInvalid={invalidFields.includes("title")}
-              id="title"
-              placeholder="請輸入標題"
-            />
-            <InputLabel htmlFor="description">簡介</InputLabel>
-            <Textarea
-              id="description"
-              onChange={(e) =>
-                setCardSetData({ ...cardSetData, description: e.target.value })
-              }
-              placeholder="請輸入簡介"
-            />
-            <InputLabel>
-              目的
-              <RequiredNotice>
-                {`*${invalidFields.includes("purpose") ? " 必選項" : ""}`}
-              </RequiredNotice>
-            </InputLabel>
-            <RadioWrapper>
-              <InputRadio
-                type="radio"
-                id="languageLearning"
-                name="purpose"
-                value="languageLearning"
-                onChange={(e) => {
-                  if (e.target.checked)
-                    setCardSetData({
-                      ...cardSetData,
-                      purpose: "languageLearning",
-                    });
-                }}
-              />
-              <InputLabel htmlFor="languageLearning">語言學習</InputLabel>
-              <InputRadio
-                type="radio"
-                id="others"
-                name="purpose"
-                value="others"
-                onChange={(e) => {
-                  if (e.target.checked)
-                    setCardSetData({
-                      ...cardSetData,
-                      purpose: "others",
-                      learningLanguage: null,
-                      interfaceLanguage: null,
-                    });
-                }}
-              />
-              <InputLabel htmlFor="others">其他</InputLabel>
-            </RadioWrapper>
-            {cardSetData.purpose === "languageLearning" && (
-              <>
-                <InputLabel>
-                  正面字卡顯示的語言
-                  <RequiredNotice>*</RequiredNotice>
-                </InputLabel>
-                <Select
-                  options={languageOptions}
-                  onChange={(selectedOption) =>
-                    setCardSetData({
-                      ...cardSetData,
-                      learningLanguage: selectedOption.value,
-                    })
-                  }
-                  styles={selectStyles(
-                    invalidFields.includes("learningLanguage")
-                  )}
+    <ConfigProvider theme={customTheme}>
+      <Background>
+        <Wrapper>
+          {step === 0 && (
+            <>
+              <HeadingContainer>
+                <Heading>
+                  <EditIcon />
+                  <p>新增卡牌組</p>
+                </Heading>
+                <NextStepButton
+                  type="submit"
+                  onClick={handleFirstStepSubmit}
+                  value="下一步"
                 />
-                <InputLabel>
-                  背面字卡顯示的語言
-                  <RequiredNotice>*</RequiredNotice>
-                </InputLabel>
-                <Select
-                  options={languageOptions}
-                  onChange={(selectedOption) =>
-                    setCardSetData({
-                      ...cardSetData,
-                      interfaceLanguage: selectedOption.value,
-                    })
-                  }
-                  styles={selectStyles(
-                    invalidFields.includes("interfaceLanguage")
+              </HeadingContainer>
+              <Steps
+                current={step}
+                items={[
+                  {
+                    title: "基本資料",
+                  },
+                  {
+                    title: "字卡內容",
+                  },
+                  {
+                    title: "完成新增卡牌組",
+                  },
+                ]}
+              />
+              <Form onSubmit={handleFirstStepSubmit}>
+                <CardSetInfo>
+                  <InputLabel htmlFor="title">
+                    標題<RequiredNotice>*</RequiredNotice>
+                  </InputLabel>
+                  <Input
+                    type="text"
+                    onChange={(e) =>
+                      setCardSetData({ ...cardSetData, title: e.target.value })
+                    }
+                    $isInvalid={invalidFields.includes("title")}
+                    id="title"
+                    placeholder="請輸入標題"
+                  />
+                  <InputLabel htmlFor="description">簡介</InputLabel>
+                  <Textarea
+                    id="description"
+                    onChange={(e) =>
+                      setCardSetData({
+                        ...cardSetData,
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder="請輸入簡介"
+                  />
+                  <InputLabel>
+                    目的
+                    <RequiredNotice>
+                      {`*${invalidFields.includes("purpose") ? " 必選項" : ""}`}
+                    </RequiredNotice>
+                  </InputLabel>
+                  <RadioWrapper>
+                    <InputRadio
+                      type="radio"
+                      id="languageLearning"
+                      name="purpose"
+                      value="languageLearning"
+                      onChange={(e) => {
+                        if (e.target.checked)
+                          setCardSetData({
+                            ...cardSetData,
+                            purpose: "languageLearning",
+                          });
+                      }}
+                    />
+                    <InputLabel htmlFor="languageLearning">語言學習</InputLabel>
+                    <InputRadio
+                      type="radio"
+                      id="others"
+                      name="purpose"
+                      value="others"
+                      onChange={(e) => {
+                        if (e.target.checked)
+                          setCardSetData({
+                            ...cardSetData,
+                            purpose: "others",
+                            learningLanguage: null,
+                            interfaceLanguage: null,
+                          });
+                      }}
+                    />
+                    <InputLabel htmlFor="others">其他</InputLabel>
+                  </RadioWrapper>
+                  {cardSetData.purpose === "languageLearning" && (
+                    <>
+                      <InputLabel>
+                        正面字卡顯示的語言
+                        <RequiredNotice>*</RequiredNotice>
+                      </InputLabel>
+                      <Select
+                        options={languageOptions}
+                        onChange={(selectedOption) =>
+                          setCardSetData({
+                            ...cardSetData,
+                            learningLanguage: selectedOption.value,
+                          })
+                        }
+                        styles={selectStyles(
+                          invalidFields.includes("learningLanguage")
+                        )}
+                        placeholder="請選擇語言"
+                      />
+                      <InputLabel>
+                        背面字卡顯示的語言
+                        <RequiredNotice>*</RequiredNotice>
+                      </InputLabel>
+                      <Select
+                        options={languageOptions}
+                        onChange={(selectedOption) =>
+                          setCardSetData({
+                            ...cardSetData,
+                            interfaceLanguage: selectedOption.value,
+                          })
+                        }
+                        styles={selectStyles(
+                          invalidFields.includes("interfaceLanguage")
+                        )}
+                        placeholder="請選擇語言"
+                      />
+                    </>
                   )}
+                  <InputLabel>
+                    隱私
+                    <RequiredNotice>
+                      {`*${
+                        invalidFields.includes("visibility") ? " 必選項" : ""
+                      }`}
+                    </RequiredNotice>
+                  </InputLabel>
+                  <RadioWrapper>
+                    <InputRadio
+                      type="radio"
+                      id="public"
+                      name="visibility"
+                      value="public"
+                      onChange={(e) => {
+                        if (e.target.checked)
+                          setCardSetData({
+                            ...cardSetData,
+                            visibility: "public",
+                          });
+                      }}
+                      $isInvalid={invalidFields.includes("visibility")}
+                    />
+                    <InputLabel htmlFor="public">公開</InputLabel>
+                    <InputRadio
+                      type="radio"
+                      id="private"
+                      name="visibility"
+                      value="private"
+                      onChange={(e) => {
+                        if (e.target.checked)
+                          setCardSetData({
+                            ...cardSetData,
+                            visibility: "private",
+                          });
+                      }}
+                      $isInvalid={invalidFields.includes("visibility")}
+                    />
+                    <InputLabel htmlFor="private">私人</InputLabel>
+                  </RadioWrapper>
+                  <InputLabel htmlFor="label">標籤 (可複選) </InputLabel>
+                  <CreatableSelect
+                    id="label"
+                    isMulti
+                    options={labelOptions}
+                    value={labelOptions.filter((option) =>
+                      cardSetData.labels.some(
+                        (label) => label.labelId === option.value
+                      )
+                    )}
+                    onChange={(selectedOptions) => {
+                      setCardSetData({
+                        ...cardSetData,
+                        labels: selectedOptions
+                          ? selectedOptions.map((opt) => ({
+                              labelId: opt.value,
+                              name: opt.label,
+                            }))
+                          : [],
+                        labelNames: selectedOptions
+                          ? selectedOptions.map((opt) => opt.label)
+                          : [],
+                      });
+                    }}
+                    onCreateOption={handleCreateLabel} // 當創建新標籤時調用的處理程序
+                    placeholder="請輸入或選擇標籤"
+                  />
+                  <InputLabel>
+                    樣式<RequiredNotice>*</RequiredNotice>
+                  </InputLabel>
+                  <Select
+                    options={[
+                      ...styleOptions,
+                      { value: "newStyle", label: "新增樣式..." },
+                    ]}
+                    value={selectedStyleOption}
+                    onChange={handleStyleChange}
+                    styles={selectStyles(invalidFields.includes("styleId"))}
+                  />
+                  <InputLabel>
+                    模板<RequiredNotice>*</RequiredNotice>
+                  </InputLabel>
+                  <Select
+                    options={[
+                      ...templateOptions,
+                      { value: "newTemplate", label: "新增模板..." },
+                    ]}
+                    value={selectedTemplateOption}
+                    onChange={handleTemplateChange}
+                    styles={selectStyles(
+                      invalidFields.includes("fieldTemplateId")
+                    )}
+                  />
+                </CardSetInfo>
+                {selectedTemplate && selectedTemplate.templateName && (
+                  <TemplatePreview currentTemplate={selectedTemplate} />
+                )}
+                <InputLabel>預覽</InputLabel>
+                {selectedStyle.styleName && selectedTemplate.templateName && (
+                  <Preview
+                    currentStyle={selectedStyle}
+                    currentTemplate={selectedTemplate}
+                  />
+                )}
+                <Submit type="submit" value="下一步填寫字卡內容" />
+              </Form>
+            </>
+          )}
+          {step === 1 && (
+            <>
+              <HeadingContainer>
+                <Heading>
+                  <EditIcon />
+                  <p>新增卡牌組</p>
+                </Heading>
+                <UpperButtonGroup>
+                  <UpperPreviousStepButton
+                    onClick={() => {
+                      setStep(0);
+                    }}
+                  >
+                    上一步
+                  </UpperPreviousStepButton>
+                  <NextStepButton
+                    type="submit"
+                    onClick={handleFinalSubmit}
+                    value="儲存"
+                  />
+                </UpperButtonGroup>
+              </HeadingContainer>
+              <Steps
+                current={step}
+                items={[
+                  {
+                    title: "基本資料",
+                  },
+                  {
+                    title: "字卡內容",
+                  },
+                  {
+                    title: "完成新增卡牌組",
+                  },
+                ]}
+              />
+              <Form onSubmit={handleFinalSubmit}>
+                <InputLabel>
+                  字卡內容 (至少需要一張字卡)<RequiredNotice>*</RequiredNotice>
+                </InputLabel>
+                <CardContent
+                  currentTemplate={selectedTemplate}
+                  cardContent={cardContent}
+                  setCardContent={setCardContent}
+                  isPurposeLanguageLearning={
+                    cardSetData.purpose === "languageLearning"
+                  }
+                  interfaceLanguage={cardSetData.interfaceLanguage}
+                  suggestedTranslations={suggestedTranslations}
+                  setSuggestedTranslations={setSuggestedTranslations}
                 />
-              </>
-            )}
-            <InputLabel>
-              隱私
-              <RequiredNotice>
-                {`*${invalidFields.includes("visibility") ? " 必選項" : ""}`}
-              </RequiredNotice>
-            </InputLabel>
-            <RadioWrapper>
-              <InputRadio
-                type="radio"
-                id="public"
-                name="visibility"
-                value="public"
-                onChange={(e) => {
-                  if (e.target.checked)
-                    setCardSetData({ ...cardSetData, visibility: "public" });
-                }}
-                $isInvalid={invalidFields.includes("visibility")}
-              />
-              <InputLabel htmlFor="public">公開</InputLabel>
-              <InputRadio
-                type="radio"
-                id="private"
-                name="visibility"
-                value="private"
-                onChange={(e) => {
-                  if (e.target.checked)
-                    setCardSetData({ ...cardSetData, visibility: "private" });
-                }}
-                $isInvalid={invalidFields.includes("visibility")}
-              />
-              <InputLabel htmlFor="private">私人</InputLabel>
-            </RadioWrapper>
-            <InputLabel htmlFor="label">標籤 (可複選) </InputLabel>
-            <CreatableSelect
-              id="label"
-              isMulti
-              options={labelOptions}
-              value={labelOptions.filter((option) =>
-                cardSetData.labels.some(
-                  (label) => label.labelId === option.value
-                )
-              )}
-              onChange={(selectedOptions) => {
-                setCardSetData({
-                  ...cardSetData,
-                  labels: selectedOptions
-                    ? selectedOptions.map((opt) => ({
-                        labelId: opt.value,
-                        name: opt.label,
-                      }))
-                    : [],
-                  labelNames: selectedOptions
-                    ? selectedOptions.map((opt) => opt.label)
-                    : [],
-                });
+                <ButtonGroup>
+                  <PreviousStepButton
+                    onClick={() => {
+                      setStep(0);
+                    }}
+                  >
+                    上一步
+                  </PreviousStepButton>
+                  <Submit type="submit" value="儲存" />
+                </ButtonGroup>
+              </Form>
+            </>
+          )}
+          {showNewStyleModal && (
+            <NewStyleModal
+              onClose={() => {
+                setShowNewStyleModal(false);
               }}
-              onCreateOption={handleCreateLabel} // 當創建新標籤時調用的處理程序
+              onStyleAdded={handleStyleAdded}
             />
-            <InputLabel>
-              樣式<RequiredNotice>*</RequiredNotice>
-            </InputLabel>
-            <Select
-              options={[
-                ...styleOptions,
-                { value: "newStyle", label: "新增樣式..." },
-              ]}
-              value={selectedStyleOption}
-              onChange={handleStyleChange}
-              styles={selectStyles(invalidFields.includes("styleId"))}
-            />
-            <InputLabel>
-              模板<RequiredNotice>*</RequiredNotice>
-            </InputLabel>
-            <Select
-              options={[
-                ...templateOptions,
-                { value: "newTemplate", label: "新增模板..." },
-              ]}
-              value={selectedTemplateOption}
-              onChange={handleTemplateChange}
-              styles={selectStyles(invalidFields.includes("fieldTemplateId"))}
-            />
-          </CardSetInfo>
-          {selectedTemplate && selectedTemplate.templateName && (
-            <TemplatePreview currentTemplate={selectedTemplate} />
           )}
-          <InputLabel>預覽</InputLabel>
-          {selectedStyle.styleName && selectedTemplate.templateName && (
-            <Preview
+          {showNewTemplateModal && (
+            <NewTemplateModal
               currentStyle={selectedStyle}
-              currentTemplate={selectedTemplate}
+              onClose={() => {
+                setShowNewTemplateModal(false);
+              }}
+              onTemplateAdded={handleTemplateAdded}
             />
           )}
-          <InputLabel>
-            字卡內容 (至少需要一張字卡)<RequiredNotice>*</RequiredNotice>
-          </InputLabel>
-          <CardContent
-            currentTemplate={selectedTemplate}
-            cardContent={cardContent}
-            setCardContent={setCardContent}
-            isPurposeLanguageLearning={
-              cardSetData.purpose === "languageLearning"
-            }
-            interfaceLanguage={cardSetData.interfaceLanguage}
-            suggestedTranslations={suggestedTranslations}
-            setSuggestedTranslations={setSuggestedTranslations}
-          />
-          <Submit type="submit" value="儲存" />
-        </Form>
-        {showNewStyleModal && (
-          <NewStyleModal
-            onClose={() => {
-              setShowNewStyleModal(false);
-            }}
-            onStyleAdded={handleStyleAdded}
-          />
-        )}
-        {showNewTemplateModal && (
-          <NewTemplateModal
-            currentStyle={selectedStyle}
-            onClose={() => {
-              setShowNewTemplateModal(false);
-            }}
-            onTemplateAdded={handleTemplateAdded}
-          />
-        )}
-      </Wrapper>
-    </Background>
+        </Wrapper>
+      </Background>
+    </ConfigProvider>
   );
 }
 
@@ -599,21 +713,28 @@ const Wrapper = styled.div`
   margin: 0 auto;
   padding: 30px 20px;
   max-width: 1160px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
+  border: 1px solid #e6e3e1;
   border-radius: 8px;
   background-color: white;
 `;
 
 const Heading = styled.h2`
   padding-bottom: 30px;
-  font-size: 28px;
-  color: #414141;
   user-select: none;
+  font-weight: 400;
+  font-size: 32px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  white-space: pre-line;
+  color: #293241;
+  display: flex;
+  gap: 12px;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
+  margin-top: 8px;
 `;
 
 const CardSetInfo = styled.div`
@@ -631,6 +752,7 @@ const InputLabel = styled.label`
   margin-top: 12px;
   margin-bottom: 12px;
   font-size: 18px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
 `;
 
 const RequiredNotice = styled.span`
@@ -676,31 +798,30 @@ const InputRadio = styled.input`
 const RadioWrapper = styled.div``;
 
 const Submit = styled.input`
+  padding: 0 14px;
   margin-top: 20px;
   align-self: center;
-  width: 128px;
+  min-width: 128px;
   height: 45px;
   font-size: 16px;
   line-height: 16px;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: white;
-  background: linear-gradient(to right, #63b3ed, #4299e1); /* 漸層的天藍色 */
+  /* background: linear-gradient(to right, #63b3ed, #4299e1); 漸層的天藍色 */
+  background-color: #3d5a80;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4); /* 輕微的陰影 */
   transition: all 0.3s ease-in-out;
 
-  &:hover {
-    background: linear-gradient(to right, #4299e1, #3182ce); /* 加深的漸層 */
-    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.6); /* 增強陰影效果 */
-  }
+  /* &:hover {
+    background-color: #3182ce;
+  } */
 
-  &:active {
-    background: linear-gradient(to right, #3182ce, #2b6cb0); /* 更深的顏色 */
-    box-shadow: 0 3px 10px rgba(66, 153, 225, 0.4); /* 陰影變小 */
-    transform: translateY(2px); /* 按下效果 */
-  }
+  /* &:active {
+    background: linear-gradient(to right, #3182ce, #2b6cb0); 
+    transform: translateY(2px); 
+  } */
 `;
 
 const selectStyles = (isInvalid) => ({
@@ -716,3 +837,109 @@ const selectStyles = (isInvalid) => ({
     },
   }),
 });
+
+const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="32"
+    height="32"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+    />
+  </svg>
+);
+
+const ButtonGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin: 0 auto;
+  width: 500px;
+  justify-content: space-around;
+  @media only screen and (max-width: 639px) {
+    width: 100%;
+  }
+`;
+
+const PreviousStepButton = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 14px;
+  margin-top: 20px;
+  min-width: 128px;
+  height: 45px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 400;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: white;
+  background-color: #3d5a80;
+  border-radius: 8px;
+  cursor: pointer;
+`;
+
+const HeadingContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: start;
+`;
+
+const NextStepButton = styled.input`
+  width: 90px;
+  height: 36px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 400;
+  text-align: center;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: white;
+  background-color: #3d5a80;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  user-select: none;
+  cursor: pointer;
+  @media only screen and (max-width: 639px) {
+    display: none;
+  }
+`;
+
+const UpperButtonGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 36px;
+  @media only screen and (max-width: 639px) {
+    display: none;
+  }
+`;
+
+const UpperPreviousStepButton = styled.div`
+  width: 90px;
+  height: 36px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: white;
+  background-color: #3d5a80;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  user-select: none;
+  cursor: pointer;
+  @media only screen and (max-width: 639px) {
+    display: none;
+  }
+`;

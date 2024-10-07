@@ -3,6 +3,8 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { TrashIcon, PlusIcon } from "./icon";
 import { uploadImageToStorage, translateText } from "../../utils/api";
+import { Input } from "antd";
+const { TextArea } = Input;
 
 export default function CardContent({
   currentTemplate,
@@ -125,7 +127,8 @@ export default function CardContent({
                     (frontField, index) => {
                       if (frontField.type === "text") {
                         return (
-                          <TextInput
+                          <TextArea
+                            autoSize
                             key={index}
                             placeholder={frontField.name}
                             value={card.frontFields[index]?.value || ""}
@@ -192,7 +195,8 @@ export default function CardContent({
                     if (backField.type === "text") {
                       return (
                         <div key={index}>
-                          <TextInput
+                          <TextArea
+                            autoSize
                             placeholder={backField.name}
                             value={card.backFields[index]?.value || ""}
                             onChange={(e) =>
