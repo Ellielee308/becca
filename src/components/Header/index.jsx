@@ -272,7 +272,7 @@ const IconContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #adadad;
+  background-color: #3d5a80;
   border-radius: 4px;
 `;
 
