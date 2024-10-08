@@ -312,7 +312,7 @@ const IntroductionSection = styled.div`
   @media only screen and (min-width: 1440px) {
     height: 60vh;
   }
-  @media only screen and (max-width: 1279px) {
+  @media only screen and (max-width: 1079px) {
     padding: 0 40px 0px 40px;
   }
 `;
@@ -325,7 +325,7 @@ const IntroductionSectionText = styled.div`
 const BannerImg = styled.img`
   width: 360px;
   height: auto;
-  @media only screen and (max-width: 1279px) {
+  @media only screen and (max-width: 1079px) {
     width: 240px;
   }
 `;
