@@ -9,6 +9,7 @@ import quizSVG from "./images/quiz.svg";
 import gameSVG from "./images/game.svg";
 import searchSVG from "./images/search.svg";
 import customizeSVG from "./images/customize.svg";
+import learningSVG from "./images/learning.svg";
 import { Skeleton } from "antd";
 
 function Home() {
@@ -135,33 +136,36 @@ function Home() {
   return (
     <Wrapper>
       <IntroductionSection>
-        <BannerTextChinese>
-          背卡有BECCA， <br />
-          學習不再卡！
-        </BannerTextChinese>
-        <BannerText>
-          Backed by Cards, <br /> Boosted by BECCA.
-        </BannerText>
-        <ButtonGroup>
-          {user ? (
-            <WelcomeText>{`歡迎回來，${user.username}！`}</WelcomeText>
-          ) : (
-            <SignUpButton onClick={() => setShowLoginModal(true)}>
-              免費註冊
-            </SignUpButton>
-          )}
-          <CallToActionButton
-            onClick={() => {
-              if (user) {
-                navigate("/cardset/new"); // 如果已登入，導航到創建卡牌組的頁面
-              } else {
-                setShowLoginModal(true); // 如果未登入，顯示登入 Modal
-              }
-            }}
-          >
-            + 創建自己的記憶卡牌組
-          </CallToActionButton>
-        </ButtonGroup>
+        <IntroductionSectionText>
+          <BannerTextChinese>
+            背卡有BECCA， <br />
+            學習不再卡！
+          </BannerTextChinese>
+          <BannerText>
+            Backed by Cards, <br /> Boosted by BECCA.
+          </BannerText>
+          <ButtonGroup>
+            {user ? (
+              <WelcomeText>{`歡迎回來，${user.username}！`}</WelcomeText>
+            ) : (
+              <SignUpButton onClick={() => setShowLoginModal(true)}>
+                免費註冊
+              </SignUpButton>
+            )}
+            <CallToActionButton
+              onClick={() => {
+                if (user) {
+                  navigate("/cardset/new"); // 如果已登入，導航到創建卡牌組的頁面
+                } else {
+                  setShowLoginModal(true); // 如果未登入，顯示登入 Modal
+                }
+              }}
+            >
+              + 創建自己的記憶卡牌組
+            </CallToActionButton>
+          </ButtonGroup>
+        </IntroductionSectionText>
+        <BannerImg src={learningSVG} />
       </IntroductionSection>
       <FeatureSection>
         <SectionTitle>
@@ -287,14 +291,25 @@ const Wrapper = styled.div`
 
 const IntroductionSection = styled.div`
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 60px 30px 60px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 220px 30px 220px;
   background-color: #eff7ff;
   height: 400px;
   @media only screen and (min-width: 1440px) {
     height: 60vh;
   }
+`;
+
+const IntroductionSectionText = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const BannerImg = styled.img`
+  width: 360px;
+  height: auto;
 `;
 
 const BannerTextChinese = styled.div`
@@ -303,6 +318,7 @@ const BannerTextChinese = styled.div`
   white-space: pre-line;
   line-height: 72px;
   color: #293241;
+  font-weight: 500;
 `;
 
 const BannerText = styled.div`
@@ -336,8 +352,9 @@ const CallToActionButton = styled.div`
   width: fit-content;
   padding: 10px 14px;
   border-radius: 8px;
-  background-color: #d3d2d2;
-  color: #616161;
+  background-color: #faf8f8;
+  border: 1.5px solid #3d5a80;
+  color: #3d5a80;
   cursor: pointer;
 `;
 

@@ -118,6 +118,7 @@ const Title = styled.h2`
   font-size: 24px;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: #3d5a80;
+  font-weight: bold;
 `;
 
 const Split = styled.div`

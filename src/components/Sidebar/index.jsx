@@ -61,7 +61,7 @@ const Wrapper = styled.div`
   min-height: calc(100vh - 60px);
   width: 180px;
   align-items: center;
-
+  border-right: 1px solid #e6e3e1;
   z-index: 5;
 
   /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06); */

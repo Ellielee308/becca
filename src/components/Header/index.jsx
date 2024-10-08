@@ -442,7 +442,7 @@ const SearchInput = styled.input`
   font-size: 16px;
   line-height: 40px;
   background-color: transparent;
-  font-family: "TaiwanPearl-Regular";
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   &:focus {
     outline: none;
   }
