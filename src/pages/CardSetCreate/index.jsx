@@ -17,7 +17,7 @@ import {
   getUserLabels,
 } from "../../utils/api.js";
 import { Link } from "react-router-dom";
-import { ConfigProvider, Steps, message, Result } from "antd";
+import { ConfigProvider, Steps, message, Result, Skeleton } from "antd";
 
 const customTheme = {
   token: {
@@ -383,9 +383,22 @@ function CardSetCreate() {
     }
   };
 
-  if (!user || loading || !labelOptions || !allStyles || !allTemplates)
-    return <div>Loading...</div>;
-
+  if (!user || loading || !labelOptions || !allStyles || !allTemplates) {
+    return (
+      <SkeletonWrapper>
+        <Skeleton
+          active
+          title={{ width: 200 }} // 明確設置 title 寬度
+          paragraph={{ rows: 3, width: [200, 250, 180] }} // 設置每個段落寬度
+          style={{ width: "100%" }} // 設置骨架寬度撐滿
+        />
+        <SkeletonButtonWrapper>
+          <Skeleton.Button style={{ width: 120, height: 50 }} active />
+          <Skeleton.Button style={{ width: 120, height: 50 }} active />
+        </SkeletonButtonWrapper>
+      </SkeletonWrapper>
+    );
+  }
   return (
     <ConfigProvider theme={customTheme}>
       {contextHolder}
@@ -1066,4 +1079,20 @@ const GoToMyCardSetsLink = styled(Link)`
   @media only screen and (max-width: 479px) {
     font-size: 14px;
   }
+`;
+
+const SkeletonWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  height: 100vh;
+  padding: 180px 60px;
+  background-color: #eff7ff;
+`;
+
+const SkeletonButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  width: 100%; // 確保寬度被撐開
 `;

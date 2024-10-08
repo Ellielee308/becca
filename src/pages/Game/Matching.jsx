@@ -468,7 +468,7 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
         )}
         {gameStatus === "completed" && (
           <>
-            <RankingTitle>🎖️ 排行榜 ✨</RankingTitle>
+            <RankingTitle>排行榜</RankingTitle>
             {isLoading ? (
               <p>加載中...</p>
             ) : (
@@ -538,20 +538,62 @@ const ModalContent = styled.div`
   max-width: 400px;
   width: 100%;
   min-height: 360px;
+  z-index: 1001;
 `;
 const WaitingWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
 `;
-const RankingTitle = styled.h2`
-  font-size: 20px;
-  font-family: "Noto Sans TC", sans-serif;
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 10px;
-  font-weight: 500;
-  color: #3d5a80;
+
+const RankingTitle = styled.h1`
+  position: relative;
+  margin: 0 auto 8px;
+  padding: 10px 50px;
+  text-align: center;
+  background-color: #f6c144;
+  color: #854d19;
+  font-weight: bold;
+  user-select: none;
+  font-size: 18px;
+  line-height: 18px;
+
+  &::before,
+  &::after {
+    content: "";
+    width: 80px;
+    height: 100%;
+    background-color: #d99514;
+
+    /* position ribbon ends behind and slightly lower */
+    position: absolute;
+    top: 16px;
+    z-index: -1;
+
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 25% 50%);
+    background-image: linear-gradient(45deg, transparent 50%, #b87b0e 50%);
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    background-position: bottom right;
+  }
+
+  &::before {
+    left: -60px;
+  }
+
+  &::after {
+    right: -60px;
+    transform: scaleX(-1); /* flip horizontally */
+  }
 `;
+// const RankingTitle = styled.h2`
+//   font-size: 20px;
+//   font-family: "Noto Sans TC", sans-serif;
+//   border-bottom: 2px solid #e0e0e0;
+//   padding-bottom: 10px;
+//   font-weight: 500;
+//   color: #3d5a80;
+// `;
 
 const RankingList = styled.ul`
   margin-top: 16px;

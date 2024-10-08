@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getUserCollection, getCardSet, getStyle } from "../../utils/api";
 import { useUser } from "../../context/UserContext.jsx";
+import { Skeleton } from "antd";
 
 function UserCollection() {
   const { user } = useUser();
@@ -234,3 +235,18 @@ const LabelIcon = () => (
     />
   </svg>
 );
+
+const SkeletonWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  height: 100vh;
+  padding: 180px 60px;
+  background-color: #eff7ff;
+`;
+
+const SkeletonButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+`;

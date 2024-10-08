@@ -9,6 +9,7 @@ import quizSVG from "./images/quiz.svg";
 import gameSVG from "./images/game.svg";
 import searchSVG from "./images/search.svg";
 import customizeSVG from "./images/customize.svg";
+import { Skeleton } from "antd";
 
 function Home() {
   const { user, loading } = useUser();
@@ -112,7 +113,24 @@ function Home() {
   }, [selectedLanguage, allCardSets, allStyles]);
 
   if (!cardSetData || !styleData || loading) {
-    return <div>Loading...</div>;
+    return (
+      <SkeletonWrapper>
+        <Skeleton
+          active
+          title={false}
+          paragraph={{ rows: 2, width: [320, 320, 280, 280] }}
+        />
+        <Skeleton
+          active
+          title={false}
+          paragraph={{ rows: 2, width: [300, 300] }}
+        />
+        <SkeletonButtonWrapper>
+          <Skeleton.Button style={{ width: 120 }} active />
+          <Skeleton.Button style={{ width: 120 }} active />
+        </SkeletonButtonWrapper>
+      </SkeletonWrapper>
+    );
   }
   return (
     <Wrapper>
@@ -806,3 +824,19 @@ const RightArrowIcon = () => (
     />
   </svg>
 );
+
+const SkeletonWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  height: 100vh;
+  padding: 180px 60px;
+  background-color: #eff7ff;
+`;
+
+const SkeletonButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  width: 100%; // 確保寬度被撐開
+`;
