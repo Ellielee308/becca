@@ -63,13 +63,9 @@ const Wrapper = styled.div`
   align-items: center;
   border-right: 1px solid #e6e3e1;
   z-index: 5;
-
   /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06); */
-
   /* border: 1px solid #e0e4e8; */
-
-  transition: all 0.3s ease-in-out;
-
+  /* transition: all 0.3s ease-in-out; */
   /* &:hover {
     width: 200px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);

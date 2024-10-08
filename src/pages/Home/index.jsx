@@ -30,11 +30,23 @@ function Home() {
       "OZF0I6vBBYrak511I8J8",
       "RPPGIb5gbGMg4WzxBSEE",
       "jH4kPradOCKZM8SMH7to",
+    ],
+    japanese: [
+      "RF4PwG15orgdw6uu9Dxt",
+      "jT9sT4jV1j6j78SVjtPZ",
+      "hwA45Ctnr8iapSlwhrjy",
+      "HbVwvihKfneXonAI7Wkx",
+      "GD41WWkFbWwhV8UEoq0w",
+    ],
+    korean: [
+      "Xs29nvPJA8TqGL8RkZmL",
+      "bt3Ovd9XJEy5orhb0nb2",
+      "yC58RWlXDvG8oEQtzAp9",
       "lUdoYfQAvZH9sfR1vLf4",
       "v4yO156v7OFG43aVNroX",
+      "Dro5LM2tQcAZlwyl9e9I",
+      "PswtaA6E4eQXZy99e0KG",
     ],
-    japanese: ["OZF0I6vBBYrak511I8J8", "RPPGIb5gbGMg4WzxBSEE"],
-    korean: ["lUdoYfQAvZH9sfR1vLf4", "v4yO156v7OFG43aVNroX"],
   };
 
   const handleScroll = (direction) => {
@@ -629,6 +641,7 @@ const CardSetDescription = styled.p`
   color: gray;
   word-break: break-word;
   line-height: 1.7;
+  font-family: "Noto Sans TC", sans-serif;
 `;
 
 const LoginModal = ({ onClose }) => {

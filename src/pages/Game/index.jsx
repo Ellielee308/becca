@@ -18,6 +18,7 @@ import { db } from "../../utils/firebaseConfig.js";
 import Matching from "./Matching";
 import MultipleChoices from "./MultipleChoices";
 import photoPlaceholder from "./images/photo-placeholder.jpg";
+import beccaDog from "./images/beccaDog.png";
 import { message } from "antd";
 
 function Game() {
@@ -347,7 +348,7 @@ function Game() {
           <PlayersGridContainer>
             {players.map((player, index) => (
               <PlayerItem key={index}>
-                <ProfilePicture src={photoPlaceholder} />
+                <ProfilePicture src={beccaDog} />
                 <PlayerName> {player.username}</PlayerName>
               </PlayerItem>
             ))}
@@ -539,10 +540,11 @@ const PlayerItem = styled.div`
 `;
 
 const ProfilePicture = styled.img`
-  width: 60px;
-  height: 60px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #d3d3d3;
 `;
 
 const PlayerName = styled.p`

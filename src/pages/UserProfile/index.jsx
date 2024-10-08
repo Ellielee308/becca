@@ -95,31 +95,33 @@ function UserProfile() {
   return (
     <Wrapper>
       {contextHolder}
-      <Title>用戶總覽</Title>
-      <Split />
       <ProfileSection>
-        <ProfilePictureContainer>
-          <ProfilePicture
-            src={
-              newProfilePicture
-                ? URL.createObjectURL(newProfilePicture)
-                : user.profilePicture
-            }
-          />
-          <EditProfilePictureIcon onClick={handleIconClick}>
-            <EditIcon />
-          </EditProfilePictureIcon>
-        </ProfilePictureContainer>
-        <AccountInfo>
-          <AccountInfoItem>{`Email: ${user.email}`}</AccountInfoItem>
-          <AccountInfoItem>{`用戶名: ${user.username}`}</AccountInfoItem>
-          <AccountInfoItem>{`卡牌組數量: ${
-            cardSetCount ? cardSetCount : 0
-          }`}</AccountInfoItem>
-          <AccountInfoItem>
-            {`完成測驗數量: ${completedQuizCount ? completedQuizCount : 0}`}
-          </AccountInfoItem>
-        </AccountInfo>
+        <Title>用戶總覽</Title>
+        <Split />
+        <ProfileInfoWrapper>
+          <ProfilePictureContainer>
+            <ProfilePicture
+              src={
+                newProfilePicture
+                  ? URL.createObjectURL(newProfilePicture)
+                  : user.profilePicture
+              }
+            />
+            <EditProfilePictureIcon onClick={handleIconClick}>
+              <EditIcon />
+            </EditProfilePictureIcon>
+          </ProfilePictureContainer>
+          <AccountInfo>
+            <AccountInfoItem>{`Email: ${user.email}`}</AccountInfoItem>
+            <AccountInfoItem>{`用戶名: ${user.username}`}</AccountInfoItem>
+            <AccountInfoItem>{`卡牌組數量: ${
+              cardSetCount ? cardSetCount : 0
+            }`}</AccountInfoItem>
+            <AccountInfoItem>
+              {`完成測驗數量: ${completedQuizCount ? completedQuizCount : 0}`}
+            </AccountInfoItem>
+          </AccountInfo>
+        </ProfileInfoWrapper>
       </ProfileSection>
       {/* Modal 彈窗 */}
       {isModalOpen && (
@@ -146,9 +148,10 @@ function UserProfile() {
           </ModalContent>
         </ModalOverlay>
       )}
-      <Title>活躍足跡</Title>
-      <Split />
       <CalendarSection>
+        <Title>活躍足跡</Title>
+        <Split />
+
         {activeDays.length > 0 && <UserCalendar activeDays={activeDays} />}
       </CalendarSection>
     </Wrapper>
@@ -158,20 +161,23 @@ function UserProfile() {
 export default UserProfile;
 
 const Wrapper = styled.div`
-  padding: 0 100px 0 120px;
-  width: fit-content;
-  margin: 80px auto 0 auto;
+  margin-top: 80px;
+  padding: 0 80px;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
   @media only screen and (max-width: 639px) {
-    padding: 0 0 20px 0;
-    width: 100%;
+    padding: 0;
+  }
+  @media only screen and (min-width: 640px) and (max-width: 1023px) {
+    margin-left: 60px;
   }
 `;
 
 const Title = styled.h2`
-  font-size: 22px;
+  font-size: 24px;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: #3d5a80;
 `;
@@ -187,13 +193,18 @@ const ProfileSection = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 8px 0;
   margin-bottom: 36px;
+  flex-direction: column;
   @media only screen and (max-width: 480px) {
-    flex-direction: column;
     gap: 20px;
     align-items: center;
   }
+`;
+
+const ProfileInfoWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-top: 36px;
 `;
 
 const ProfilePictureContainer = styled.div`
@@ -230,8 +241,9 @@ const AccountInfoItem = styled.p`
 
 const CalendarSection = styled.div`
   display: flex;
-  width: 100%;
   justify-content: center;
+  flex-direction: column;
+  width: 100%;
 `;
 
 const EditProfilePictureIcon = styled.div`
@@ -328,6 +340,7 @@ const CancelButton = styled.button`
 
 const UserCalendar = ({ activeDays }) => {
   const [value, setValue] = useState(new Date());
+  const [activeView, setActiveView] = useState(new Date());
   const [highlightedDates, setHighlightedDates] = useState([]);
 
   // 處理 activeDays 數據並轉換成 Date 格式
@@ -338,17 +351,38 @@ const UserCalendar = ({ activeDays }) => {
     }
   }, [activeDays]);
 
-  // 自定義樣式渲染函數
+  // 處理月份切換
+  const handleActiveStartDateChange = ({ activeStartDate }) => {
+    if (activeStartDate) {
+      setActiveView(activeStartDate);
+    }
+  };
+
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
-      // 檢查這一天是否在 activeDays 裡
+      // 檢查是否為未來日期
+      const isInFuture = date > new Date();
+
       const isActive = highlightedDates.some(
         (activeDay) =>
           activeDay.getDate() === date.getDate() &&
           activeDay.getMonth() === date.getMonth() &&
           activeDay.getFullYear() === date.getFullYear()
       );
-      return isActive ? "highlight" : "inactive";
+
+      const belongsToDisplayedMonth =
+        date.getMonth() === activeView.getMonth() &&
+        date.getFullYear() === activeView.getFullYear();
+
+      if (belongsToDisplayedMonth) {
+        // 如果是未來日期，不添加任何背景色
+        if (isInFuture) {
+          return "future-date";
+        }
+        return isActive ? "highlight" : "inactive";
+      }
+
+      return "other-month";
     }
     return null;
   };
@@ -356,21 +390,26 @@ const UserCalendar = ({ activeDays }) => {
   return (
     <CalendarWrapper>
       <Calendar
-        onChange={setValue}
         value={value}
         tileClassName={tileClassName}
+        view="month"
+        maxDetail="month"
+        showNavigation={true}
+        onActiveStartDateChange={handleActiveStartDateChange}
+        activeStartDate={activeView}
       />
     </CalendarWrapper>
   );
 };
 
 const CalendarWrapper = styled.div`
+  align-self: center;
   .react-calendar {
     width: 400px;
     height: 400px;
     background-color: #f9f9f9;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
     padding: 20px;
     border: none;
     font-family: monospace;
@@ -398,6 +437,27 @@ const CalendarWrapper = styled.div`
     font-weight: bold;
   }
 
+  .react-calendar__navigation__label {
+    font-weight: bold;
+    font-size: 18px;
+    color: #6f8695;
+    cursor: default !important;
+    pointer-events: none; /* 添加這行來禁用所有點擊事件 */
+    user-select: none; /* 防止文字被選中 */
+  }
+
+  /* 確保標題按鈕也完全禁用 */
+  .react-calendar__navigation__label > button {
+    cursor: default !important;
+    pointer-events: none;
+  }
+
+  /* 禁用月份視圖的點擊 */
+  .react-calendar__year-view__months__month {
+    pointer-events: none !important;
+    cursor: default !important;
+  }
+
   .react-calendar__month-view__days {
     flex-grow: 1;
     display: grid !important;
@@ -417,8 +477,8 @@ const CalendarWrapper = styled.div`
     padding: 0;
     font-size: 14px; /* 日期字體大小 */
     border-radius: 50%; /* 讓日期成為圓形 */
-    transition: background-color 0.3s ease;
     border: 1px solid transparent;
+    pointer-events: none;
   }
 
   /* 禁用 hover 和選中效果 */
@@ -431,11 +491,6 @@ const CalendarWrapper = styled.div`
   .react-calendar__navigation button:active {
     background-color: transparent;
     outline: none;
-  }
-
-  .react-calendar__tile--now {
-    background: #ebbd78 !important; /* 當前日期背景色 */
-    color: #000;
   }
 
   /* 選中日期的樣式 */
@@ -466,6 +521,10 @@ const CalendarWrapper = styled.div`
     color: #ccc;
   }
 
+  .react-calendar__navigation {
+    cursor: default;
+  }
+
   /* 改進月份切換按鈕的樣式 */
   .react-calendar__navigation button {
     background-color: none;
@@ -489,6 +548,7 @@ const CalendarWrapper = styled.div`
     font-weight: bold;
     font-size: 18px;
     color: #6f8695;
+    cursor: not-allowed;
   }
 
   /* 週數和日期保持一致 */
@@ -499,5 +559,60 @@ const CalendarWrapper = styled.div`
   .react-calendar__month-view__days {
     display: grid;
     grid-template-columns: repeat(7, 1fr); /* 保持 7 列的日期結構 */
+  }
+  .react-calendar__navigation__next2-button {
+    display: none;
+  }
+
+  .react-calendar__navigation__prev2-button {
+    display: none;
+  }
+
+  .react-calendar__navigation__label {
+  }
+  .highlight {
+    background-color: #75e766;
+    color: white !important;
+    border-radius: 50%;
+  }
+
+  .highlight:hover {
+    background-color: #75e766;
+  }
+
+  .inactive {
+    background-color: #e0e0e0 !important;
+    color: black !important;
+    border-radius: 50%;
+  }
+
+  /* 非當前月份的日期樣式 */
+  .other-month {
+    color: #ccc !important;
+    background: none !important;
+  }
+
+  .future-date {
+    background: none !important;
+    color: black !important;
+  }
+
+  .react-calendar__tile--now {
+    background: none !important; /* 移除背景色 */
+    color: #000 !important; /* 設置日期文字顏色 */
+    position: relative; /* 讓偽元素相對於父元素定位 */
+  }
+
+  .react-calendar__tile--now::after {
+    content: "";
+    position: absolute;
+    bottom: 6px; /* 控制點的位置，讓它靠近數字的下方 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: #ff8a5b; /* 橘色點 */
+    border-radius: 50%;
+    z-index: 1; /* 確保偽元素在日期數字的後面 */
   }
 `;
