@@ -415,7 +415,7 @@ const FeatureGridWrapper = styled.div`
   margin-top: 12px;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 20px;
-  @media (max-width: 1279px) {
+  @media (max-width: 1079px) {
     grid-template-columns: 1fr 1fr;
   }
   @media (max-width: 639px) {
