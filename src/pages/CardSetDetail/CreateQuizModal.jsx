@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { useUser } from "../../context/UserContext.jsx";
 import { createQuiz } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
+import { message } from "antd";
 
 const CreateQuizModal = ({
   onClose,
@@ -55,7 +56,7 @@ const CreateQuizModal = ({
       if (quizId) {
         navigate(`/quiz/${quizId}`);
       } else {
-        alert("測驗創建失敗，請稍後再試");
+        message.error("測驗創建失敗，請稍後再試");
       }
     } catch (error) {
       console.error("提交測驗時出現錯誤：", error);

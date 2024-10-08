@@ -711,7 +711,7 @@ const ProfilePicture = styled.img`
   width: 64px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid #fff;
+  border: 2px solid #d3d3d3; // 添加灰色框線
 `;
 
 const SectionTitleWrapper = styled.div`

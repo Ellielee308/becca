@@ -359,6 +359,7 @@ const SubMenuProfilePicture = styled.img`
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #d3d3d3; // 添加灰色框線
 `;
 
 const SubMenuProfileTextWrapper = styled.div`
@@ -410,10 +411,11 @@ const NavItemWrapper = styled.div`
 `;
 
 const ProfilePicture = styled.img`
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #d3d3d3; // 添加灰色框線
 `;
 
 const SearchSection = styled.div`

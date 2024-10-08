@@ -143,6 +143,7 @@ function UserCardSets() {
         {userCardSets &&
           userCardStyles &&
           styleMap &&
+          userCardSets.length > 0 &&
           userCardSets.map((cardSet) => {
             return (
               <CardContainer key={cardSet.cardSetId}>
@@ -234,6 +235,13 @@ function UserCardSets() {
             );
           })}
       </CardGridWrapper>
+      {userCardSets && userCardSets.length === 0 && (
+        <div>
+          目前沒有卡牌組，可以點擊
+          <LinkToCardSetNew to="/cardset/new">此處</LinkToCardSetNew>
+          建立卡牌組！
+        </div>
+      )}
     </Wrapper>
   );
 }
@@ -253,8 +261,9 @@ const Wrapper = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 24px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: #3d5a80;
 `;
 
 const Split = styled.div`
@@ -415,6 +424,15 @@ const SubMenuItem = styled.div`
 const SubMenuItemText = styled.p`
   margin-left: 14px;
   color: ${(props) => (props.$isDelete ? "red" : "inherit")};
+`;
+
+const LinkToCardSetNew = styled(Link)`
+  margin: 0 4px;
+  color: #3d5a80;
+  font-weight: bold;
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const LabelIcon = () => (

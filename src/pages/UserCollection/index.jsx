@@ -114,8 +114,9 @@ const Wrapper = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 24px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: #3d5a80;
 `;
 
 const Split = styled.div`

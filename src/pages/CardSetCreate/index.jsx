@@ -261,7 +261,7 @@ function CardSetCreate() {
   const handleTemplateChange = (selectedOption) => {
     if (selectedOption.value === "newTemplate") {
       if (!selectedStyle.styleName) {
-        alert("請先選擇樣式！");
+        message.warning("請先選擇樣式！");
         return;
       } else {
         setShowNewTemplateModal(true); // 當選擇「新增樣式…」時顯示 Modal}

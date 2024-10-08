@@ -8,6 +8,7 @@ import {
 } from "../../utils/api.js";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import { message } from "antd";
 
 function UserProfile() {
   const { user, setUser, loading } = useUser();
@@ -16,6 +17,7 @@ function UserProfile() {
   const [activeDays, setActiveDays] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // 控制 Modal 的狀態
   const [newProfilePicture, setNewProfilePicture] = useState(null);
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -75,11 +77,11 @@ function UserProfile() {
           profilePicture: updatedProfilePictureURL, // 更新狀態中的頭像 URL
         }));
 
-        alert("大頭貼更新成功！");
+        message.success("大頭貼更新成功！"); // 成功訊息
         handleCloseModal(); // 關閉 modal
       } catch (error) {
         console.error("更新大頭貼失敗", error);
-        alert("更新大頭貼失敗，請稍後再試！");
+        message.error("更新大頭貼失敗，請稍後再試！"); // 錯誤訊息
       }
     }
   };
@@ -92,6 +94,7 @@ function UserProfile() {
     );
   return (
     <Wrapper>
+      {contextHolder}
       <Title>用戶總覽</Title>
       <Split />
       <ProfileSection>
@@ -168,8 +171,9 @@ const Wrapper = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 22px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  color: #3d5a80;
 `;
 
 const Split = styled.div`
@@ -205,6 +209,7 @@ const ProfilePicture = styled.img`
   width: 160px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #d3d3d3; // 添加灰色框線
 `;
 
 const AccountInfo = styled.div`
@@ -273,7 +278,7 @@ const ModalContent = styled.div`
   border-radius: 12px;
   min-width: 300px;
   max-width: 400px;
-  min-height: 200px;
+  min-height: 240px;
 `;
 
 const ModalHeader = styled.h3`
@@ -307,6 +312,7 @@ const UploadButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   flex: 1;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
 `;
 
 const CancelButton = styled.button`
@@ -317,6 +323,7 @@ const CancelButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   flex: 1;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
 `;
 
 const UserCalendar = ({ activeDays }) => {

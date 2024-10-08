@@ -100,6 +100,7 @@ const Wrapper = styled.div`
   max-width: 1160px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+  background-color: #eff7ff;
 `;
 
 const QuizDescription = styled.div`

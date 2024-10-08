@@ -294,6 +294,17 @@ function Game() {
     return `${minutes} 分 ${seconds} 秒`;
   };
 
+  useEffect(() => {
+    if (gameData && gameData.startedAt && !hasJoinedGame) {
+      // 顯示提示訊息
+      message.warning("遊戲已開始，無法加入！");
+      // 延遲一段時間後再導航
+      setTimeout(() => {
+        navigate("/"); // 導航至首頁或其他頁面
+      }, 1500); // 等待 1.5 秒，讓訊息顯示完畢
+    }
+  }, [gameData, hasJoinedGame, navigate]);
+
   if (
     !gameId ||
     !gameData ||
@@ -306,10 +317,6 @@ function Game() {
     loading
   ) {
     return <div>Loading...</div>;
-  }
-  if (gameData.startedAt && !hasJoinedGame) {
-    alert("遊戲已開始，無法加入！");
-    navigate("/");
   }
   return (
     <Wrapper>

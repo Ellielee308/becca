@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { useUser } from "../../context/UserContext.jsx";
 import { createGameWithQuestion } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
+import { message } from "antd";
 
 const CreateGameModal = ({
   onClose,
@@ -80,7 +81,7 @@ const CreateGameModal = ({
       if (gameId) {
         navigate(`/game/${gameId}`);
       } else {
-        alert("測驗遊戲失敗，請稍後再試");
+        message.error("創建遊戲失敗，請稍後再試！");
       }
     } catch (error) {
       console.error("提交遊戲資料時出現錯誤：", error);

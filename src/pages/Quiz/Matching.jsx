@@ -483,6 +483,15 @@ const ReviewButton = styled.div`
   background-color: #adbce5;
   cursor: pointer;
   user-select: none;
+  color: white; // 文字顏色設為白色
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+
+  &:hover {
+    background-color: #889ccd; // 當懸停時，改變背景顏色
+    color: #ffffff; // 保持白色字體
+  }
 `;
 
 const LeaveButton = styled.div`
@@ -495,6 +504,15 @@ const LeaveButton = styled.div`
   background-color: #f59873;
   cursor: pointer;
   user-select: none;
+  color: #ffffff; // 文字顏色設為白色
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+
+  &:hover {
+    background-color: #f57d51; // 當懸停時，改變背景顏色
+    color: #ffffff; // 保持白色字體
+  }
 `;
 
 const CustomLink = styled(Link)`
@@ -504,10 +522,6 @@ const CustomLink = styled(Link)`
   width: 100%;
   height: 100%;
   transition: color 0.3s ease;
-
-  &:hover {
-    color: #2e85b1;
-  }
 `;
 
 QuizResultModal.propTypes = {

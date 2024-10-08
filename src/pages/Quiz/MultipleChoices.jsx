@@ -317,6 +317,7 @@ const ChoiceCard = styled.div`
   cursor: pointer;
   outline: ${(props) => props.$outlineColor} 2px solid;
   transition: box-shadow 0.3s ease, transform 0.3s ease, outline 0.3s ease;
+  background-color: #fff;
 
   /* 懸停效果 */
   &:hover {
@@ -580,6 +581,15 @@ const ReviewButton = styled.div`
   background-color: #adbce5;
   cursor: pointer;
   user-select: none;
+  color: white; // 文字顏色設為白色
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+
+  &:hover {
+    background-color: #889ccd; // 當懸停時，改變背景顏色
+    color: #ffffff; // 保持白色字體
+  }
 `;
 
 const LeaveButton = styled.div`
@@ -592,6 +602,24 @@ const LeaveButton = styled.div`
   background-color: #f59873;
   cursor: pointer;
   user-select: none;
+  color: #ffffff; // 文字顏色設為白色
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+
+  &:hover {
+    background-color: #f57d51; // 當懸停時，改變背景顏色
+    color: #ffffff; // 保持白色字體
+  }
+`;
+
+const CustomLink = styled(Link)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  transition: color 0.3s ease;
 `;
 
 QuizResultModal.propTypes = {
@@ -655,16 +683,3 @@ const SideHeading = styled.p`
 //   width: auto;
 //   margin: 0 auto;
 // `;
-
-const CustomLink = styled(Link)`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  transition: color 0.3s ease;
-
-  &:hover {
-    color: #2e85b1;
-  }
-`;
