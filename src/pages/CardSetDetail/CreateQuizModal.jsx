@@ -210,6 +210,7 @@ const CreateButton = styled.input`
   margin-top: auto;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
 
   &:hover {
     background-color: #45a049; /* 滑過時的顏色 */

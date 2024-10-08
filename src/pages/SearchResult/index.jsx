@@ -52,10 +52,9 @@ function SearchResult() {
     <Background>
       <Wrapper>
         <Title>
-          <SearchIcon />
-          {`共找到 ${searchResults.length} 則有關「${keyword}」的搜尋結果`}
+          <LabelIcon />
+          {keyword}
         </Title>
-        <TitleSplit />
         <ResultWrapper>
           {searchResults.length === 0 ? (
             <NoFoundNote>查無搜尋結果，換個關鍵字搜尋看看吧！</NoFoundNote>
@@ -109,7 +108,7 @@ const Background = styled.div`
 
 const Wrapper = styled.div`
   margin: 0 auto;
-  padding-top: 20px;
+  padding: 20px 60px;
   max-width: 1160px;
   min-height: calc(100vh - 120px);
 `;

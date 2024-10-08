@@ -84,13 +84,12 @@ const Heading = styled.div`
   margin: 0 30px 45px 30px;
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
 `;
 
 const RequiredNotice = styled.span`
   font-size: 12px;
-  margin-top: 8px;
   color: #ff6f61;
+  margin: 8px 0 0 5px;
 `;
 
 const SideWrapper = styled.div`

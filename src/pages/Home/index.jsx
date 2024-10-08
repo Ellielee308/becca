@@ -638,6 +638,7 @@ const LoginModal = ({ onClose }) => {
   const [username, setUsername] = useState(""); // 用戶名（註冊時使用）
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMode = () => {
     setIsLogin((prev) => !prev);

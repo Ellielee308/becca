@@ -96,7 +96,7 @@ export default Quiz;
 
 const Wrapper = styled.div`
   margin: 100px auto 120px auto;
-  padding: 30px 20px;
+  padding: 20px 20px;
   max-width: 1160px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -120,8 +120,10 @@ const Title = styled.p`
   font-size: 24px;
   margin-bottom: 16px;
   text-align: center;
+  color: #3d5a80;
 `;
 
 const QuizTypeDescription = styled.p`
   font-size: 20px;
+  color: #3d5a80;
 `;
