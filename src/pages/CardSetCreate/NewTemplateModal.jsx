@@ -56,6 +56,8 @@ const NewTemplateModal = ({
   const [selectedField, setSelectedField] = useState(null);
   const { user } = useUser();
   const cardRef = useRef(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [newTemplateData, setNewTemplateData] = useState({
     fieldTemplateId: "", //自動生成
@@ -97,7 +99,6 @@ const NewTemplateModal = ({
     createdAt: "",
   });
 
-  const [isFlipped, setIsFlipped] = useState(false);
   const handleFlip = () => {
     setIsFlipped((prevState) => !prevState);
     setSelectedField(null);
@@ -163,6 +164,8 @@ const NewTemplateModal = ({
   const handleSubmit = async () => {
     setInvalidTemplateName(false);
     setExistedTemplateName(false);
+    if (isSaving) return;
+
     if (newTemplateData.templateName.trim() === "") {
       message.error("請填入模板名稱");
       setInvalidTemplateName(true);
@@ -218,39 +221,44 @@ const NewTemplateModal = ({
       frontFields: updatedFrontFields,
       backFields: updatedBackFields,
     };
-
+    setIsSaving(true);
     try {
       messageApi.open({
         type: "loading",
-        content: "儲存中...",
-        duration: 0, // 使 loading 狀態持續，直到手動銷毀
+        content: "儲存中，請稍候...",
+        duration: 0,
       });
       const newTemplateId = await saveCardTemplate({
         ...updatedTemplateData,
         userId: user.userId,
       });
-      // 成功後顯示成功訊息並關閉 modal
-      messageApi.destroy(); // 關閉 loading 訊息
-      // 儲存成功，顯示 success 訊息
+
+      messageApi.destroy();
+
       messageApi.open({
         type: "success",
         content: "儲存成功！",
-        duration: 2, // 延遲 2 秒自動隱藏
+        duration: 2,
       });
-      // 延遲關閉表單
+
       setTimeout(() => {
         onTemplateAdded(updatedTemplateData, newTemplateId);
         onClose();
       }, 2000);
     } catch (error) {
       console.error("儲存樣式失敗：", error.message);
-      // 失敗後顯示錯誤訊息
-      messageApi.destroy(); // 關閉 loading 訊息
+
+      messageApi.destroy();
+
       messageApi.open({
         type: "error",
         content: "儲存失敗，請再試一次。",
-        duration: 3, // 顯示 3 秒的錯誤訊息
+        duration: 3,
       });
+    } finally {
+      setTimeout(() => {
+        setIsSaving(false); // 確保表單關閉後才允許再次提交
+      }, 2000);
     }
   };
 
@@ -462,7 +470,9 @@ const NewTemplateModal = ({
               </FlipCard>
             </CardWrapper>
           </EditAreaWrapper>
-          <SaveButton onClick={handleSubmit}>儲存模板</SaveButton>
+          <SaveButton onClick={handleSubmit} $notAllowed={isSaving}>
+            {isSaving ? "儲存中..." : "儲存模板"}
+          </SaveButton>
           {isAddFieldModalOpen && (
             <AddFieldModal
               onClose={() => setIsAddFieldModalOpen(false)}
@@ -481,6 +491,7 @@ NewTemplateModal.propTypes = {
   currentStyle: PropTypes.object,
   onClose: PropTypes.func,
   onTemplateAdded: PropTypes.func,
+  templateNames: PropTypes.array,
 };
 
 const renderFieldContent = (field) => {
@@ -846,7 +857,7 @@ const SaveButton = styled.div`
   color: white;
   background-color: #3d5a80;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: ${(props) => (props.$notAllowed ? "not-allowed" : "pointer")};
 `;
 
 const AddFieldButton = styled.div`
@@ -1077,7 +1088,9 @@ const AddFieldModal = ({ onClose, onSave }) => {
           onChange={(e) => setFieldName(e.target.value)}
           style={{
             fontSize: "14px",
-            borderColor: invalidFieldName ? "#ff6f61" : "#d9d9d9", // 根據狀態設置框線顏色
+            borderColor: invalidFieldName ? "#ff6f61" : "#d9d9d9",
+            paddingTop: "5px",
+            paddingLeft: "4px",
           }}
         />
         <Label>新增在哪一面？</Label>
@@ -1155,15 +1168,12 @@ const AddFieldHeading = styled.h3`
   font-weight: 500;
 `;
 
-const NewFieldNameInput = styled.input`
-  height: 28px;
-`;
-
 const NewFieldSelect = styled.select`
   height: 30px;
   border-radius: 8px;
   border-color: #d9d9d9;
-  font-size: "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
 `;
 
 const IsRequiredWrapper = styled.div`

@@ -70,6 +70,7 @@ const defaultBackgroundColors = [
 
 const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
   const { user } = useUser();
+  const [isSaving, setIsSaving] = useState(false);
   const [style, setStyle] = useState({
     styleId: "",
     styleName: "",
@@ -174,8 +175,9 @@ const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
     event.preventDefault();
     setInvalidStyleName(false);
     setExistedStyleName(false);
+    if (isSaving) return;
 
-    if (style.styleName === "") {
+    if (style.styleName === "" || !style.styleName.trim()) {
       message.error("請填入樣式名稱");
       setInvalidStyleName(true);
       return;
@@ -186,8 +188,8 @@ const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
       return;
     } else {
       setInvalidStyleName(false);
+      setIsSaving(true);
       try {
-        // 顯示 loading 訊息
         messageApi.open({
           type: "loading",
           content: "儲存中，請稍候...",
@@ -199,17 +201,14 @@ const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
           userId: user.userId,
         });
 
-        // 隱藏 loading 狀態
         messageApi.destroy();
 
-        // 儲存成功，顯示 success 訊息
         messageApi.open({
           type: "success",
           content: "儲存成功！",
-          duration: 2, // 延遲 2 秒自動隱藏
+          duration: 2,
         });
 
-        // 延遲關閉表單
         setTimeout(() => {
           onStyleAdded(style, newStyleId);
           onClose();
@@ -217,15 +216,17 @@ const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
       } catch (error) {
         console.error("儲存樣式失敗：", error);
 
-        // 隱藏 loading 狀態
         messageApi.destroy();
 
-        // 儲存失敗，顯示 error 訊息
         messageApi.open({
           type: "error",
           content: "儲存失敗，請再試一次。",
-          duration: 3, // 顯示 3 秒的錯誤訊息
+          duration: 3,
         });
+      } finally {
+        setTimeout(() => {
+          setIsSaving(false); // 確保表單關閉後才允許再次提交
+        }, 2000);
       }
     }
   };
@@ -358,7 +359,12 @@ const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
                 />
               </PickerContainer>
             )}
-            <SaveButton type="submit" value="儲存樣式" />
+            <SaveButton
+              type="submit"
+              disabled={isSaving}
+              $notAllowed={isSaving}
+              value={isSaving ? "儲存中..." : "儲存樣式"}
+            />
           </Form>
         </ModalContent>
       </ModalWrapper>
@@ -370,6 +376,7 @@ export default NewStyleModal;
 NewStyleModal.propTypes = {
   onClose: PropTypes.func,
   onStyleAdded: PropTypes.func,
+  styleNames: PropTypes.array,
 };
 
 const ModalWrapper = styled.div`
@@ -565,11 +572,10 @@ const SaveButton = styled.input`
   line-height: 16px;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: white;
-  /* background: linear-gradient(to right, #63b3ed, #4299e1); 漸層的天藍色 */
   background-color: #3d5a80;
   border: none;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: ${(props) => (props.$notAllowed ? "not-allowed" : "pointer")};
   transition: all 0.3s ease-in-out;
 `;
 
