@@ -497,7 +497,7 @@ NewTemplateModal.propTypes = {
 const renderFieldContent = (field) => {
   switch (field.type) {
     case "text":
-      return field.name; // 渲染文字內容
+      return field.name;
     case "image":
       return (
         <ImageWrapper>
@@ -511,7 +511,7 @@ const renderFieldContent = (field) => {
         </ImageWrapper>
       );
     default:
-      return null; // 如果類型未定義，不渲染任何內容
+      return null;
   }
 };
 
@@ -753,13 +753,6 @@ const FieldContainer = styled.div`
     `}
 `;
 
-// 用於顯示圖片的樣式
-const ImageExample = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: ${(props) => props.style?.objectFit || "cover"};
-`;
-
 const SideFieldList = styled.div`
   display: flex;
   flex-direction: row;
@@ -861,8 +854,8 @@ const SaveButton = styled.div`
 `;
 
 const AddFieldButton = styled.div`
-  background-color: #cce5ff; /* 淺藍色，符合主題 */
-  color: #003366; /* 深藍色文字，提升可讀性 */
+  background-color: #cce5ff;
+  color: #003366;
   width: 120px;
   height: 30px;
   line-height: 30px;
@@ -873,14 +866,22 @@ const AddFieldButton = styled.div`
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
-    box-shadow: 0px 4px 8px rgba(0, 0, 102, 0.2); /* 添加陰影效果以增強互動性 */
+    box-shadow: 0px 4px 8px rgba(0, 0, 102, 0.2);
   }
 `;
 
 // 用於顯示圖片的樣式
 const ImageWrapper = styled.div`
   position: relative;
-  display: inline-block; // 讓 ImageWrapper 的大小與圖片保持一致
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+`;
+
+// 用於顯示圖片的樣式
+const ImageExample = styled.img`
+  max-width: 100%;
+  max-height: 100%;
 `;
 
 const ImageName = styled.p`
