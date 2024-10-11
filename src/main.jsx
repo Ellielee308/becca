@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import App from "./App.jsx";
 import Layout from "./components/Layout.jsx";
 import Home from "./pages/Home";
@@ -62,6 +62,7 @@ createRoot(document.getElementById("root")).render(
             />
             <Route path="search/:keyword" element={<SearchResult />} />
             <Route path="game/:gameId" element={<Game />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

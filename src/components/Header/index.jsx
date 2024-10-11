@@ -2,8 +2,7 @@ import styled from "styled-components";
 import { Link, NavLink } from "react-router-dom";
 import { useUser } from "../../context/UserContext.jsx";
 import { useState, useEffect } from "react";
-import { register, login } from "../../utils/api.js";
-import PropTypes from "prop-types";
+import LoginModal from "../LoginModal.jsx";
 import { signOut } from "firebase/auth";
 import { auth } from "../../utils/firebaseConfig.js";
 import { useNavigate } from "react-router-dom";
@@ -158,7 +157,10 @@ function Header() {
         ) : null}
       </NavigateWrapper>
       {showLoginModal && (
-        <LoginModal onClose={() => setShowLoginModal(false)} />
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          isLoginMode={true}
+        />
       )}
       {showSidebar && <Overlay onClick={toggleSidebar} />}
       <Sidebar showSidebar={showSidebar}>
@@ -555,181 +557,6 @@ const MobileLinkToCardSetNew = styled(Link)`
     display: none;
   }
 `;
-
-const LoginModal = ({ onClose }) => {
-  const [isLogin, setIsLogin] = useState(true); // 控制登入或註冊模式
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState(""); // 用戶名（註冊時使用）
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const toggleMode = () => {
-    setIsLogin((prev) => !prev);
-    setError("");
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      if (isLogin) {
-        await login(email, password);
-        console.log("已透過 Modal 登入成功");
-        onClose();
-      } else {
-        if (!username) {
-          throw new Error("請輸入用戶名");
-        }
-        await register(email, password, username);
-        console.log("已透過 Modal 註冊成功");
-        onClose();
-      }
-    } catch (err) {
-      handleAuthError(err);
-    } finally {
-      setLoading(false); // 結束載入狀態
-    }
-  };
-
-  const handleAuthError = (error) => {
-    if (error.code === "auth/email-already-in-use") {
-      setError("此 Email 已經被使用，請更換 Email");
-    } else if (error.code === "auth/invalid-credential") {
-      setError("Email或密碼錯誤，請重新輸入");
-    } else {
-      setError(error.message);
-    }
-  };
-
-  return (
-    <ModalOverlay>
-      <ModalContent>
-        <CloseButton onClick={onClose}>×</CloseButton>
-        <ModalHeader>{isLogin ? "登入" : "註冊"}</ModalHeader>
-        <Form onSubmit={handleSubmit}>
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="密碼"
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          {!isLogin && (
-            <Input
-              type="text"
-              placeholder="用戶名"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          )}
-          {error && <ErrorText>{error}</ErrorText>}
-          <SubmitButton>
-            {loading ? "處理中..." : isLogin ? "登入" : "註冊"}
-          </SubmitButton>
-        </Form>
-        <ToggleText onClick={toggleMode}>
-          {isLogin ? "沒有帳號？立即註冊" : "已經有帳號？立即登入"}
-        </ToggleText>
-      </ModalContent>
-    </ModalOverlay>
-  );
-};
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* 半透明背景 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  width: 400px;
-  max-width: 90%;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  position: relative;
-  text-align: center;
-`;
-
-const CloseButton = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-`;
-
-const ModalHeader = styled.h2`
-  margin-bottom: 20px;
-  text-align: left;
-  font-size: 20px;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-`;
-
-const Input = styled.input`
-  margin-bottom: 15px;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  outline: none;
-  &:focus {
-    border-color: #4e98dd; /* 當焦點時變化顏色 */
-  }
-`;
-
-const SubmitButton = styled.button`
-  background: #4e98dd;
-  color: white;
-  border: none;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  &:hover {
-    background: #367bb5;
-  }
-`;
-
-const ToggleText = styled.p`
-  margin-top: 20px;
-  color: #4e98dd;
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const ErrorText = styled.p`
-  font-size: 12px;
-  color: red;
-  margin-bottom: 8px;
-`;
-
-LoginModal.propTypes = {
-  onClose: PropTypes.func,
-};
 
 const Sidebar = styled.div`
   position: fixed;

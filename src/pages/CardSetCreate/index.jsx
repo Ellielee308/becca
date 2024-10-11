@@ -444,6 +444,7 @@ function CardSetCreate() {
                     $isInvalid={invalidFields.includes("title")}
                     id="title"
                     placeholder="請輸入標題"
+                    value={cardSetData.title}
                   />
                   <InputLabel htmlFor="description">簡介</InputLabel>
                   <Textarea
@@ -455,6 +456,7 @@ function CardSetCreate() {
                       })
                     }
                     placeholder="請輸入簡介"
+                    value={cardSetData.description}
                   />
                   <InputLabel>
                     目的
@@ -475,6 +477,7 @@ function CardSetCreate() {
                             purpose: "languageLearning",
                           });
                       }}
+                      checked={cardSetData.purpose === "languageLearning"}
                     />
                     <InputLabel htmlFor="languageLearning">語言學習</InputLabel>
                     <InputRadio
@@ -491,6 +494,7 @@ function CardSetCreate() {
                             interfaceLanguage: null,
                           });
                       }}
+                      checked={cardSetData.purpose === "others"}
                     />
                     <InputLabel htmlFor="others">其他</InputLabel>
                   </RadioWrapper>
@@ -512,6 +516,10 @@ function CardSetCreate() {
                           invalidFields.includes("learningLanguage")
                         )}
                         placeholder="請選擇語言"
+                        value={languageOptions.find(
+                          (option) =>
+                            option.value === cardSetData.learningLanguage
+                        )}
                       />
                       <InputLabel>
                         背面字卡顯示的語言
@@ -529,6 +537,10 @@ function CardSetCreate() {
                           invalidFields.includes("interfaceLanguage")
                         )}
                         placeholder="請選擇語言"
+                        value={languageOptions.find(
+                          (option) =>
+                            option.value === cardSetData.interfaceLanguage
+                        )}
                       />
                     </>
                   )}
@@ -554,6 +566,7 @@ function CardSetCreate() {
                           });
                       }}
                       $isInvalid={invalidFields.includes("visibility")}
+                      checked={cardSetData.visibility === "public"}
                     />
                     <InputLabel htmlFor="public">公開</InputLabel>
                     <InputRadio
@@ -569,6 +582,7 @@ function CardSetCreate() {
                           });
                       }}
                       $isInvalid={invalidFields.includes("visibility")}
+                      checked={cardSetData.visibility === "private"}
                     />
                     <InputLabel htmlFor="private">私人</InputLabel>
                   </RadioWrapper>
