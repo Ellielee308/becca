@@ -16,7 +16,7 @@ import {
 import Preview from "../CardSetEdit/Preview.jsx";
 import TemplatePreview from "../CardSetEdit/TemplatePreview.jsx";
 import CardContent from "../CardSetEdit/CardContent.jsx";
-import NewStyleModal from "../CardSetEdit/NewStyleModal.jsx";
+import NewStyleModal from "../../components/NewStyleModal.jsx";
 import { languageOptions } from "./options.js";
 import { Link } from "react-router-dom";
 import { ConfigProvider, Steps, message, Result } from "antd";
