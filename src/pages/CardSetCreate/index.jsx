@@ -47,6 +47,7 @@ function CardSetCreate() {
   const [step, setStep] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
   const [newCardSetId, setNewCardSetId] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const [cardSetData, setCardSetData] = useState({
     cardSetId: "",
     userId: "",
@@ -295,7 +296,7 @@ function CardSetCreate() {
     event.preventDefault();
     let newInvalidFields = [];
 
-    if (cardSetData.title === "") {
+    if (cardSetData.title.trim() === "") {
       newInvalidFields.push("title");
     }
     if (cardSetData.purpose === "") {
@@ -326,6 +327,8 @@ function CardSetCreate() {
   // 處理卡片內容提交
   const handleFinalSubmit = async (event) => {
     event.preventDefault();
+    if (isSaving) return;
+
     // 檢查卡片內容的有效性
     if (cardContent.length < 1) {
       messageApi.warning("字卡至少需要一張！");
@@ -360,7 +363,7 @@ function CardSetCreate() {
         }
       }
     }
-
+    setIsSaving(true);
     try {
       messageApi.loading({
         content: "提交中，請稍候...",
@@ -376,10 +379,12 @@ function CardSetCreate() {
       messageApi.destroy(); // 隱藏 loading
       messageApi.success("卡牌組提交成功！");
       setStep(2); // 移動到第 3 步顯示結果
+      setIsSaving(false);
     } catch (error) {
       messageApi.destroy(); // 隱藏 loading
       messageApi.error("儲存失敗，請重試。");
       console.error("儲存過程出現錯誤：", error);
+      setIsSaving(false);
     }
   };
 

@@ -215,14 +215,13 @@ function UserCardSets() {
                             <ShareIcon />
                             <SubMenuItemText>分享</SubMenuItemText>
                           </SubMenuItem>
-                          <SubMenuItem>
+                          <SubMenuItem
+                            onClick={() =>
+                              handleDeleteCardSet(cardSet.cardSetId)
+                            }
+                          >
                             <TrashIcon />
-                            <SubMenuItemText
-                              $isDelete
-                              onClick={() =>
-                                handleDeleteCardSet(cardSet.cardSetId)
-                              }
-                            >
+                            <SubMenuItemText $isDelete>
                               {isDeleting ? "刪除中..." : "刪除"}
                             </SubMenuItemText>
                           </SubMenuItem>
