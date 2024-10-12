@@ -103,7 +103,7 @@ const renderFieldContent = (field) => {
     case "image":
       return (
         <ImageWrapper>
-          <Image src={imageIcon} alt={field.name} style={field.style} />
+          <ImageExample src={imageIcon} alt={field.name} />
           <ImageName>{field.name}</ImageName>
         </ImageWrapper>
       );
@@ -286,28 +286,29 @@ const FieldContainer = styled.div`
 // 用於顯示圖片的樣式
 const ImageWrapper = styled.div`
   position: relative;
-  display: inline-block; // 讓 ImageWrapper 的大小與圖片保持一致
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+`;
+
+const ImageExample = styled.img`
+  max-width: 100%;
+  max-height: 100%;
 `;
 
 const ImageName = styled.p`
   position: absolute;
-  top: 50%; // 垂直居中
-  left: 50%; // 水平居中
-  transform: translate(-50%, -50%); // 將元素的中心點移動到其容器的中心
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   margin: 0;
-  padding: 8px 16px; // 內邊距讓文字不緊貼邊框
-  background-color: rgba(0, 0, 0, 0.5); // 半透明的黑色背景
-  color: white; // 文字顏色為白色
-  border-radius: 4px; // 圓角邊框
-  font-size: 14px; // 文字大小
+  padding: 8px 16px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
   text-align: center;
-  width: fit-content; // 讓內容決定寬度
-  pointer-events: none; // 讓名稱不影響圖片的點擊操作
-`;
-
-const Image = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: ${(props) => props.style?.objectFit || "cover"};
-  display: block;
+  width: fit-content;
+  pointer-events: none;
 `;

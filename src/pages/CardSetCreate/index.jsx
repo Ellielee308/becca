@@ -5,7 +5,7 @@ import CreatableSelect from "react-select/creatable";
 import Select from "react-select";
 import { languageOptions } from "./testOptions.js";
 import TemplatePreview from "./TemplatePreview.jsx";
-import Preview from "./Preview.jsx";
+import Preview from "../../components/Preview.jsx";
 import CardContent from "./CardContent.jsx";
 import NewStyleModal from "../../components/NewStyleModal.jsx";
 import NewTemplateModal from "./NewTemplateModal.jsx";

@@ -13,7 +13,7 @@ import {
   addNewLabel,
   updateCardSetWithNewCards,
 } from "../../utils/api";
-import Preview from "../CardSetEdit/Preview.jsx";
+import Preview from "../../components/Preview.jsx";
 import TemplatePreview from "../CardSetEdit/TemplatePreview.jsx";
 import CardContent from "../CardSetEdit/CardContent.jsx";
 import NewStyleModal from "../../components/NewStyleModal.jsx";
