@@ -162,6 +162,23 @@ function CardSetEdit() {
   };
 
   const handleCreateLabel = async (newLabel) => {
+    const isLabelExist = labelOptions.some(
+      (option) => option.label.toLowerCase() === newLabel.toLowerCase()
+    );
+
+    if (isLabelExist) {
+      console.log("標籤已存在，不允許重複創建：", newLabel);
+      messageApi.error("標籤已存在，不允許重複創建");
+      return;
+    }
+
+    // 檢查是否含有特殊字元（允許字母、數字、空格，以及其他語言字符）
+    const specialCharRegex = /^[\p{L}\p{N}\s]+$/u;
+    if (!specialCharRegex.test(newLabel)) {
+      console.log("標籤名稱含有不允許的特殊字元，創建失敗：", newLabel);
+      messageApi.error("標籤名稱含有不允許的特殊字元，創建失敗");
+      return;
+    }
     try {
       const newLabelId = await addNewLabel({
         name: newLabel,

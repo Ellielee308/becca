@@ -121,12 +121,6 @@ const Title = styled.h2`
   font-weight: 500;
 `;
 
-const TitleSplit = styled.div`
-  margin-top: 16px;
-  width: 100%;
-  border-bottom: 1px rgb(40, 46, 62) solid;
-`;
-
 const NoFoundNote = styled.p`
   font-size: 20px;
 `;
