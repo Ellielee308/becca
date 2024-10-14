@@ -15,7 +15,7 @@ import {
 import CreateQuizModal from "./CreateQuizModal";
 import CreateGameModal from "./CreateGameModal";
 import { useUser } from "../../context/UserContext.jsx";
-import { message } from "antd";
+import { ConfigProvider, message, Result, Button } from "antd";
 
 function CardSetDetail() {
   const { cardSetId } = useParams();
@@ -30,7 +30,7 @@ function CardSetDetail() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isCardListDisplayed, setIsCardListDisplayed] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const { user } = useUser();
+  const { user, loading } = useUser();
   useEffect(() => {
     const fetchCardSetData = async () => {
       try {
@@ -160,333 +160,367 @@ function CardSetDetail() {
     setIsCardListDisplayed((prev) => !prev);
   };
 
-  if (!cardSetData || !cards || !ownerData) {
+  const customTheme = {
+    components: {
+      Result: {
+        titleFontSize: 20,
+      },
+    },
+    token: {
+      colorPrimary: "#3d5a80",
+      colorTextHeading: "#3d5a80",
+      borderRadius: 8,
+      fontFamily: "'TaiwanPearl-Regular', 'Noto Sans TC', sans-serif;",
+    },
+  };
+
+  if (!cardSetData || !cards || !ownerData || loading) {
     return <div>Loading...</div>;
   }
   return (
     <Background>
       {contextHolder}
-      <Wrapper>
-        {showCreateQuizModal && (
-          <CreateQuizModal
-            onClose={() => setShowCreateQuizModal(null)}
-            quizType={showCreateQuizModal}
-            cardSetId={cardSetId}
-            totalCardsNumber={cards.length}
-            cards={cards}
-          />
-        )}
-        {showCreateGameModal && (
-          <CreateGameModal
-            onClose={() => setShowCreateGameModal(null)}
-            quizType={showCreateGameModal}
-            cardSetId={cardSetId}
-            totalCardsNumber={cards.length}
-            cards={cards}
-          />
-        )}
-        <TitleBar>
-          <Title>{cardSetData.title}</Title>
-          <StarContainer onClick={handleToggleFavorite}>
-            {isFavorited ? <FilledStarIcon /> : <StarIcon />}
-          </StarContainer>
-        </TitleBar>
-        <CardContainer>
-          <ArrowIconContainer
-            disabled={currentCardIndex === 0}
-            onClick={handlePreviousCard}
-          >
-            <LeftArrowIcon />
-          </ArrowIconContainer>
-          {cardSetId && style && template && cards && (
-            <CardContent
-              currentStyle={style}
-              currentTemplate={template}
-              currentCard={cards[currentCardIndex]}
+      {cardSetData.visibility === "private" &&
+      (!user || user.userId !== ownerData.userId) ? (
+        <NoAccessWrapper>
+          <ConfigProvider theme={customTheme}>
+            <Result
+              status="warning"
+              title="此卡牌組為私人卡牌組，您沒有權限查看。"
             />
-          )}
-          <ArrowIconContainer
-            disabled={currentCardIndex === cards.length - 1}
-            onClick={handleNextCard}
-          >
-            <RightArrowIcon />
-          </ArrowIconContainer>
-        </CardContainer>
-        <CardSetDetailsWrapper>
-          <MobileActionBar>
-            <MobileArrowIconContainer
-              disabled={currentCardIndex === 0}
-              onClick={handlePreviousCard}
-            >
-              <LeftArrowIcon />
-            </MobileArrowIconContainer>
-            <CardNumberWrapper>{`${currentCardIndex + 1} / ${
-              cards.length
-            }`}</CardNumberWrapper>
-            <MobileArrowIconContainer
-              disabled={currentCardIndex === cards.length - 1}
-              onClick={handleNextCard}
-            >
-              <RightArrowIcon />
-            </MobileArrowIconContainer>
-          </MobileActionBar>
-          <ProgressBar>
-            <Progress
-              width={`${((currentCardIndex + 1) / cards.length) * 100}%`}
-            />
-          </ProgressBar>
-          <ActionWrapper>
-            <LabelWrapper>
-              <LabelIconContainer>
-                <LabelIcon />
-              </LabelIconContainer>
-              <LabelNameContainer>
-                {cardSetData.labels.length > 0 ? (
-                  cardSetData.labels.map((label, index) => (
-                    <Link key={index} to={`/search/${label.name}`}>
-                      <LabelName>
-                        {label.name}
-                        {index < cardSetData.labels.length - 1 && ", "}
-                      </LabelName>
-                    </Link>
-                  ))
-                ) : (
-                  <NoLabelName>無標籤</NoLabelName>
-                )}
-              </LabelNameContainer>
-            </LabelWrapper>
-          </ActionWrapper>
-          <InformationWrapper>
-            <ProfilePictureWrapper>
-              {cardSetData && ownerData && ownerData.profilePicture && (
-                <ProfilePicture src={ownerData.profilePicture} />
+          </ConfigProvider>
+          <NoAccessNavWrapper>
+            <HomepageButton to="/">回到首頁</HomepageButton>
+            {user && user.userId && (
+              <CardSetButton to="user/me/profile">我的卡牌組</CardSetButton>
+            )}
+          </NoAccessNavWrapper>
+        </NoAccessWrapper>
+      ) : (
+        <>
+          <Wrapper>
+            {showCreateQuizModal && (
+              <CreateQuizModal
+                onClose={() => setShowCreateQuizModal(null)}
+                quizType={showCreateQuizModal}
+                cardSetId={cardSetId}
+                totalCardsNumber={cards.length}
+                cards={cards}
+              />
+            )}
+            {showCreateGameModal && (
+              <CreateGameModal
+                onClose={() => setShowCreateGameModal(null)}
+                quizType={showCreateGameModal}
+                cardSetId={cardSetId}
+                totalCardsNumber={cards.length}
+                cards={cards}
+              />
+            )}
+            <TitleBar>
+              <Title>{cardSetData.title}</Title>
+              <StarContainer onClick={handleToggleFavorite}>
+                {isFavorited ? <FilledStarIcon /> : <StarIcon />}
+              </StarContainer>
+            </TitleBar>
+            <CardContainer>
+              <ArrowIconContainer
+                disabled={currentCardIndex === 0}
+                onClick={handlePreviousCard}
+              >
+                <LeftArrowIcon />
+              </ArrowIconContainer>
+              {cardSetId && style && template && cards && (
+                <CardContent
+                  currentStyle={style}
+                  currentTemplate={template}
+                  currentCard={cards[currentCardIndex]}
+                />
               )}
-            </ProfilePictureWrapper>
-            <DescriptionWrapper>
-              <AuthorName>{`作者： ${ownerData.username}`}</AuthorName>
-              <Description>{cardSetData.description}</Description>
-            </DescriptionWrapper>
-          </InformationWrapper>
-          <hr />
-          <EvaluationSection>
-            <SectionTitleWrapper>
+              <ArrowIconContainer
+                disabled={currentCardIndex === cards.length - 1}
+                onClick={handleNextCard}
+              >
+                <RightArrowIcon />
+              </ArrowIconContainer>
+            </CardContainer>
+            <CardSetDetailsWrapper>
+              <MobileActionBar>
+                <MobileArrowIconContainer
+                  disabled={currentCardIndex === 0}
+                  onClick={handlePreviousCard}
+                >
+                  <LeftArrowIcon />
+                </MobileArrowIconContainer>
+                <CardNumberWrapper>{`${currentCardIndex + 1} / ${
+                  cards.length
+                }`}</CardNumberWrapper>
+                <MobileArrowIconContainer
+                  disabled={currentCardIndex === cards.length - 1}
+                  onClick={handleNextCard}
+                >
+                  <RightArrowIcon />
+                </MobileArrowIconContainer>
+              </MobileActionBar>
+              <ProgressBar>
+                <Progress
+                  width={`${((currentCardIndex + 1) / cards.length) * 100}%`}
+                />
+              </ProgressBar>
+              <ActionWrapper>
+                <LabelWrapper>
+                  <LabelIconContainer>
+                    <LabelIcon />
+                  </LabelIconContainer>
+                  <LabelNameContainer>
+                    {cardSetData.labels.length > 0 ? (
+                      cardSetData.labels.map((label, index) => (
+                        <Link key={index} to={`/search/${label.name}`}>
+                          <LabelName>
+                            {label.name}
+                            {index < cardSetData.labels.length - 1 && ", "}
+                          </LabelName>
+                        </Link>
+                      ))
+                    ) : (
+                      <NoLabelName>無標籤</NoLabelName>
+                    )}
+                  </LabelNameContainer>
+                </LabelWrapper>
+              </ActionWrapper>
+              <InformationWrapper>
+                <ProfilePictureWrapper>
+                  {cardSetData && ownerData && ownerData.profilePicture && (
+                    <ProfilePicture src={ownerData.profilePicture} />
+                  )}
+                </ProfilePictureWrapper>
+                <DescriptionWrapper>
+                  <AuthorName>{`作者： ${ownerData.username}`}</AuthorName>
+                  <Description>{cardSetData.description}</Description>
+                </DescriptionWrapper>
+              </InformationWrapper>
+              <hr />
+              <EvaluationSection>
+                <SectionTitleWrapper>
+                  <PuzzleIcon />
+                  <SectionTitle>測驗</SectionTitle>
+                </SectionTitleWrapper>
+                <GameOptionsWrapper>
+                  <GameOptionButton
+                    onClick={() => {
+                      if (!user) {
+                        message.warning("會員才能創建測驗，請先登入！");
+                        return;
+                      }
+                      if (cards.length < 4) {
+                        message.warning("至少要有四張字卡才能進行配對測驗！");
+                        return;
+                      }
+                      setShowCreateQuizModal("matching");
+                    }}
+                  >
+                    配對題
+                  </GameOptionButton>
+                  <GameOptionButton
+                    onClick={() => {
+                      if (!user) {
+                        message.warning("會員才能創建測驗，請先登入！");
+                        return;
+                      }
+                      if (cards.length < 4) {
+                        message.warning("至少要有四張字卡才能進行選擇題測驗！");
+                        return;
+                      }
+                      setShowCreateQuizModal("multipleChoices");
+                    }}
+                  >
+                    選擇題
+                  </GameOptionButton>
+                </GameOptionsWrapper>
+                <SectionTitleWrapper>
+                  <MultiplePlayersIcon />
+                  <SectionTitle>多人遊戲</SectionTitle>
+                </SectionTitleWrapper>
+                <GameOptionsWrapper>
+                  <GameOptionButton
+                    $isGame
+                    onClick={() => {
+                      if (!user) {
+                        message.warning("會員才能創建遊戲，請先登入！");
+                        return;
+                      }
+                      if (cards.length < 4) {
+                        message.warning("至少要有四張字卡才能進行配對遊戲！");
+                        return;
+                      }
+                      setShowCreateGameModal("matching");
+                    }}
+                  >
+                    配對題
+                  </GameOptionButton>
+                  <GameOptionButton
+                    $isGame
+                    onClick={() => {
+                      if (!user) {
+                        message.warning("會員才能創建遊戲，請先登入！");
+                        return;
+                      }
+                      if (cards.length < 4) {
+                        message.warning("至少要有四張字卡才能進行選擇題遊戲！");
+                        return;
+                      }
+                      setShowCreateGameModal("multipleChoices");
+                    }}
+                  >
+                    選擇題
+                  </GameOptionButton>
+                </GameOptionsWrapper>
+                <hr />
+              </EvaluationSection>
+              <SectionTitleWrapper>
+                <ListIcon />
+                <SectionTitle>{`所有字卡  (${cards.length})`}</SectionTitle>
+                <SpreadArrowContainer onClick={toggleCardListDisplay}>
+                  {isCardListDisplayed ? <ArrowUp /> : <ArrowDown />}
+                </SpreadArrowContainer>
+              </SectionTitleWrapper>
+              {isCardListDisplayed && (
+                <ListSection>
+                  {cards.map((card, index) => (
+                    <CardWrapper key={card.cardId}>
+                      <SerialNumber>{index + 1}</SerialNumber>
+                      <CardContentWrapper>
+                        <Side>
+                          <SideHeading>正面</SideHeading>
+                          {template.frontFields.map((frontField, index) => {
+                            if (frontField.type === "text") {
+                              return (
+                                <TextWrapper key={index}>
+                                  {card.frontFields[index].value}
+                                </TextWrapper>
+                              );
+                            } else if (frontField.type === "image") {
+                              if (
+                                card.frontFields[index]?.value &&
+                                card.frontFields[index].value.trim() !== ""
+                              ) {
+                                return (
+                                  <ImagePreview
+                                    key={index}
+                                    src={card.frontFields[index].value}
+                                    alt={frontField.name}
+                                  />
+                                );
+                              }
+                            }
+                          })}
+                        </Side>
+                        <SideSplit />
+                        <Side>
+                          <SideHeading>背面</SideHeading>
+                          {template.backFields.map((backField, index) => {
+                            if (backField.type === "text") {
+                              return (
+                                <TextWrapper key={index}>
+                                  {card.backFields[index].value}
+                                </TextWrapper>
+                              );
+                            } else if (backField.type === "image") {
+                              if (
+                                card.backFields[index]?.value &&
+                                card.backFields[index].value.trim() !== ""
+                              ) {
+                                return (
+                                  <ImagePreview
+                                    key={index}
+                                    src={card.backFields[index].value}
+                                    alt={backField.name}
+                                  />
+                                );
+                              }
+                            }
+                          })}
+                        </Side>
+                      </CardContentWrapper>
+                    </CardWrapper>
+                  ))}
+                </ListSection>
+              )}
+            </CardSetDetailsWrapper>
+          </Wrapper>
+          <SideMenu>
+            <SideMenuTitle>練習一下吧！</SideMenuTitle>
+            <SideMenuSectionTitle>
               <PuzzleIcon />
-              <SectionTitle>測驗</SectionTitle>
-            </SectionTitleWrapper>
-            <GameOptionsWrapper>
-              <GameOptionButton
-                onClick={() => {
-                  if (!user) {
-                    message.warning("會員才能創建測驗，請先登入！");
-                    return;
-                  }
-                  if (cards.length < 4) {
-                    message.warning("至少要有四張字卡才能進行配對測驗！");
-                    return;
-                  }
-                  setShowCreateQuizModal("matching");
-                }}
-              >
-                配對題
-              </GameOptionButton>
-              <GameOptionButton
-                onClick={() => {
-                  if (!user) {
-                    message.warning("會員才能創建測驗，請先登入！");
-                    return;
-                  }
-                  if (cards.length < 4) {
-                    message.warning("至少要有四張字卡才能進行選擇題測驗！");
-                    return;
-                  }
-                  setShowCreateQuizModal("multipleChoices");
-                }}
-              >
-                選擇題
-              </GameOptionButton>
-            </GameOptionsWrapper>
-            <SectionTitleWrapper>
+              <p>測驗</p>
+            </SideMenuSectionTitle>
+            <SideMenuQuiz
+              onClick={() => {
+                if (!user) {
+                  message.warning("會員才能創建測驗，請先登入！");
+                  return;
+                }
+                if (cards.length < 4) {
+                  message.warning("至少要有四張字卡才能進行配對測驗！");
+                  return;
+                }
+                setShowCreateQuizModal("matching");
+              }}
+            >
+              配對測驗
+            </SideMenuQuiz>
+            <SideMenuQuiz
+              onClick={() => {
+                if (!user) {
+                  message.warning("會員才能創建測驗，請先登入！");
+                  return;
+                }
+                if (cards.length < 4) {
+                  message.warning("至少要有四張字卡才能進行選擇題測驗！");
+                  return;
+                }
+                setShowCreateQuizModal("multipleChoices");
+              }}
+            >
+              選擇題測驗
+            </SideMenuQuiz>
+            <SideMenuSectionTitle>
               <MultiplePlayersIcon />
-              <SectionTitle>多人遊戲</SectionTitle>
-            </SectionTitleWrapper>
-            <GameOptionsWrapper>
-              <GameOptionButton
-                $isGame
-                onClick={() => {
-                  if (!user) {
-                    message.warning("會員才能創建遊戲，請先登入！");
-                    return;
-                  }
-                  if (cards.length < 4) {
-                    message.warning("至少要有四張字卡才能進行配對遊戲！");
-                    return;
-                  }
-                  setShowCreateGameModal("matching");
-                }}
-              >
-                配對題
-              </GameOptionButton>
-              <GameOptionButton
-                $isGame
-                onClick={() => {
-                  if (!user) {
-                    message.warning("會員才能創建遊戲，請先登入！");
-                    return;
-                  }
-                  if (cards.length < 4) {
-                    message.warning("至少要有四張字卡才能進行選擇題遊戲！");
-                    return;
-                  }
-                  setShowCreateGameModal("multipleChoices");
-                }}
-              >
-                選擇題
-              </GameOptionButton>
-            </GameOptionsWrapper>
-            <hr />
-          </EvaluationSection>
-          <SectionTitleWrapper>
-            <ListIcon />
-            <SectionTitle>{`所有字卡  (${cards.length})`}</SectionTitle>
-            <SpreadArrowContainer onClick={toggleCardListDisplay}>
-              {isCardListDisplayed ? <ArrowUp /> : <ArrowDown />}
-            </SpreadArrowContainer>
-          </SectionTitleWrapper>
-          {isCardListDisplayed && (
-            <ListSection>
-              {cards.map((card, index) => (
-                <CardWrapper key={card.cardId}>
-                  <SerialNumber>{index + 1}</SerialNumber>
-                  <CardContentWrapper>
-                    <Side>
-                      <SideHeading>正面</SideHeading>
-                      {template.frontFields.map((frontField, index) => {
-                        if (frontField.type === "text") {
-                          return (
-                            <TextWrapper key={index}>
-                              {card.frontFields[index].value}
-                            </TextWrapper>
-                          );
-                        } else if (frontField.type === "image") {
-                          if (
-                            card.frontFields[index]?.value &&
-                            card.frontFields[index].value.trim() !== ""
-                          ) {
-                            return (
-                              <ImagePreview
-                                key={index}
-                                src={card.frontFields[index].value}
-                                alt={frontField.name}
-                              />
-                            );
-                          }
-                        }
-                      })}
-                    </Side>
-                    <SideSplit />
-                    <Side>
-                      <SideHeading>背面</SideHeading>
-                      {template.backFields.map((backField, index) => {
-                        if (backField.type === "text") {
-                          return (
-                            <TextWrapper key={index}>
-                              {card.backFields[index].value}
-                            </TextWrapper>
-                          );
-                        } else if (backField.type === "image") {
-                          if (
-                            card.backFields[index]?.value &&
-                            card.backFields[index].value.trim() !== ""
-                          ) {
-                            return (
-                              <ImagePreview
-                                key={index}
-                                src={card.backFields[index].value}
-                                alt={backField.name}
-                              />
-                            );
-                          }
-                        }
-                      })}
-                    </Side>
-                  </CardContentWrapper>
-                </CardWrapper>
-              ))}
-            </ListSection>
-          )}
-        </CardSetDetailsWrapper>
-      </Wrapper>
-      <SideMenu>
-        <SideMenuTitle>練習一下吧！</SideMenuTitle>
-        <SideMenuSectionTitle>
-          <PuzzleIcon />
-          <p>測驗</p>
-        </SideMenuSectionTitle>
-        <SideMenuQuiz
-          onClick={() => {
-            if (!user) {
-              message.warning("會員才能創建測驗，請先登入！");
-              return;
-            }
-            if (cards.length < 4) {
-              message.warning("至少要有四張字卡才能進行配對測驗！");
-              return;
-            }
-            setShowCreateQuizModal("matching");
-          }}
-        >
-          配對測驗
-        </SideMenuQuiz>
-        <SideMenuQuiz
-          onClick={() => {
-            if (!user) {
-              message.warning("會員才能創建測驗，請先登入！");
-              return;
-            }
-            if (cards.length < 4) {
-              message.warning("至少要有四張字卡才能進行選擇題測驗！");
-              return;
-            }
-            setShowCreateQuizModal("multipleChoices");
-          }}
-        >
-          選擇題測驗
-        </SideMenuQuiz>
-        <SideMenuSectionTitle>
-          <MultiplePlayersIcon />
-          <p>多人遊戲</p>
-        </SideMenuSectionTitle>
-        <SideMenuGame
-          onClick={() => {
-            if (!user) {
-              message.warning("會員才能創建遊戲，請先登入！");
-              return;
-            }
-            if (cards.length < 4) {
-              message.warning("至少要有四張字卡才能進行配對遊戲！");
-              return;
-            }
-            setShowCreateGameModal("matching");
-          }}
-        >
-          配對遊戲
-        </SideMenuGame>
-        <SideMenuGame
-          onClick={() => {
-            if (!user) {
-              message.warning("會員才能創建遊戲，請先登入！");
-              return;
-            }
-            if (cards.length < 4) {
-              message.warning("至少要有四張字卡才能進行選擇題遊戲！");
-              return;
-            }
-            setShowCreateGameModal("multipleChoices");
-          }}
-        >
-          選擇題遊戲
-        </SideMenuGame>
-      </SideMenu>
+              <p>多人遊戲</p>
+            </SideMenuSectionTitle>
+            <SideMenuGame
+              onClick={() => {
+                if (!user) {
+                  message.warning("會員才能創建遊戲，請先登入！");
+                  return;
+                }
+                if (cards.length < 4) {
+                  message.warning("至少要有四張字卡才能進行配對遊戲！");
+                  return;
+                }
+                setShowCreateGameModal("matching");
+              }}
+            >
+              配對遊戲
+            </SideMenuGame>
+            <SideMenuGame
+              onClick={() => {
+                if (!user) {
+                  message.warning("會員才能創建遊戲，請先登入！");
+                  return;
+                }
+                if (cards.length < 4) {
+                  message.warning("至少要有四張字卡才能進行選擇題遊戲！");
+                  return;
+                }
+                setShowCreateGameModal("multipleChoices");
+              }}
+            >
+              選擇題遊戲
+            </SideMenuGame>
+          </SideMenu>
+        </>
+      )}
     </Background>
   );
 }
@@ -938,6 +972,59 @@ const SideMenuGame = styled.div`
 
   &:last-child {
     margin-bottom: 0;
+  }
+`;
+
+const NoAccessWrapper = styled.div`
+  min-height: calc(100vh - 180px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+
+const NoAccessNavWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 16px;
+`;
+
+const HomepageButton = styled(Link)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background-color: #3d5a80;
+  cursor: pointer;
+  user-select: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  &:hover {
+    background-color: #4b688e;
+  }
+`;
+
+const CardSetButton = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background-color: #adbce5;
+  cursor: pointer;
+  user-select: none;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+
+  &:hover {
+    background-color: #889ccd;
   }
 `;
 
