@@ -127,7 +127,7 @@ export default function CardContent({
                     (frontField, index) => {
                       if (frontField.type === "text") {
                         return (
-                          <TextArea
+                          <CustomTextArea
                             autoSize
                             key={index}
                             placeholder={frontField.name}
@@ -146,12 +146,15 @@ export default function CardContent({
                                 ? () => handleBlur(cardIndex, index)
                                 : null
                             }
+                            $isRequired={frontField.required}
                           />
                         );
                       } else if (frontField.type === "image") {
                         return (
                           <ImageUploadWrapper key={index}>
-                            <ImageFieldName>{frontField.name}</ImageFieldName>
+                            <ImageFieldName $isRequired={frontField.required}>
+                              {frontField.name}
+                            </ImageFieldName>
                             <ImageInput
                               type="file"
                               accept="image/*"
@@ -195,7 +198,7 @@ export default function CardContent({
                     if (backField.type === "text") {
                       return (
                         <div key={index}>
-                          <TextArea
+                          <CustomTextArea
                             autoSize
                             placeholder={backField.name}
                             value={card.backFields[index]?.value || ""}
@@ -207,6 +210,7 @@ export default function CardContent({
                                 e.target.value
                               )
                             }
+                            $isRequired={backField.required}
                           />
                           {index === firstTextInputIndex &&
                             firstTextInputIndex !== -1 &&
@@ -227,7 +231,9 @@ export default function CardContent({
                     } else if (backField.type === "image") {
                       return (
                         <ImageUploadWrapper key={index}>
-                          <ImageFieldName>{backField.name}</ImageFieldName>
+                          <ImageFieldName $isRequired={backField.required}>
+                            {backField.name}
+                          </ImageFieldName>
                           <ImageInput
                             type="file"
                             accept="image/*"
@@ -267,6 +273,191 @@ export default function CardContent({
     </Wrapper>
   );
 }
+const Wrapper = styled.div`
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0px;
+  width: 100%;
+  width: 600px;
+  gap: 20px;
+`;
+
+const CardWrapper = styled.div`
+  margin: 20px 0px;
+  padding: 35px 30px;
+  border: 1px solid #c2c2c2;
+  background-color: #fff;
+  width: 100%;
+  max-width: 600px;
+  min-height: 180px;
+  border-radius: 8px;
+`;
+
+const TitleBar = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const Heading = styled.p`
+  font-size: 18px;
+`;
+const ButtonGroupWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+`;
+
+const SideWrapper = styled.div`
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  @media only screen and (max-width: 559px) {
+    flex-direction: column;
+  }
+`;
+
+const Side = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+`;
+
+const SideSplit = styled.div`
+  height: 80px;
+  border-left: 1px solid #c2c2c2;
+  margin: 0 16px;
+  @media only screen and (max-width: 559px) {
+    height: 0px;
+    width: 20%;
+    border-left: none;
+    margin: 20px 0px;
+  }
+`;
+
+const SideHeading = styled.p`
+  font-size: 14px;
+  margin-bottom: 8px;
+`;
+
+const TextInput = styled.input`
+  height: 30px;
+  border: solid 1px #c1c0c0;
+  border-radius: 4px;
+  width: 100%;
+`;
+
+const CustomTextArea = styled(TextArea)`
+  &::placeholder {
+    color: ${(props) =>
+      props.$isRequired ? "#ff6f61" : "rgba(0, 0, 0, 0.35)"};
+  }
+`;
+
+const NewCardWrapper = styled.div`
+  border: 1px solid #c2c2c2;
+  width: 100%;
+  max-width: 600px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+`;
+
+const NewCardHeading = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+`;
+
+const PlusButton = styled.div`
+  width: 40px;
+  height: 40px;
+  display: flex;
+  margin-right: 15px;
+  align-items: center;
+  justify-content: center;
+  background-color: #adadad;
+  border-radius: 4px;
+`;
+
+const PlusLabel = styled.p`
+  font-size: 20px;
+`;
+
+const ImageUploadWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const ImageFieldName = styled.p`
+  font-size: 14px;
+  color: #636262;
+  color: ${(props) => (props.$isRequired ? "#ff6f61" : " #636262;")};
+`;
+
+const ImageInput = styled.input`
+  margin-top: 8px;
+`;
+
+const ButtonIconContainer = styled.div`
+  cursor: pointer;
+`;
+
+const ImagePreview = styled.img`
+  margin-top: 4px;
+  height: 100px;
+  width: 100%;
+  object-fit: contain;
+`;
+
+const SuggestionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0px 10px 0px;
+  /* border: 1px solid black; */
+`;
+
+const SuggestionNotice = styled.p`
+  font-size: 12px;
+  color: #4350fa;
+  user-select: none;
+  margin-bottom: 8px;
+`;
+
+const SuggestionWord = styled.div`
+  cursor: pointer;
+  background-color: #e0f2ff;
+  overflow-y: hidden;
+  height: 24px;
+  line-height: 24px;
+  padding: 0 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+  color: #1a73e8;
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  &:hover {
+    background-color: #cce6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 115, 232, 0.2);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(26, 115, 232, 0.1);
+  }
+`;
 
 CardContent.propTypes = {
   currentTemplate: PropTypes.shape({
@@ -316,169 +507,6 @@ CardContent.propTypes = {
   interfaceLanguage: PropTypes.string,
   suggestedTranslations: PropTypes.array,
   setSuggestedTranslations: PropTypes.func,
+  deletedCards: PropTypes.array,
+  setDeletedCards: PropTypes.func,
 };
-
-const Wrapper = styled.div`
-  align-self: center;
-  display: flex;
-  flex-direction: column;
-  margin: 20px 0px;
-  width: 600px;
-  gap: 20px;
-`;
-
-const CardWrapper = styled.div`
-  margin: 20px 0px;
-  padding: 35px 0px;
-  border: 1px solid #c2c2c2;
-  width: 600px;
-  min-height: 180px;
-  border-radius: 8px;
-`;
-
-const TitleBar = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 30px;
-`;
-
-const Heading = styled.p`
-  font-size: 18px;
-`;
-const ButtonGroupWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-`;
-
-const SideWrapper = styled.div`
-  margin-top: 20px;
-  display: flex;
-  flex-direction: row;
-`;
-
-const Side = styled.div`
-  padding: 0px 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-`;
-
-const SideSplit = styled.div`
-  height: 80px;
-  border-left: 1px solid #c2c2c2;
-`;
-
-const SideHeading = styled.p`
-  font-size: 18px;
-  margin-bottom: 12px;
-`;
-
-const TextInput = styled.input`
-  height: 30px;
-  border: solid 1px #c1c0c0;
-  width: 100%;
-`;
-
-const NewCardWrapper = styled.div`
-  border: 1px solid #c2c2c2;
-  width: 600px;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 8px;
-`;
-
-const NewCardHeading = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-`;
-
-const PlusButton = styled.div`
-  width: 40px;
-  height: 40px;
-  display: flex;
-  margin-right: 15px;
-  align-items: center;
-  justify-content: center;
-  background-color: #adadad;
-  border-radius: 4px;
-`;
-
-const PlusLabel = styled.p`
-  font-size: 20px;
-`;
-
-const ImageUploadWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const ImageFieldName = styled.p`
-  font-size: 14px;
-  color: #636262;
-`;
-
-const ImageInput = styled.input`
-  margin-top: 8px;
-`;
-
-const ButtonIconContainer = styled.div`
-  cursor: pointer;
-`;
-
-const ImagePreview = styled.img`
-  height: 100px;
-  width: auto;
-  object-fit: cover;
-`;
-
-const SuggestionWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 10px 0px 10px 0px;
-  /* border: 1px solid black; */
-`;
-
-const SuggestionNotice = styled.p`
-  font-size: 12px;
-  color: #4350fa;
-  user-select: none;
-  margin-bottom: 8px;
-`;
-
-const SuggestionWord = styled.div`
-  cursor: pointer;
-  background-color: #e0f2ff; /* 淡藍色背景 */
-  overflow-y: hidden;
-  height: 24px;
-  line-height: 24px;
-  padding: 0 12px;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, transform 0.2s ease,
-    box-shadow 0.2s ease;
-  color: #1a73e8; /* 藍色文字 */
-  font-size: 14px;
-  text-align: center;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-
-  /* Hover 和 Active 狀態效果 */
-  &:hover {
-    background-color: #cce6ff; /* Hover 時加深的藍色背景 */
-    transform: translateY(-2px); /* 輕微的向上移動效果 */
-    box-shadow: 0 4px 8px rgba(26, 115, 232, 0.2); /* 添加輕微的藍色陰影 */
-  }
-
-  &:active {
-    transform: translateY(1px); /* Active 時稍微向下壓 */
-    box-shadow: 0 2px 4px rgba(26, 115, 232, 0.1); /* 陰影變小 */
-  }
-`;
