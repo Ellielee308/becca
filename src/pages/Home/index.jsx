@@ -317,7 +317,7 @@ const Wrapper = styled.div`
   height: fit-content;
   padding: 80px 0px 0px 0px;
   @media only screen and (max-width: 639px) {
-    padding: 60px 0px 10px 0px;
+    padding: 60px 0px 0px 0px;
   }
 `;
 
@@ -338,7 +338,7 @@ const IntroductionSection = styled.div`
   @media only screen and (max-width: 660px) {
     flex-direction: column;
     height: fit-content;
-    padding: 40px 60px;
+    padding: 40px 40px;
     align-items: flex-start;
   }
 `;
@@ -457,6 +457,9 @@ const FeatureSection = styled.div`
   flex-direction: column;
   padding: 30px 60px 42px 60px;
   background-color: #fff;
+  @media (max-width: 639px) {
+    padding: 30px 40px 42px 40px;
+  }
 `;
 
 const FeatureGridWrapper = styled.div`
@@ -587,6 +590,9 @@ const ExploreSection = styled.div`
   flex-direction: column;
   padding: 30px 60px 30px 60px;
   background-color: #e1e5f2;
+  @media (max-width: 639px) {
+    padding: 30px 40px 30px 40px;
+  }
 `;
 
 const CarouselWrapper = styled.div`
