@@ -14,6 +14,7 @@ const CreateGameModal = ({
   cards,
 }) => {
   const { user } = useUser();
+  const [invalidTime, setInvalidTime] = useState(false);
   const [newGameData, setNewGameData] = useState({
     gameId: "",
     roomName: "",
@@ -64,6 +65,12 @@ const CreateGameModal = ({
 
   const handleSumbit = async (event) => {
     event.preventDefault();
+    setInvalidTime(false);
+    if (newGameData.timeLimit < 20) {
+      setInvalidTime(true);
+      return;
+    }
+
     let questions;
     let questionData;
 
@@ -79,6 +86,7 @@ const CreateGameModal = ({
     try {
       const gameId = await createGameWithQuestion(newGameData, questionData);
       if (gameId) {
+        message.success("創建遊戲成功");
         navigate(`/game/${gameId}`);
       } else {
         message.error("創建遊戲失敗，請稍後再試！");
@@ -173,7 +181,7 @@ const CreateGameModal = ({
                   ))}
                 </QuestionQtySelect>
               </QuestionQtySelectWrapper>
-              <Label htmlFor="roomName">時間限制</Label>
+              <Label htmlFor="time">時間限制（最少為20秒）</Label>
               <GameTimeInput onTimeChange={handleTimeChange} />
             </>
           )}
@@ -204,9 +212,14 @@ const CreateGameModal = ({
                   ))}
                 </QuestionQtySelect>
               </QuestionQtySelectWrapper>
-              <Label htmlFor="roomName">時間限制</Label>
+              <Label htmlFor="time">時間限制（最少為20秒）</Label>
               <GameTimeInput onTimeChange={handleTimeChange} />
             </>
+          )}
+          {invalidTime && (
+            <InvalidTimeNotice>
+              遊戲時間最少為20秒，請重新設定
+            </InvalidTimeNotice>
           )}
           <CreateButton type="submit" value="創建遊戲" />
         </Form>
@@ -332,6 +345,12 @@ const QtyOption = styled.option`
   text-align: left;
 `;
 
+const InvalidTimeNotice = styled.div`
+  font-size: 12px;
+  color: #ff6f61;
+  margin: 8px 0;
+`;
+
 const CreateButton = styled.input`
   padding: 12px 24px;
   font-size: 16px;
@@ -363,6 +382,7 @@ CreateGameModal.propTypes = {
   quizType: PropTypes.string,
   totalCardsNumber: PropTypes.number,
   cardSetId: PropTypes.string,
+  cards: PropTypes.array,
 };
 
 const GameTimeInput = ({ onTimeChange }) => {
@@ -415,6 +435,10 @@ const GameTimeInput = ({ onTimeChange }) => {
       </InputGroup>
     </InputContainer>
   );
+};
+
+GameTimeInput.propTypes = {
+  onTimeChange: PropTypes.func,
 };
 
 const InputContainer = styled.div`
