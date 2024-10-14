@@ -328,18 +328,27 @@ const IntroductionSection = styled.div`
   align-items: center;
   padding: 0 220px 30px 220px;
   background-color: #eff7ff;
-  height: 400px;
-  @media only screen and (min-width: 1440px) {
-    height: 60vh;
+  height: 60vh;
+  @media only screen and (max-width: 1439px) {
+    height: 400px;
   }
   @media only screen and (max-width: 1079px) {
     padding: 0 40px 0px 40px;
+  }
+  @media only screen and (max-width: 660px) {
+    flex-direction: column;
+    height: fit-content;
+    padding: 40px 60px;
+    align-items: flex-start;
   }
 `;
 
 const IntroductionSectionText = styled.div`
   display: flex;
   flex-direction: column;
+  @media only screen and (max-width: 660px) {
+    align-items: flex-start;
+  }
 `;
 
 const BannerImg = styled.img`
@@ -347,6 +356,11 @@ const BannerImg = styled.img`
   height: auto;
   @media only screen and (max-width: 1079px) {
     width: 240px;
+  }
+  @media only screen and (max-width: 660px) {
+    margin-top: 32px;
+    width: 180px;
+    align-self: flex-end;
   }
 `;
 
@@ -357,6 +371,9 @@ const BannerTextChinese = styled.div`
   line-height: 72px;
   color: #293241;
   font-weight: 500;
+  @media only screen and (max-width: 660px) {
+    font-size: 32px;
+  }
 `;
 
 const BannerText = styled.div`
@@ -400,6 +417,11 @@ const ButtonGroup = styled.div`
   display: flex;
   align-items: center;
   margin-top: 12px;
+  @media only screen and (max-width: 660px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 `;
 
 const WelcomeText = styled.div`
@@ -415,12 +437,19 @@ const SectionTitle = styled.div`
   margin-bottom: 12px;
   font-weight: 500;
   color: #22254c;
+  @media only screen and (max-width: 479px) {
+    display: flex;
+    flex-direction: column;
+  }
 `;
 
 const SectionEnglishSpan = styled.span`
   font-size: 18px;
   font-family: "Poppins", sans-serif;
   margin-left: 8px;
+  @media only screen and (max-width: 479px) {
+    margin: 10px 0 0 0;
+  }
 `;
 
 const FeatureSection = styled.div`
@@ -548,6 +577,9 @@ const LanguageButton = styled.button`
     background-color: ${(props) =>
       props.active ? "#3d5a80" : "#d0d7e3"}; // 使用 hover 顏色
   }
+  @media (max-width: 379px) {
+    padding: 6px 12px;
+  }
 `;
 
 const ExploreSection = styled.div`
@@ -591,10 +623,13 @@ const ScrollButton = styled.button`
     outline: none;
   }
   &:first-of-type {
-    left: 10px; /* 左邊按鈕 */
+    left: 10px;
   }
   &:last-of-type {
-    right: 10px; /* 右邊按鈕 */
+    right: 10px;
+  }
+  @media (max-width: 639px) {
+    display: none;
   }
 `;
 
@@ -611,6 +646,9 @@ const CardSetWrapper = styled.div`
 
   &::-webkit-scrollbar {
     display: none;
+  }
+  @media (max-width: 639px) {
+    margin: 20px 0;
   }
 `;
 
@@ -671,7 +709,7 @@ const LeftArrowIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     strokeWidth={1.5}
-    stroke="currentColor"
+    stroke="#3d5a80"
     width="20"
     height="20"
   >
@@ -689,7 +727,7 @@ const RightArrowIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     strokeWidth={1.5}
-    stroke="currentColor"
+    stroke="#3d5a80"
     width="20"
     height="20"
   >
