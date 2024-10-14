@@ -53,10 +53,22 @@ function Home() {
       const scrollAmount = 300; // 每次滾動的距離
       const container = carouselRef.current;
 
+      // 無限滾動的實現，判斷滾動後的位置並重複內容
       if (direction === "left") {
         container.scrollLeft -= scrollAmount;
+        if (container.scrollLeft <= 0) {
+          // 當到達最左邊時，滾動到最右邊
+          container.scrollLeft = container.scrollWidth;
+        }
       } else {
         container.scrollLeft += scrollAmount;
+        if (
+          container.scrollLeft + container.offsetWidth >=
+          container.scrollWidth
+        ) {
+          // 當到達最右邊時，滾動到最左邊
+          container.scrollLeft = 0;
+        }
       }
     }
   };
@@ -258,23 +270,29 @@ function Home() {
           <CardSetWrapper ref={carouselRef}>
             {cardSetData &&
               styleData &&
-              cardSetData.map((cardSet) => {
-                return (
-                  <CardContainer
-                    key={cardSet.cardSetId}
-                    to={`/cardset/${cardSet.cardSetId}`}
-                  >
-                    <CardWrapper $cardSetStyle={styleData[cardSet.styleId]}>
-                      {cardSet.title}
-                    </CardWrapper>
-                    <CardSetDetailsContainer>
-                      <CardSetDescription>
-                        {cardSet.description}
-                      </CardSetDescription>
-                    </CardSetDetailsContainer>
-                  </CardContainer>
-                );
-              })}
+              [...Array(3)].map(
+                (
+                  _,
+                  i // 複製三次數據以實現無縫滾動
+                ) =>
+                  cardSetData.map((cardSet) => {
+                    return (
+                      <CardContainer
+                        key={`${cardSet.cardSetId}-${i}`}
+                        to={`/cardset/${cardSet.cardSetId}`}
+                      >
+                        <CardWrapper $cardSetStyle={styleData[cardSet.styleId]}>
+                          {cardSet.title}
+                        </CardWrapper>
+                        <CardSetDetailsContainer>
+                          <CardSetDescription>
+                            {cardSet.description}
+                          </CardSetDescription>
+                        </CardSetDetailsContainer>
+                      </CardContainer>
+                    );
+                  })
+              )}
           </CardSetWrapper>
           <ScrollButton onClick={() => handleScroll("right")}>
             <RightArrowIcon />
@@ -532,12 +550,6 @@ const LanguageButton = styled.button`
   }
 `;
 
-const ExploreEnglishSpan = styled.span`
-  font-size: 16px;
-  font-family: "Poppins", sans-serif;
-  margin-left: 8px;
-`;
-
 const ExploreSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -587,6 +599,7 @@ const ScrollButton = styled.button`
 `;
 
 const CardSetWrapper = styled.div`
+  width: 100%;
   display: flex;
   gap: 16px;
   overflow-x: auto;
@@ -597,7 +610,7 @@ const CardSetWrapper = styled.div`
   -ms-overflow-style: none; /* IE and Edge */
 
   &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
   }
 `;
 
