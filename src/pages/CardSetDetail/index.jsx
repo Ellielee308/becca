@@ -15,7 +15,7 @@ import {
 import CreateQuizModal from "./CreateQuizModal";
 import CreateGameModal from "./CreateGameModal";
 import { useUser } from "../../context/UserContext.jsx";
-import { ConfigProvider, message, Result, Button } from "antd";
+import { ConfigProvider, message, Result } from "antd";
 
 function CardSetDetail() {
   const { cardSetId } = useParams();
@@ -1146,7 +1146,6 @@ const CardViewWrapper = styled.div`
   display: block;
   margin: 32px 0px;
   width: 100%;
-  aspect-ratio: 3 / 2;
   max-width: 600px;
   perspective: 1000px;
   transform-style: preserve-3d;
@@ -1159,7 +1158,7 @@ const CardViewWrapper = styled.div`
 const FlipCard = styled.div`
   position: relative;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 3 / 2;
   transform-style: preserve-3d;
   transition: ${(props) => {
     switch (props.currentStyle.animation) {
@@ -1205,6 +1204,7 @@ const FrontCard = styled.div`
   gap: 16px;
   width: 100%;
   height: 100%;
+  overflow: auto;
   outline-style: ${(props) => props.currentStyle.borderStyle};
   outline-color: ${(props) => props.currentStyle.borderColor};
   outline-width: ${(props) => props.currentStyle.borderWidth};
@@ -1230,6 +1230,7 @@ const BackCard = styled.div`
   gap: 16px;
   width: 100%;
   height: 100%;
+  overflow: auto;
   outline-style: ${(props) => props.currentStyle.borderStyle};
   outline-color: ${(props) => props.currentStyle.borderColor};
   outline-width: ${(props) => props.currentStyle.borderWidth};
