@@ -363,7 +363,7 @@ function Game() {
       {/* 未登入用戶名輸入框 */}
       {!user && !hasJoinedGame && gameData.status === "waiting" && (
         <JoinGameContainer>
-          <form
+          <JoinGameForm
             onSubmit={(event) => {
               event.preventDefault();
               handleJoinGame();
@@ -377,7 +377,7 @@ function Game() {
               onChange={handleUsernameChange}
             />
             <JoinButton type="submit">加入遊戲</JoinButton>
-          </form>
+          </JoinGameForm>
         </JoinGameContainer>
       )}
       {gameData &&
@@ -484,6 +484,17 @@ const JoinGameContainer = styled.div`
   align-items: center;
   justify-content: center;
   margin-top: 30px;
+  @media screen and (max-width: 430px) {
+    flex-direction: column;
+  }
+`;
+
+const JoinGameForm = styled.form`
+  display: flex;
+  @media screen and (max-width: 430px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const UsernameInput = styled.input`
@@ -498,6 +509,9 @@ const UsernameInput = styled.input`
   &:focus {
     border-color: #adbce5;
     box-shadow: 0 4px 10px rgba(173, 188, 229, 0.3);
+  }
+  @media screen and (max-width: 430px) {
+    margin-right: 0px;
   }
 `;
 
@@ -516,6 +530,9 @@ const JoinButton = styled.button`
   &:hover {
     background-color: #5a9cb1;
     box-shadow: 0 4px 15px rgba(90, 156, 177, 0.3);
+  }
+  @media screen and (max-width: 430px) {
+    margin-top: 12px;
   }
 `;
 
