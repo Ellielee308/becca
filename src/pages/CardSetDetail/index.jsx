@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { useParams, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useEffect, useState, useCallback } from "react";
@@ -175,7 +175,22 @@ function CardSetDetail() {
   };
 
   if (!cardSetData || !cards || !ownerData || loading) {
-    return <div>Loading...</div>;
+    return (
+      <Background>
+        <SkeletonWrapper>
+          <SkeletonTitle />
+          <SkeletonCard />
+          <SkeletonProgressBar />
+          <SkeletonDescriptionBox>
+            <SkeletonAvatar />
+            <SkeletonDescriptionWrapper>
+              <SkeletonAuthorName />
+              <SkeletonDescription />
+            </SkeletonDescriptionWrapper>
+          </SkeletonDescriptionBox>
+        </SkeletonWrapper>
+      </Background>
+    );
   }
   return (
     <Background>
@@ -540,7 +555,6 @@ const Background = styled.div`
 `;
 
 const Wrapper = styled.div`
-  /* background-color: white; */
   margin: 0 auto;
   padding: 20px 20px;
   max-width: 1160px;
@@ -1537,3 +1551,118 @@ const ArrowUp = () => (
     />
   </svg>
 );
+
+/* Skeleton */
+const skeletonAnimation = keyframes`
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+`;
+const SkeletonWrapper = styled.div`
+  margin: 60px auto 0 auto;
+  max-width: 1160px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  @media only screen and (max-width: 639px) {
+    width: 100%;
+    padding: 0 20px 0 20px;
+  }
+`;
+
+const SkeletonTitle = styled.div`
+  align-self: flex-start;
+  margin-bottom: 16px;
+  width: 400px;
+  height: 36px;
+  border-radius: 8px;
+  background: #e0e0e0;
+  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
+  @media only screen and (max-width: 639px) {
+    width: 50%;
+  }
+`;
+
+const SkeletonCard = styled.div`
+  margin-bottom: 16px;
+  width: 600px;
+  height: 400px;
+  background: #e0e0e0;
+  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
+  @media only screen and (max-width: 639px) {
+    width: 100%;
+    aspect-ratio: 3/2;
+  }
+`;
+
+const SkeletonProgressBar = styled.div`
+  margin-bottom: 24px;
+  width: 100%;
+  height: 20px;
+  border-radius: 4px;
+  background: #e0e0e0;
+  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
+`;
+
+const SkeletonDescriptionBox = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  @media only screen and (max-width: 639px) {
+  }
+`;
+
+const SkeletonAvatar = styled.div`
+  margin-right: 16px;
+  height: 64px;
+  width: 64px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: ${skeletonAnimation} 1.5s infinite;
+`;
+
+const SkeletonDescriptionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+const SkeletonAuthorName = styled.p`
+  margin-bottom: 16px;
+  height: 16px;
+  width: 280px;
+  background: #f0f0f0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: ${skeletonAnimation} 1.5s infinite;
+  border-radius: 4px;
+  @media only screen and (max-width: 639px) {
+  }
+`;
+
+const SkeletonDescription = styled.div`
+  height: 40px;
+  width: 440px;
+  background: #f0f0f0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: ${skeletonAnimation} 1.5s infinite;
+  border-radius: 8px;
+  @media only screen and (max-width: 639px) {
+    width: 360px;
+  }
+`;
