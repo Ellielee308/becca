@@ -147,7 +147,7 @@ function Game() {
           const sortedPlayers = playersData.sort((a, b) => {
             return new Date(a.joinedAt) - new Date(b.joinedAt);
           });
-
+          console.log("最新順序", sortedPlayers);
           setPlayers(sortedPlayers);
         }
       });
@@ -162,17 +162,16 @@ function Game() {
       const unsubscribe = onSnapshot(gameRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-          setGameData(data);
-          setPlayers(data.players || []);
+          const playersData = data.players || [];
+          const sortedPlayers = playersData.sort((a, b) => {
+            return Date.parse(a.joinedAt) - Date.parse(b.joinedAt);
+          });
 
-          // 當遊戲狀態變更為 "completed" 時，通知玩家遊戲結束
-          if (data.status === "completed") {
-            console.log("遊戲時間結束！");
-          }
+          console.log("最新順序", sortedPlayers);
+          setPlayers(sortedPlayers);
         }
       });
 
-      // 在組件卸載時取消監聽
       return () => unsubscribe();
     }
   }, [gameId]);
@@ -354,12 +353,15 @@ function Game() {
         <PlayersList>
           <Lable>目前玩家</Lable>
           <PlayersGridContainer>
-            {players.map((player, index) => (
-              <PlayerItem key={index}>
-                <ProfilePicture src={player.profilePicture} />
-                <PlayerName> {player.username}</PlayerName>
-              </PlayerItem>
-            ))}
+            {players
+              .slice() // 創建副本以避免改變原始陣列
+              .sort((a, b) => Date.parse(a.joinedAt) - Date.parse(b.joinedAt)) // 按照 `joinedAt` 排序
+              .map((player, index) => (
+                <PlayerItem key={index}>
+                  <ProfilePicture src={player.profilePicture} />
+                  <PlayerName>{player.username}</PlayerName>
+                </PlayerItem>
+              ))}
           </PlayersGridContainer>
         </PlayersList>
       )}
