@@ -142,13 +142,7 @@ function Game() {
       const unsubscribe = onSnapshot(gameRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-          const playersData = data.players || [];
-
-          const sortedPlayers = playersData.sort((a, b) => {
-            return new Date(a.joinedAt) - new Date(b.joinedAt);
-          });
-          console.log("最新順序", sortedPlayers);
-          setPlayers(sortedPlayers);
+          setPlayers(data.players || []);
         }
       });
 
@@ -162,16 +156,17 @@ function Game() {
       const unsubscribe = onSnapshot(gameRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-          const playersData = data.players || [];
-          const sortedPlayers = playersData.sort((a, b) => {
-            return Date.parse(a.joinedAt) - Date.parse(b.joinedAt);
-          });
+          setGameData(data);
+          setPlayers(data.players || []);
 
-          console.log("最新順序", sortedPlayers);
-          setPlayers(sortedPlayers);
+          // 當遊戲狀態變更為 "completed" 時，通知玩家遊戲結束
+          if (data.status === "completed") {
+            console.log("遊戲時間結束！");
+          }
         }
       });
 
+      // 在組件卸載時取消監聽
       return () => unsubscribe();
     }
   }, [gameId]);
@@ -387,7 +382,7 @@ function Game() {
       )}
       {gameData &&
         gameData.quizType === "matching" &&
-        gameData.status !== "waiting" && (
+        gameData.status === "in-progress" && (
           <Matching
             gameData={gameData}
             gameQuestionData={gameQuestionData}
@@ -398,7 +393,7 @@ function Game() {
         )}
       {gameData &&
         gameData.quizType === "multipleChoices" &&
-        gameData.status !== "waiting" && (
+        gameData.status === "in-progress" && (
           <MultipleChoices
             gameData={gameData}
             gameQuestionData={gameQuestionData}
