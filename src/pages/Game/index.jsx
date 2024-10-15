@@ -382,7 +382,7 @@ function Game() {
       )}
       {gameData &&
         gameData.quizType === "matching" &&
-        gameData.status === "in-progress" && (
+        gameData.status !== "waiting" && (
           <Matching
             gameData={gameData}
             gameQuestionData={gameQuestionData}
@@ -393,7 +393,7 @@ function Game() {
         )}
       {gameData &&
         gameData.quizType === "multipleChoices" &&
-        gameData.status === "in-progress" && (
+        gameData.status !== "waiting" && (
           <MultipleChoices
             gameData={gameData}
             gameQuestionData={gameQuestionData}
