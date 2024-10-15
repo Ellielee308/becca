@@ -17,8 +17,6 @@ import { doc, collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../utils/firebaseConfig.js";
 import Matching from "./Matching";
 import MultipleChoices from "./MultipleChoices";
-import photoPlaceholder from "./images/photo-placeholder.jpg";
-import beccaDog from "./images/beccaDog.png";
 import { message } from "antd";
 
 function Game() {
@@ -47,7 +45,11 @@ function Game() {
         try {
           isJoining.current = true;
           console.log("嘗試加入遊戲...");
-          const participantId = await joinCompetition(gameId, user.username);
+          const participantId = await joinCompetition(
+            gameId,
+            user.username,
+            user
+          );
           setHasJoinedGame(true);
           setParticipantId(participantId);
           console.log(
@@ -140,7 +142,13 @@ function Game() {
       const unsubscribe = onSnapshot(gameRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-          setPlayers(data.players || []);
+          const playersData = data.players || [];
+
+          const sortedPlayers = playersData.sort((a, b) => {
+            return new Date(a.joinedAt) - new Date(b.joinedAt);
+          });
+
+          setPlayers(sortedPlayers);
         }
       });
 
@@ -241,7 +249,7 @@ function Game() {
     }
 
     try {
-      const participantId = await joinCompetition(gameId, username);
+      const participantId = await joinCompetition(gameId, username, user);
       setHasJoinedGame(true);
       setParticipantId(participantId);
       console.log(`玩家 "${username}" 加入遊戲，ID：${participantId}！`);
@@ -348,7 +356,7 @@ function Game() {
           <PlayersGridContainer>
             {players.map((player, index) => (
               <PlayerItem key={index}>
-                <ProfilePicture src={beccaDog} />
+                <ProfilePicture src={player.profilePicture} />
                 <PlayerName> {player.username}</PlayerName>
               </PlayerItem>
             ))}

@@ -927,11 +927,20 @@ export async function getGameQuestions(gameQuestionId) {
   }
 }
 
-export async function joinCompetition(gameId, username) {
+export async function joinCompetition(gameId, username, user) {
   try {
-    let participantId = ""; // 定義一個變數來存儲參賽者 ID
+    let participantId = "";
+    const publicAvatars = [
+      "https://firebasestorage.googleapis.com/v0/b/becca-24.appspot.com/o/beccaDogs%2Fbecca1.png?alt=media&token=0fd51cb4-ad4f-4fbe-bd61-7bd45f886ee7",
+      "https://firebasestorage.googleapis.com/v0/b/becca-24.appspot.com/o/beccaDogs%2Fbecca2.png?alt=media&token=dedb5821-7be7-4875-b5d9-92e261c6bb13",
+      "https://firebasestorage.googleapis.com/v0/b/becca-24.appspot.com/o/beccaDogs%2Fbecca3.png?alt=media&token=8221eb3f-5d13-4315-9963-3560332ce51f",
+    ];
+    // 選擇一個隨機頭像
+    const randomAvatar =
+      publicAvatars[Math.floor(Math.random() * publicAvatars.length)];
 
-    // 開始 Firestore 事務
+    const participantAvatar = user ? user.profilePicture : randomAvatar;
+
     await runTransaction(db, async (transaction) => {
       // 創建參賽者文檔
       const participantsCollectionRef = collection(db, "participants");
@@ -939,7 +948,9 @@ export async function joinCompetition(gameId, username) {
         participantId: "",
         gameId,
         username,
+        profilePicture: participantAvatar,
         gameEndedAt: null,
+        joinedAt: new Date().toISOString(),
       };
       const docRef = await addDoc(participantsCollectionRef, participantData);
 
@@ -955,6 +966,8 @@ export async function joinCompetition(gameId, username) {
         players: arrayUnion({
           participantId,
           username,
+          profilePicture: participantAvatar,
+          joinedAt: new Date().toISOString(),
         }),
       });
     });
