@@ -31,7 +31,7 @@ function App() {
       <GlobalStyle />
       <Header />
       <Outlet />
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

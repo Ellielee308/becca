@@ -31,10 +31,10 @@ function Sidebar() {
           <FolderOpenIcon />
           <NavItemName>卡牌組</NavItemName>
         </StyledNavLink>
-        <StyledNavLink to="/user/me/collection">
+        {/* <StyledNavLink to="/user/me/collection">
           <StarIcon />
           <NavItemName>收藏</NavItemName>
-        </StyledNavLink>
+        </StyledNavLink> */}
       </NavLinkWrapper>
       <LogOutButton
         onClick={() => {
@@ -56,8 +56,8 @@ const Wrapper = styled.div`
   left: 0;
   display: flex;
   flex-direction: column;
-  padding: 18px 0 78px 0;
-  background-color: #fff;
+  padding: 18px 0 20px 0;
+  background-color: #eff0f1;
   min-height: calc(100vh - 60px);
   width: 180px;
   align-items: center;

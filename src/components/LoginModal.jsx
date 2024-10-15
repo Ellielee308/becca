@@ -204,6 +204,8 @@ const ModalHeader = styled.h2`
   margin-bottom: 20px;
   text-align: left;
   font-size: 20px;
+  color: #3d5a80;
+  user-select: none;
 `;
 
 const Form = styled.form`
@@ -223,6 +225,7 @@ const Title = styled.p`
   display: flex;
   align-items: center;
   gap: 4px;
+  color: #3d5a80;
 `;
 
 const Input = styled.input`

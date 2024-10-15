@@ -180,10 +180,10 @@ function Header() {
               <FolderOpenIcon />
               <NavItemName>卡牌組</NavItemName>
             </StyledNavLink>
-            <StyledNavLink to="/user/me/collection" onClick={toggleSidebar}>
+            {/* <StyledNavLink to="/user/me/collection" onClick={toggleSidebar}>
               <StarIcon />
               <NavItemName>收藏</NavItemName>
-            </StyledNavLink>
+            </StyledNavLink> */}
           </NavLinkWrapper>
           <LogOutButton
             onClick={() => {
@@ -303,7 +303,7 @@ const LoginTrigger = styled.div`
   height: 36px;
   font-size: 14px;
   padding: 8px 20px;
-  background-color: #1d1d1d;
+  background-color: #3d5a80;
   color: white;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);

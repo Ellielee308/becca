@@ -1,19 +1,13 @@
 import styled from "styled-components";
+import { useUser } from "../../context/UserContext.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getUserCollection, getCardSet, getStyle } from "../../utils/api";
-import { useUser } from "../../context/UserContext.jsx";
-import { Skeleton } from "antd";
 
-function UserCollection() {
+function Collection() {
   const { user } = useUser();
-
   const [userCollection, setUserCollection] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   useEffect(() => {
     const fetchUserCollection = async () => {
@@ -44,12 +38,9 @@ function UserCollection() {
 
     fetchUserCollection();
   }, [user]);
-
   if (loading) return <div>Loading...</div>;
   return (
     <Wrapper>
-      <Title>收藏</Title>
-      <Split />
       <CardGridWrapper>
         {userCollection &&
           userCollection.length > 0 &&
@@ -100,31 +91,13 @@ function UserCollection() {
   );
 }
 
-export default UserCollection;
+export default Collection;
 
 const Wrapper = styled.div`
-  margin-top: 80px;
-  padding: 0 80px;
-  min-height: 100vh;
-  width: 100%;
+  padding-bottom: 20px;
   @media only screen and (max-width: 639px) {
     padding: 0;
   }
-  @media only screen and (min-width: 640px) and (max-width: 1023px) {
-    margin-left: 60px;
-  }
-`;
-
-const Title = styled.h2`
-  font-size: 24px;
-  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
-  color: #3d5a80;
-`;
-
-const Split = styled.div`
-  margin-top: 16px;
-  border-top: 1px solid #c9c9c9;
-  width: 100%;
 `;
 
 const CardGridWrapper = styled.div`
@@ -143,7 +116,7 @@ const CardContainer = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   transition: box-shadow 0.3s ease;
-
+  background-color: #fff;
   &:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }
@@ -184,6 +157,7 @@ const CardSetDescription = styled.p`
   overflow: hidden;
   white-space: pre-line;
   color: gray;
+  line-height: 24px;
 `;
 
 const LabelWrapper = styled.div`
@@ -236,18 +210,3 @@ const LabelIcon = () => (
     />
   </svg>
 );
-
-const SkeletonWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 60px;
-  height: 100vh;
-  padding: 180px 60px;
-  background-color: #eff7ff;
-`;
-
-const SkeletonButtonWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 30px;
-`;

@@ -445,7 +445,7 @@ const SuggestionWord = styled.div`
   font-size: 14px;
   text-align: center;
   white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow: hidden;
 
   &:hover {
     background-color: #cce6ff;

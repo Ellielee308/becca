@@ -9,6 +9,7 @@ import {
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { message } from "antd";
+import Collection from "./Collection.jsx";
 
 function UserProfile() {
   const { user, setUser, loading } = useUser();
@@ -95,65 +96,80 @@ function UserProfile() {
   return (
     <Wrapper>
       {contextHolder}
-      <ProfileSection>
-        <Title>用戶總覽</Title>
-        <Split />
-        <ProfileInfoWrapper>
-          <ProfilePictureContainer>
-            <ProfilePicture
-              src={
-                newProfilePicture
-                  ? URL.createObjectURL(newProfilePicture)
-                  : user.profilePicture
-              }
-            />
-            <EditProfilePictureIcon onClick={handleIconClick}>
-              <EditIcon />
-            </EditProfilePictureIcon>
-          </ProfilePictureContainer>
-          <AccountInfo>
-            <AccountInfoItem>{`Email: ${user.email}`}</AccountInfoItem>
-            <AccountInfoItem>{`用戶名: ${user.username}`}</AccountInfoItem>
-            <AccountInfoItem>{`卡牌組數量: ${
-              cardSetCount ? cardSetCount : 0
-            }`}</AccountInfoItem>
-            <AccountInfoItem>
-              {`完成測驗數量: ${completedQuizCount ? completedQuizCount : 0}`}
-            </AccountInfoItem>
-          </AccountInfo>
-        </ProfileInfoWrapper>
-      </ProfileSection>
-      {/* Modal 彈窗 */}
-      {isModalOpen && (
-        <ModalOverlay onClick={handleCloseModal}>
-          <ModalContent onClick={(e) => e.stopPropagation()}>
-            <ModalHeader>更換頭像</ModalHeader>
-            <FileInput
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            {newProfilePicture && (
-              <ImagePreview
-                src={URL.createObjectURL(newProfilePicture)}
-                alt="New profile preview"
+      <InfoSection>
+        <ProfileSection>
+          <TitleBar>
+            <ProfileIcon />
+            <Title>用戶總覽</Title>
+          </TitleBar>
+          <Split />
+          <ProfileInfoWrapper>
+            <ProfilePictureContainer>
+              <ProfilePicture
+                src={
+                  newProfilePicture
+                    ? URL.createObjectURL(newProfilePicture)
+                    : user.profilePicture
+                }
               />
-            )}
-            <ModalActions>
-              <UploadButton onClick={handleSaveProfilePicture}>
-                上傳
-              </UploadButton>
-              <CancelButton onClick={handleCancel}>取消</CancelButton>
-            </ModalActions>
-          </ModalContent>
-        </ModalOverlay>
-      )}
-      <CalendarSection>
-        <Title>活躍足跡</Title>
+              <EditProfilePictureIcon onClick={handleIconClick}>
+                <EditIcon />
+              </EditProfilePictureIcon>
+            </ProfilePictureContainer>
+            <AccountInfo>
+              <AccountInfoItem>{`Email: ${user.email}`}</AccountInfoItem>
+              <AccountInfoItem>{`用戶名: ${user.username}`}</AccountInfoItem>
+              <AccountInfoItem>{`卡牌組數量: ${
+                cardSetCount ? cardSetCount : 0
+              }`}</AccountInfoItem>
+              <AccountInfoItem>
+                {`完成測驗數量: ${completedQuizCount ? completedQuizCount : 0}`}
+              </AccountInfoItem>
+            </AccountInfo>
+          </ProfileInfoWrapper>
+        </ProfileSection>
+        {/* Modal 彈窗 */}
+        {isModalOpen && (
+          <ModalOverlay onClick={handleCloseModal}>
+            <ModalContent onClick={(e) => e.stopPropagation()}>
+              <ModalHeader>更換頭像</ModalHeader>
+              <FileInput
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              {newProfilePicture && (
+                <ImagePreview
+                  src={URL.createObjectURL(newProfilePicture)}
+                  alt="New profile preview"
+                />
+              )}
+              <ModalActions>
+                <UploadButton onClick={handleSaveProfilePicture}>
+                  上傳
+                </UploadButton>
+                <CancelButton onClick={handleCancel}>取消</CancelButton>
+              </ModalActions>
+            </ModalContent>
+          </ModalOverlay>
+        )}
+        <CalendarSection>
+          <TitleBar>
+            <CalendarIcon />
+            <Title>活躍足跡</Title>
+          </TitleBar>
+          <Split />
+          {activeDays.length > 0 && <UserCalendar activeDays={activeDays} />}
+        </CalendarSection>
+      </InfoSection>
+      <CollectionSection>
+        <TitleBar>
+          <StarIcon />
+          <Title>收藏卡牌組</Title>
+        </TitleBar>
         <Split />
-
-        {activeDays.length > 0 && <UserCalendar activeDays={activeDays} />}
-      </CalendarSection>
+        <Collection />
+      </CollectionSection>
     </Wrapper>
   );
 }
@@ -161,40 +177,58 @@ function UserProfile() {
 export default UserProfile;
 
 const Wrapper = styled.div`
-  margin-top: 80px;
-  padding: 0 80px;
+  padding: 80px 80px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: #fff;
+  @media only screen and (max-width: 1023px) {
+    padding: 80px 100px;
+  }
+  @media only screen and (max-width: 969px) {
+    margin-left: 40px;
+  }
+  @media only screen and (max-width: 639px) {
+    margin-left: 0px;
+    padding: 80px 32px;
+  }
+`;
+
+const InfoSection = styled.div`
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 24px;
-  @media only screen and (max-width: 639px) {
-    padding: 0;
-  }
-  @media only screen and (min-width: 640px) and (max-width: 1023px) {
-    margin-left: 60px;
+  width: 100%;
+  gap: 20px;
+  @media only screen and (max-width: 969px) {
+    flex-direction: column;
   }
 `;
 
 const Title = styled.h2`
-  font-size: 24px;
+  font-size: 22px;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: #3d5a80;
 `;
 
 const Split = styled.div`
-  margin-top: 16px;
-  margin-bottom: 16px;
-  border-top: 1px solid #c9c9c9;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-top: 1.5px solid #c9c9c9;
   width: 100%;
 `;
 
 const ProfileSection = styled.div`
   display: flex;
   justify-content: center;
-  width: 100%;
+  width: 50%;
   margin-bottom: 36px;
   flex-direction: column;
+  height: 100%;
+  @media only screen and (max-width: 969px) {
+    width: 100%;
+  }
   @media only screen and (max-width: 480px) {
     gap: 20px;
     align-items: center;
@@ -204,7 +238,13 @@ const ProfileSection = styled.div`
 const ProfileInfoWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  margin-top: 36px;
+  margin-top: 10%;
+
+  @media only screen and (max-width: 1023px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
 `;
 
 const ProfilePictureContainer = styled.div`
@@ -226,8 +266,11 @@ const ProfilePicture = styled.img`
 const AccountInfo = styled.div`
   display: flex;
   flex-direction: column;
-  padding-left: 60px;
+  padding-left: 40px;
   justify-content: space-around;
+  @media only screen and (max-width: 1023px) {
+    padding-left: 0px;
+  }
   @media only screen and (max-width: 480px) {
     gap: 14px;
     padding-left: 0;
@@ -243,7 +286,10 @@ const CalendarSection = styled.div`
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 100%;
+  width: 50%;
+  @media only screen and (max-width: 969px) {
+    width: 100%;
+  }
 `;
 
 const EditProfilePictureIcon = styled.div`
@@ -398,21 +444,43 @@ const UserCalendar = ({ activeDays }) => {
         onActiveStartDateChange={handleActiveStartDateChange}
         activeStartDate={activeView}
       />
+      <ExplanationWrapper>
+        <ExplanationBar>
+          <ExampleActiveCircle />
+          <ExampleText>上線日期</ExampleText>
+        </ExplanationBar>
+        <ExplanationBar>
+          <ExampleTodayCircle />
+          <ExampleText>今日日期</ExampleText>
+        </ExplanationBar>
+      </ExplanationWrapper>
     </CalendarWrapper>
   );
 };
 
 const CalendarWrapper = styled.div`
   align-self: center;
+  display: flex;
+  flex-direction: row;
+  @media only screen and (max-width: 1279px) {
+    flex-direction: column;
+  }
+  @media only screen and (max-width: 969px) {
+    flex-direction: row;
+    margin-bottom: 16px;
+  }
+  @media only screen and (max-width: 750px) {
+    flex-direction: column;
+  }
   .react-calendar {
-    width: 400px;
-    height: 400px;
+    font-family: "Noto Sans TC", sans-serif;
+    width: 360px;
+    height: 360px;
     background-color: #f9f9f9;
     border-radius: 12px;
     /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
     padding: 20px;
     border: none;
-    font-family: monospace;
     display: flex;
     flex-direction: column;
     @media only screen and (max-width: 480px) {
@@ -440,7 +508,7 @@ const CalendarWrapper = styled.div`
   .react-calendar__navigation__label {
     font-weight: bold;
     font-size: 18px;
-    color: #6f8695;
+    color: #3d5a80;
     cursor: default !important;
     pointer-events: none; /* 添加這行來禁用所有點擊事件 */
     user-select: none; /* 防止文字被選中 */
@@ -476,9 +544,10 @@ const CalendarWrapper = styled.div`
     align-items: center; /* 垂直居中 */
     padding: 0;
     font-size: 14px; /* 日期字體大小 */
-    border-radius: 50%; /* 讓日期成為圓形 */
+    /* border-radius: 50%; */
     border: 1px solid transparent;
     pointer-events: none;
+    font-family: "Noto Sans TC", sans-serif;
   }
 
   /* 禁用 hover 和選中效果 */
@@ -492,23 +561,15 @@ const CalendarWrapper = styled.div`
     background-color: transparent;
     outline: none;
   }
-
-  /* 選中日期的樣式 */
-  .react-calendar__tile--active {
-    background: inherit;
-    color: inherit;
-    border-radius: 50%;
-  }
-
   /* 活躍日期 */
   .highlight {
-    background-color: #75e766;
+    background-color: #00b4d8;
     color: white !important;
     border-radius: 50%;
   }
 
   .highlight:hover {
-    background-color: #75e766;
+    background-color: #00b4d8;
   }
 
   .inactive {
@@ -523,6 +584,8 @@ const CalendarWrapper = styled.div`
 
   .react-calendar__navigation {
     cursor: default;
+    color: #3d5a80;
+    font-family: "Noto Sans TC", sans-serif;
   }
 
   /* 改進月份切換按鈕的樣式 */
@@ -531,7 +594,7 @@ const CalendarWrapper = styled.div`
     padding: 10px;
     border: none;
     cursor: pointer;
-    font-family: monospace;
+    font-family: "Noto Sans TC", sans-serif;
   }
   .react-calendar__navigation button:hover,
   .react-calendar__navigation button:focus,
@@ -571,19 +634,19 @@ const CalendarWrapper = styled.div`
   .react-calendar__navigation__label {
   }
   .highlight {
-    background-color: #75e766;
+    background-color: #00b4d8;
     color: white !important;
-    border-radius: 50%;
+    /* border-radius: 50%; */
   }
 
   .highlight:hover {
-    background-color: #75e766;
+    background-color: #00b4d8;
   }
 
   .inactive {
     background-color: #e0e0e0 !important;
     color: black !important;
-    border-radius: 50%;
+    /* border-radius: 50%; */
   }
 
   /* 非當前月份的日期樣式 */
@@ -606,13 +669,119 @@ const CalendarWrapper = styled.div`
   .react-calendar__tile--now::after {
     content: "";
     position: absolute;
-    bottom: 6px; /* 控制點的位置，讓它靠近數字的下方 */
+    bottom: 3px; /* 控制點的位置，讓它靠近數字的下方 */
     left: 50%;
     transform: translateX(-50%);
     width: 6px;
     height: 6px;
-    background-color: #ff8a5b; /* 橘色點 */
+    background-color: #ff8a5b;
     border-radius: 50%;
     z-index: 1; /* 確保偽元素在日期數字的後面 */
   }
+
+  .react-calendar__navigation__label__labelText,
+  .react-calendar__navigation__label__labelText--from {
+    color: #3d5a80;
+  }
+`;
+
+const CollectionSection = styled.div`
+  height: 600px;
+  width: 100%;
+`;
+
+const ProfileIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="28"
+    height="28"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+    />
+  </svg>
+);
+
+const TitleBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #3d5a80;
+`;
+
+const CalendarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="28"
+    height="28"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z"
+    />
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="28"
+    height="28"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+    />
+  </svg>
+);
+
+const ExplanationWrapper = styled.div`
+  width: fit-content;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-left: 10px;
+  align-self: flex-end;
+`;
+
+const ExplanationBar = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ExampleActiveCircle = styled.div`
+  background-color: #00b4d8;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+`;
+
+const ExampleTodayCircle = styled.div`
+  background-color: #ff8a5b;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+`;
+
+const ExampleText = styled.div`
+  font-size: 14px;
 `;

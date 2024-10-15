@@ -288,6 +288,23 @@ function Home() {
                           <CardSetDescription>
                             {cardSet.description}
                           </CardSetDescription>
+                          <LabelWrapper>
+                            <LabelIconContainer>
+                              <LabelIcon />
+                            </LabelIconContainer>
+                            <LabelNameContainer>
+                              {cardSet.labels.length > 0 ? (
+                                cardSet.labels.map((label, index) => (
+                                  <LabelName key={label.labelId}>
+                                    {label.name}
+                                    {index < cardSet.labels.length - 1 && ", "}
+                                  </LabelName>
+                                ))
+                              ) : (
+                                <NoLabelName>無標籤</NoLabelName>
+                              )}
+                            </LabelNameContainer>
+                          </LabelWrapper>
                         </CardSetDetailsContainer>
                       </CardContainer>
                     );
@@ -661,7 +678,7 @@ const CardSetWrapper = styled.div`
 const CardContainer = styled(Link)`
   flex: 0 0 280px;
   height: 300px;
-  padding: 20px;
+  padding: 20px 20px 0 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
@@ -700,14 +717,64 @@ const CardSetDescription = styled.p`
   margin-top: 8px;
   font-size: 14px;
   text-align: justify;
-  height: 60px;
+  height: 50px;
   overflow: hidden;
   white-space: pre-line;
   color: gray;
   word-break: break-word;
-  line-height: 1.7;
+  line-height: 22px;
   font-family: "Noto Sans TC", sans-serif;
 `;
+const LabelWrapper = styled.div`
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+`;
+
+const LabelIconContainer = styled.div`
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+`;
+
+const LabelNameContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const LabelName = styled.span`
+  white-space: pre;
+  color: gray;
+  font-size: 14px;
+  cursor: pointer; // 指針變成手型
+  transition: color 0.3s ease; // 增加過渡效果
+
+  &:hover {
+    color: #3d5a80; // 修改為更顯眼的顏色，與網站主題一致
+  }
+`;
+const NoLabelName = styled.span`
+  white-space: pre;
+  color: gray;
+  font-size: 14px;
+`;
+
+const LabelIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width="18"
+    height="18"
+  >
+    <path
+      fillRule="evenodd"
+      d="M5.25 2.25a3 3 0 0 0-3 3v4.318a3 3 0 0 0 .879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 0 0 5.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 0 0-2.122-.879H5.25ZM6.375 7.5a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
 
 const LeftArrowIcon = () => (
   <svg
