@@ -78,16 +78,16 @@ function UserProfile() {
           profilePicture: updatedProfilePictureURL, // 更新狀態中的頭像 URL
         }));
 
-        message.success("大頭貼更新成功！"); // 成功訊息
-        handleCloseModal(); // 關閉 modal
+        message.success("大頭貼更新成功！");
+        handleCloseModal();
       } catch (error) {
         console.error("更新大頭貼失敗", error);
-        message.error("更新大頭貼失敗，請稍後再試！"); // 錯誤訊息
+        message.error("更新大頭貼失敗，請稍後再試！");
       }
     }
   };
 
-  if (!user || loading)
+  if (!user || loading || cardSetCount === null || completedQuizCount === null)
     return (
       <>
         <div>Loading...</div>

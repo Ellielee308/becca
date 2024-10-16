@@ -554,7 +554,6 @@ export async function getCompletedQuizzesCount(currentUserId) {
 
   try {
     const snapshot = await getCountFromServer(q);
-
     return snapshot.data().count;
   } catch (error) {
     console.error("Error fetching completed quizzes count:", error);

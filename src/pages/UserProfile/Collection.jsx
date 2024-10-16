@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useUser } from "../../context/UserContext.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -38,7 +38,16 @@ function Collection() {
 
     fetchUserCollection();
   }, [user]);
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <Wrapper>
+        <CardGridWrapper>
+          <SkeletonCardContainer />
+          <SkeletonCardContainer />
+          <SkeletonCardContainer />
+        </CardGridWrapper>
+      </Wrapper>
+    );
   return (
     <Wrapper>
       <CardGridWrapper>
@@ -193,6 +202,25 @@ const NoLabelName = styled.span`
   white-space: pre;
   color: gray;
   font-size: 14px;
+`;
+
+/* Skeleton */
+const skeletonLoading = keyframes`
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+`;
+
+const SkeletonCardContainer = styled.div`
+  width: 100%;
+  aspect-ratio: 23/24;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: ${skeletonLoading} 1.5s infinite;
 `;
 
 const LabelIcon = () => (

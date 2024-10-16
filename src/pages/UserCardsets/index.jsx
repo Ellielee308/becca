@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useUser } from "../../context/UserContext.jsx";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -133,8 +133,23 @@ function UserCardSets() {
     });
   }
   if (!currentUserId || !userCardSets || !userCardStyles || !styleMap) {
-    return <div>Loading...</div>;
+    return (
+      <Wrapper>
+        <TitleBar>
+          <FolderOpenIcon />
+          <Title>所有卡牌組</Title>
+        </TitleBar>
+        <Split />
+        <CardGridWrapper>
+          <SkeletonCardContainer />
+          <SkeletonCardContainer />
+          <SkeletonCardContainer />
+          <SkeletonCardContainer />
+        </CardGridWrapper>
+      </Wrapper>
+    );
   }
+
   return (
     <Wrapper>
       {contextHolder}
@@ -272,7 +287,7 @@ const TitleBar = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 24px;
+  font-size: 22px;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: #3d5a80;
 `;
@@ -445,6 +460,24 @@ const LinkToCardSetNew = styled(Link)`
   &:hover {
     text-decoration: underline;
   }
+`;
+/* Skeleton */
+const skeletonLoading = keyframes`
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+`;
+
+const SkeletonCardContainer = styled.div`
+  width: 100%;
+  aspect-ratio: 23/24;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: ${skeletonLoading} 1.5s infinite;
 `;
 
 const LabelIcon = () => (
