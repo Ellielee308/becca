@@ -73,7 +73,7 @@ const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [style, setStyle] = useState({
     styleId: "",
-    styleName: "",
+    styleName: "紫色",
     borderStyle: "none",
     borderColor: "",
     borderWidth: "",
@@ -248,6 +248,7 @@ const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
               onChange={(e) =>
                 setStyle({ ...style, styleName: e.target.value })
               }
+              value={style.styleName}
             />
             {invalidStyleName && (
               <InvalidFieldNotice>請填入樣式名稱</InvalidFieldNotice>
