@@ -281,6 +281,7 @@ const NewTemplateModal = ({
                   templateName: e.target.value,
                 })
               }
+              value={newTemplateData.templateName}
             />
             {invalidTemplateName && (
               <InvalidFieldNotice>請填入模板名稱</InvalidFieldNotice>
