@@ -97,6 +97,26 @@ function Collection() {
       title: "確定要取消收藏該卡牌組嗎？",
       okText: "確定",
       cancelText: "取消",
+      icon: null,
+      centered: true,
+      okButtonProps: {
+        style: {
+          backgroundColor: "#3d5a80", // 自定義確定按鈕顏色
+          color: "white",
+          outline: "none", // 移除 outline
+          border: "none", // 移除按鈕邊框
+          boxShadow: "none", // 禁用按鈕陰影
+        },
+      },
+      cancelButtonProps: {
+        style: {
+          backgroundColor: "#c9c5c5", // 自定義取消按鈕顏色
+          color: "white",
+          outline: "none", // 移除 outline
+          border: "none", // 移除按鈕邊框
+          boxShadow: "none", // 禁用按鈕陰影
+        },
+      },
       onOk: async () => {
         try {
           await unfavoriteCardSet(user.userId, cardSetId);

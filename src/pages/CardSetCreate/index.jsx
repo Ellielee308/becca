@@ -1065,14 +1065,13 @@ const ResultButtonGroup = styled.div`
 `;
 
 const GoToCardSetLink = styled(Link)`
-  width: 140px;
-  height: 36px;
-  font-size: 16px;
-  line-height: 16px;
-  font-weight: 400;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 140px;
+  height: 50px;
+  font-size: 16px;
+  font-weight: 400;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: white;
   background-color: #3d5a80;
@@ -1081,37 +1080,35 @@ const GoToCardSetLink = styled(Link)`
   outline: none;
   user-select: none;
   cursor: pointer;
-  text-decoration: none; // 移除連結預設的下劃線
+  text-decoration: none;
   @media only screen and (max-width: 479px) {
     font-size: 14px;
   }
 `;
 
-// 灰色的「繼續新增牌組」按鈕
 const GoToMyCardSetsLink = styled(Link)`
-  width: 140px;
-  height: 36px;
-  font-size: 16px;
-  line-height: 16px;
-  font-weight: 400;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 140px;
+  height: 50px;
+  font-size: 16px;
+  font-weight: 400;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
-  color: #666; // 灰色文字
-  background-color: #e0e0e0; // 淺灰色背景
+  color: #666;
+  background-color: #e0e0e0;
   border-radius: 8px;
   border: none;
   outline: none;
   user-select: none;
   cursor: pointer;
-  margin-left: 16px; // 為了和「前往卡牌組」按鈕分開
-  text-decoration: none; // 移除按鈕樣式中的下劃線
+  margin-left: 16px;
+  text-decoration: none;
   &:hover {
-    background-color: #d3d3d3; // hover 時的背景顏色
+    background-color: #d3d3d3;
   }
   &:active {
-    background-color: #c0c0c0; // active 時的背景顏色
+    background-color: #c0c0c0;
   }
   @media only screen and (max-width: 479px) {
     font-size: 14px;
