@@ -5,10 +5,11 @@ import {
   getUserCardSetCount,
   getCompletedQuizzesCount,
   updateProfilePicture,
+  updateUsername,
 } from "../../utils/api.js";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { message } from "antd";
+import { message, Input } from "antd";
 import Collection from "./Collection.jsx";
 
 function UserProfile() {
@@ -19,6 +20,8 @@ function UserProfile() {
   const [isModalOpen, setIsModalOpen] = useState(false); // 控制 Modal 的狀態
   const [newProfilePicture, setNewProfilePicture] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedUsername, setEditedUsername] = useState(user?.username || "");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -87,6 +90,33 @@ function UserProfile() {
     }
   };
 
+  const handleEditClick = () => {
+    setIsEditingName(true); // 顯示編輯模式
+  };
+
+  const handleSaveUsername = async () => {
+    if (editedUsername && editedUsername !== user.username) {
+      try {
+        // 假設有 updateUsername 函數來更新用戶名
+        await updateUsername(user.userId, editedUsername);
+        setUser((prevUser) => ({
+          ...prevUser,
+          username: editedUsername, // 更新本地狀態中的用戶名
+        }));
+        message.success("用戶名已成功更新！");
+        setIsEditingName(false); // 保存後退出編輯模式
+      } catch (error) {
+        console.error("更新用戶名失敗", error);
+        message.error("更新用戶名失敗，請稍後再試！");
+      }
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingName(false); // 取消編輯模式
+    setEditedUsername(user.username); // 重置用戶名
+  };
+
   if (!user || loading || cardSetCount === null || completedQuizCount === null)
     return (
       <Wrapper>
@@ -150,13 +180,41 @@ function UserProfile() {
               </EditProfilePictureIcon>
             </ProfilePictureContainer>
             <AccountInfo>
-              <AccountInfoItem>{`Email: ${user.email}`}</AccountInfoItem>
-              <AccountInfoItem>{`用戶名: ${user.username}`}</AccountInfoItem>
-              <AccountInfoItem>{`卡牌組數量: ${
-                cardSetCount ? cardSetCount : 0
-              }`}</AccountInfoItem>
+              <AccountInfoTag>Email</AccountInfoTag>
+              <AccountInfoItem>{user.email}</AccountInfoItem>
+              <EditNameWrapper>
+                <AccountInfoTag>用戶名</AccountInfoTag>
+                <EditNameIconContainer onClick={handleEditClick}>
+                  <EditNameIcon />
+                </EditNameIconContainer>
+              </EditNameWrapper>
+              {isEditingName ? (
+                <>
+                  <Input
+                    value={editedUsername}
+                    onChange={(e) => setEditedUsername(e.target.value)}
+                  />
+                  <EditNameButtonGroup>
+                    <EditNameSaveButton onClick={handleSaveUsername}>
+                      儲存
+                    </EditNameSaveButton>
+                    <EditNameCancelButton onClick={handleCancelEdit}>
+                      取消
+                    </EditNameCancelButton>
+                  </EditNameButtonGroup>
+                </>
+              ) : (
+                <>
+                  <AccountInfoItem>{user.username}</AccountInfoItem>
+                </>
+              )}
+              <AccountInfoTag>卡牌組數量</AccountInfoTag>
               <AccountInfoItem>
-                {`完成測驗數量: ${completedQuizCount ? completedQuizCount : 0}`}
+                {cardSetCount ? cardSetCount : 0} 組
+              </AccountInfoItem>
+              <AccountInfoTag>完成測驗數量</AccountInfoTag>
+              <AccountInfoItem>
+                {completedQuizCount ? completedQuizCount : 0} 次
               </AccountInfoItem>
             </AccountInfo>
           </ProfileInfoWrapper>
@@ -271,7 +329,7 @@ const ProfileSection = styled.div`
 const ProfileInfoWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  margin-top: 10%;
+  margin-top: 16%;
 
   @media only screen and (max-width: 1023px) {
     flex-direction: column;
@@ -311,8 +369,69 @@ const AccountInfo = styled.div`
   }
 `;
 
+const EditNameWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 180px;
+`;
+
+const EditNameIconContainer = styled.div`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`;
+
+const EditNameButtonGroup = styled.div`
+  margin: 8px 0 8px 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const EditNameSaveButton = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40%;
+  height: 32px;
+  background-color: #3d5a80;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: "Noto Sans TC", sans-serif;
+  color: #fff;
+  cursor: pointer;
+`;
+
+const EditNameCancelButton = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40%;
+  height: 32px;
+  background-color: #c9c5c5;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: "Noto Sans TC", sans-serif;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+`;
+
+const AccountInfoTag = styled.p`
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: rgb(125, 125, 125);
+  font-family: "Noto Sans TC", sans-serif;
+  user-select: none;
+`;
+
 const AccountInfoItem = styled.p`
   font-size: 16px;
+  margin-bottom: 10px;
+  color: rgb(37, 37, 37);
+  user-select: none;
 `;
 
 const CalendarSection = styled.div`
@@ -397,13 +516,14 @@ const ModalActions = styled.div`
 
 const UploadButton = styled.button`
   padding: 10px 20px;
-  background-color: #f59873;
+  background-color: #3d5a80;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   flex: 1;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  font-size: 14px;
 `;
 
 const CancelButton = styled.button`
@@ -414,7 +534,8 @@ const CancelButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   flex: 1;
-  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: 14px;
 `;
 
 const UserCalendar = ({ activeDays }) => {
@@ -865,5 +986,17 @@ const StarIcon = () => (
       strokeLinejoin="round"
       d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
     />
+  </svg>
+);
+
+const EditNameIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width="14"
+    height="14"
+  >
+    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
   </svg>
 );

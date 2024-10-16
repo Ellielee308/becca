@@ -1017,3 +1017,15 @@ export async function getParticipantDoc(participantId) {
     return null;
   }
 }
+
+export const updateUsername = async (userId, newUsername) => {
+  const userDoc = doc(db, "users", userId);
+  try {
+    await updateDoc(userDoc, {
+      username: newUsername,
+    });
+    console.log("更新用戶名稱成功：", newUsername);
+  } catch (error) {
+    console.error("更新用戶名稱失敗：", error);
+  }
+};
