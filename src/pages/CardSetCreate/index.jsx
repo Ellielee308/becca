@@ -51,8 +51,8 @@ function CardSetCreate() {
   const [cardSetData, setCardSetData] = useState({
     cardSetId: "",
     userId: "",
-    title: "",
-    description: "",
+    title: "國中英文B2U5",
+    description: "康軒版國中英文第二冊第五課",
     purpose: "",
     visibility: "",
     labels: [],
