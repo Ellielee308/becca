@@ -374,6 +374,9 @@ const EditNameWrapper = styled.div`
   flex-direction: row;
   gap: 10px;
   width: 180px;
+  @media only screen and (max-width: 480px) {
+    width: fit-content;
+  }
 `;
 
 const EditNameIconContainer = styled.div`
