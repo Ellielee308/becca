@@ -234,7 +234,7 @@ const QuestionCardWrapper = styled.div`
   font-family: ${(props) => props.$style.fontFamily};
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15);
   @media only screen and (max-width: 639px) {
-    width: 65vw;
+    width: 80vw;
     aspect-ratio: 3 / 2;
     height: auto;
   }
