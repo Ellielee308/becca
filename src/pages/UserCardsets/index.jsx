@@ -137,6 +137,7 @@ function UserCardSets() {
   }
   return (
     <Wrapper>
+      {contextHolder}
       <TitleBar>
         <FolderOpenIcon />
         <Title>所有卡牌組</Title>

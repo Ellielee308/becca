@@ -1,5 +1,5 @@
 import styled, { css, keyframes } from "styled-components";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useEffect, useState, useCallback } from "react";
 import {
@@ -11,11 +11,12 @@ import {
   isCardSetFavorited,
   unfavoriteCardSet,
   favoriteCardSet,
+  deleteCardSet,
 } from "../../utils/api";
 import CreateQuizModal from "./CreateQuizModal";
 import CreateGameModal from "./CreateGameModal";
 import { useUser } from "../../context/UserContext.jsx";
-import { ConfigProvider, message, Result } from "antd";
+import { ConfigProvider, message, Result, Tooltip, Modal } from "antd";
 
 function CardSetDetail() {
   const { cardSetId } = useParams();
@@ -23,13 +24,18 @@ function CardSetDetail() {
   const [template, setTemplate] = useState(null);
   const [style, setStyle] = useState(null);
   const [cards, setCards] = useState([]);
+  const [shuffledCards, setShuffledCards] = useState([]);
+  const [cardsShuffled, setCardsShuffled] = useState(false);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [ownerData, setOwnerData] = useState();
   const [showCreateQuizModal, setShowCreateQuizModal] = useState(null);
   const [showCreateGameModal, setShowCreateGameModal] = useState(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isCardListDisplayed, setIsCardListDisplayed] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
   const { user, loading } = useUser();
   useEffect(() => {
     const fetchCardSetData = async () => {
@@ -91,6 +97,28 @@ function CardSetDetail() {
     }
   }, [user, cardSetId]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // 如果點擊發生在選單或按鈕內部，則不關閉
+      if (
+        event.target.closest(".more-actions-container") ||
+        event.target.closest(".sub-menu")
+      ) {
+        return;
+      }
+      // 如果點擊發生在外部，關閉選單
+      setIsMenuOpen(false);
+    };
+
+    // 監聽 mousedown 事件來捕捉點擊
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // 清除監聽器
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleNextCard = useCallback(() => {
     setCurrentCardIndex((prevIndex) =>
       prevIndex < cards.length - 1 ? prevIndex + 1 : prevIndex
@@ -105,6 +133,19 @@ function CardSetDetail() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
+
+  const toggleShuffleCards = () => {
+    if (!cardsShuffled) {
+      const shuffled = [...cards].sort(() => Math.random() - 0.5);
+      setShuffledCards(shuffled);
+    }
+    setCardsShuffled((prev) => !prev);
+    setCurrentCardIndex(0);
+  };
 
   const handleSwitchCardWithKeyboard = useCallback(
     (event) => {
@@ -134,6 +175,30 @@ function CardSetDetail() {
       window.removeEventListener("keydown", handleSwitchCardWithKeyboard);
     };
   }, [handleSwitchCardWithKeyboard]);
+
+  function copyShareUrl(cardSetId) {
+    const copyText = `https://becca-24.web.app/cardset/${cardSetId}`;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      // 使用 Clipboard API
+      navigator.clipboard
+        .writeText(copyText)
+        .then(() => {
+          message.success("已複製分享連結！");
+        })
+        .catch((error) => {
+          console.error("無法複製分享連結：", error);
+          message.error("複製失敗，請重試"); // 顯示錯誤信息
+        });
+    } else {
+      console.error("無法複製分享連結：沒有clipboard API");
+      message.error("瀏覽器不支援複製功能！");
+    }
+  }
+
+  const handleNavigateToEdit = () => {
+    navigate(`/cardset/${cardSetId}/edit`);
+  };
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -173,6 +238,29 @@ function CardSetDetail() {
       fontFamily: "'TaiwanPearl-Regular', 'Noto Sans TC', sans-serif;",
     },
   };
+
+  async function handleDeleteCardSet(cardSetId) {
+    if (isDeleting) return;
+
+    Modal.confirm({
+      title: "刪除卡牌組後無法復原，確定刪除嗎？",
+      okText: "確定",
+      cancelText: "取消",
+      onOk: async () => {
+        try {
+          setIsDeleting(true);
+          await deleteCardSet(cardSetId);
+          message.success("已刪除卡牌。");
+          navigate("/user/me/cardsets");
+        } catch (error) {
+          console.error("刪除卡牌組失敗：", error);
+          message.error("刪除卡牌失敗，請稍後再試！");
+        } finally {
+          setIsDeleting(false); // 無論成功與否都重置刪除狀態
+        }
+      },
+    });
+  }
 
   if (!cardSetData || !cards || !ownerData || loading) {
     return (
@@ -249,7 +337,11 @@ function CardSetDetail() {
                 <CardContent
                   currentStyle={style}
                   currentTemplate={template}
-                  currentCard={cards[currentCardIndex]}
+                  currentCard={
+                    cardsShuffled
+                      ? shuffledCards[currentCardIndex]
+                      : cards[currentCardIndex]
+                  }
                 />
               )}
               <ArrowIconContainer
@@ -302,6 +394,48 @@ function CardSetDetail() {
                     )}
                   </LabelNameContainer>
                 </LabelWrapper>
+                <MoreActionsContainer>
+                  <Tooltip title="隨機排序卡牌" arrow={false}>
+                    <ShuffleTrigger
+                      $isActive={cardsShuffled}
+                      onClick={toggleShuffleCards}
+                    >
+                      <ShuffleIcon />
+                    </ShuffleTrigger>
+                  </Tooltip>
+                  <Tooltip title="更多" arrow={false}>
+                    <MoreTrigger
+                      className="more-actions-container"
+                      onClick={toggleMenu}
+                    >
+                      <MoreIcon />
+                      {isMenuOpen && (
+                        <SubMenu className="sub-menu">
+                          <SubMenuItem onClick={() => copyShareUrl(cardSetId)}>
+                            <ShareIcon />
+                            <SubMenuItemText>分享</SubMenuItemText>
+                          </SubMenuItem>
+                          {user.userId === ownerData.userId && (
+                            <>
+                              <SubMenuItem onClick={handleNavigateToEdit}>
+                                <EditIcon />
+                                <SubMenuItemText>編輯</SubMenuItemText>
+                              </SubMenuItem>
+                              <SubMenuItem
+                                onClick={() => handleDeleteCardSet(cardSetId)}
+                              >
+                                <TrashIcon />
+                                <SubMenuItemText $isDelete>
+                                  刪除
+                                </SubMenuItemText>
+                              </SubMenuItem>
+                            </>
+                          )}
+                        </SubMenu>
+                      )}
+                    </MoreTrigger>
+                  </Tooltip>
+                </MoreActionsContainer>
               </ActionWrapper>
               <InformationWrapper>
                 <ProfilePictureWrapper>
@@ -395,9 +529,11 @@ function CardSetDetail() {
               <SectionTitleWrapper>
                 <ListIcon />
                 <SectionTitle>{`所有字卡  (${cards.length})`}</SectionTitle>
-                <SpreadArrowContainer onClick={toggleCardListDisplay}>
-                  {isCardListDisplayed ? <ArrowUp /> : <ArrowDown />}
-                </SpreadArrowContainer>
+                <Tooltip title="展開字卡" arrow={false}>
+                  <SpreadArrowContainer onClick={toggleCardListDisplay}>
+                    {isCardListDisplayed ? <ArrowUp /> : <ArrowDown />}
+                  </SpreadArrowContainer>
+                </Tooltip>
               </SectionTitleWrapper>
               {isCardListDisplayed && (
                 <ListSection>
@@ -544,7 +680,7 @@ export default CardSetDetail;
 
 const Background = styled.div`
   position: relative;
-  background-color: #eff7ff;
+  background-color: #e0ecf8;
   width: 100%;
   height: fit-content;
   padding: 60px 14px;
@@ -586,6 +722,7 @@ const Title = styled.div`
   user-select: none;
   font-family: "Noto Sans TC", sans-serif;
   color: "#3d5a80";
+  font-weight: 450;
   @media only screen and (max-width: 639px) {
     font-size: 28px;
   }
@@ -681,8 +818,10 @@ const Progress = styled.div`
 `;
 
 const ActionWrapper = styled.div`
-  margin: 20px auto; /* 上下邊距 */
+  display: flex;
+  margin: 20px auto;
   justify-content: space-between;
+  width: 100%;
 `;
 
 const LabelWrapper = styled.div`
@@ -705,12 +844,12 @@ const LabelNameContainer = styled.div`
 const LabelName = styled.span`
   white-space: pre;
   color: gray;
-  font-size: 14px;
-  cursor: pointer; // 指針變成手型
-  transition: color 0.3s ease; // 增加過渡效果
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.3s ease;
 
   &:hover {
-    color: #3d5a80; // 修改為更顯眼的顏色，與網站主題一致
+    color: #3d5a80;
   }
 `;
 
@@ -720,16 +859,95 @@ const NoLabelName = styled.span`
   font-size: 14px;
 `;
 
+const MoreActionsContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-left: auto;
+  gap: 8px;
+`;
+
+const ShuffleTrigger = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+  background-color: ${(props) =>
+    props.$isActive ? "#3d5a80" : "rgba(255, 255, 255, 0.6)"};
+  color: ${(props) => (props.$isActive ? "#fff" : "#000")}; // 改變字體顏色
+  box-shadow: ${(props) =>
+    props.$isActive ? "0px 4px 8px rgba(0, 0, 0, 0.2)" : "none"}; // 加陰影
+  cursor: pointer;
+  transition: background-color 0.3s ease, border 0.3s ease, box-shadow 0.3s ease,
+    color 0.3s ease;
+
+  &:hover {
+    background-color: ${(props) =>
+      props.$isActive ? "#2c4966" : "rgba(255, 255, 255, 1)"};
+  }
+`;
+
+const MoreTrigger = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.6);
+  &:hover {
+    background-color: rgba(255, 255, 255, 1);
+  }
+`;
+
+const SubMenu = styled.div`
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background-color: white;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 120px;
+  z-index: 100;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+`;
+
+const SubMenuItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const SubMenuItemText = styled.p`
+  margin-left: 14px;
+  color: ${(props) => (props.$isDelete ? "red" : "inherit")};
+`;
+
 const InformationWrapper = styled.div`
-  margin: 20px auto; /* 上下邊距 */
+  margin: 20px auto;
+  padding: 14px 24px;
   display: flex;
   flex-direction: row;
   align-items: center;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #d3d3d3;
 `;
 
 const DescriptionWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  color: #333333;
 `;
 
 const AuthorName = styled.p`
@@ -743,6 +961,7 @@ const Description = styled.div`
   justify-content: flex-start;
   align-items: center;
   white-space: pre-wrap;
+  line-height: 24px;
 `;
 
 const ProfilePictureWrapper = styled.div`
@@ -1042,6 +1261,121 @@ const CardSetButton = styled.div`
   }
 `;
 
+/* Skeleton */
+const skeletonAnimation = keyframes`
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+`;
+const SkeletonWrapper = styled.div`
+  margin: 60px auto 0 auto;
+  max-width: 1160px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  @media only screen and (max-width: 639px) {
+    width: 100%;
+    padding: 0 20px 0 20px;
+  }
+`;
+
+const SkeletonTitle = styled.div`
+  align-self: flex-start;
+  margin-bottom: 16px;
+  width: 400px;
+  height: 36px;
+  border-radius: 8px;
+  background: #e0e0e0;
+  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
+  @media only screen and (max-width: 639px) {
+    width: 50%;
+  }
+`;
+
+const SkeletonCard = styled.div`
+  margin-bottom: 16px;
+  width: 600px;
+  height: 400px;
+  background: #e0e0e0;
+  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
+  @media only screen and (max-width: 639px) {
+    width: 100%;
+    aspect-ratio: 3/2;
+  }
+`;
+
+const SkeletonProgressBar = styled.div`
+  margin-bottom: 24px;
+  width: 100%;
+  height: 20px;
+  border-radius: 4px;
+  background: #e0e0e0;
+  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
+`;
+
+const SkeletonDescriptionBox = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  @media only screen and (max-width: 639px) {
+  }
+`;
+
+const SkeletonAvatar = styled.div`
+  margin-right: 16px;
+  height: 64px;
+  width: 64px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: ${skeletonAnimation} 1.5s infinite;
+`;
+
+const SkeletonDescriptionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+const SkeletonAuthorName = styled.p`
+  margin-bottom: 16px;
+  height: 16px;
+  width: 280px;
+  background: #f0f0f0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: ${skeletonAnimation} 1.5s infinite;
+  border-radius: 4px;
+  @media only screen and (max-width: 639px) {
+  }
+`;
+
+const SkeletonDescription = styled.div`
+  height: 40px;
+  width: 440px;
+  background: #f0f0f0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: ${skeletonAnimation} 1.5s infinite;
+  border-radius: 8px;
+  @media only screen and (max-width: 639px) {
+    width: 360px;
+  }
+`;
+
 function CardContent({ currentStyle, currentTemplate, currentCard }) {
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -1051,6 +1385,29 @@ function CardContent({ currentStyle, currentTemplate, currentCard }) {
   useEffect(() => {
     setIsFlipped(false);
   }, [currentCard]);
+
+  const handleFlipCardWithKeyboard = useCallback((event) => {
+    const tagName = event.target.tagName.toLowerCase();
+    if (tagName === "input" || tagName === "textarea") {
+      return;
+    }
+
+    switch (event.key) {
+      case " ":
+        event.preventDefault();
+        handleFlip();
+        break;
+      default:
+        return;
+    }
+  }, []);
+  useEffect(() => {
+    window.addEventListener("keydown", handleFlipCardWithKeyboard);
+
+    return () => {
+      window.removeEventListener("keydown", handleFlipCardWithKeyboard);
+    };
+  }, [handleFlipCardWithKeyboard]);
 
   return (
     <CardViewWrapper onClick={handleFlip}>
@@ -1299,81 +1656,6 @@ const Image = styled.img`
   display: block;
 `;
 
-CardContent.propTypes = {
-  currentTemplate: PropTypes.shape({
-    templateName: PropTypes.string.isRequired,
-    frontFields: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        type: PropTypes.oneOf(["text", "image"]).isRequired,
-        required: PropTypes.bool.isRequired,
-        position: PropTypes.shape({
-          x: PropTypes.string.isRequired,
-          y: PropTypes.string.isRequired,
-        }).isRequired,
-        style: PropTypes.shape({
-          width: PropTypes.string.isRequired,
-          height: PropTypes.string.isRequired,
-          fontSize: PropTypes.string,
-          fontWeight: PropTypes.string,
-          color: PropTypes.string,
-          textAlign: PropTypes.string,
-        }).isRequired,
-      })
-    ).isRequired,
-    backFields: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        type: PropTypes.oneOf(["text", "image"]).isRequired,
-        required: PropTypes.bool.isRequired,
-        position: PropTypes.shape({
-          x: PropTypes.string.isRequired,
-          y: PropTypes.string.isRequired,
-        }).isRequired,
-        style: PropTypes.shape({
-          width: PropTypes.string.isRequired,
-          height: PropTypes.string.isRequired,
-          fontSize: PropTypes.string,
-          fontWeight: PropTypes.string,
-          color: PropTypes.string,
-          textAlign: PropTypes.string,
-        }).isRequired,
-      })
-    ).isRequired,
-  }).isRequired,
-  currentStyle: PropTypes.shape({
-    styleId: PropTypes.string,
-    userId: PropTypes.string.isRequired,
-    styleName: PropTypes.string.isRequired,
-    borderStyle: PropTypes.oneOf(["none", "solid", "dashed", "dotted"]),
-    borderColor: PropTypes.string,
-    borderWidth: PropTypes.string,
-    borderRadius: PropTypes.string,
-    backgroundColor: PropTypes.string.isRequired,
-    fontFamily: PropTypes.string.isRequired,
-    animation: PropTypes.oneOf(["verticalFlip", "horizontalFlip", "fade"])
-      .isRequired,
-  }).isRequired,
-  currentCard: PropTypes.shape({
-    cardId: PropTypes.string.isRequired,
-    cardSetId: PropTypes.string.isRequired,
-    userId: PropTypes.string.isRequired,
-    frontFields: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        value: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-    backFields: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        value: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-    createdAt: PropTypes.object.isRequired,
-  }).isRequired,
-};
-
 const LeftArrowIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -1552,117 +1834,156 @@ const ArrowUp = () => (
   </svg>
 );
 
-/* Skeleton */
-const skeletonAnimation = keyframes`
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
-`;
-const SkeletonWrapper = styled.div`
-  margin: 60px auto 0 auto;
-  max-width: 1160px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  @media only screen and (max-width: 639px) {
-    width: 100%;
-    padding: 0 20px 0 20px;
-  }
-`;
+const ShareIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="18"
+    height="18"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"
+    />
+  </svg>
+);
 
-const SkeletonTitle = styled.div`
-  align-self: flex-start;
-  margin-bottom: 16px;
-  width: 400px;
-  height: 36px;
-  border-radius: 8px;
-  background: #e0e0e0;
-  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
-  background-size: 200px 100%;
-  background-repeat: no-repeat;
-  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
-  @media only screen and (max-width: 639px) {
-    width: 50%;
-  }
-`;
+const MoreIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="26"
+    height="26"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+    />
+  </svg>
+);
 
-const SkeletonCard = styled.div`
-  margin-bottom: 16px;
-  width: 600px;
-  height: 400px;
-  background: #e0e0e0;
-  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
-  background-size: 200px 100%;
-  background-repeat: no-repeat;
-  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
-  @media only screen and (max-width: 639px) {
-    width: 100%;
-    aspect-ratio: 3/2;
-  }
-`;
+const TrashIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="red"
+    width="18"
+    height="18"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+    />
+  </svg>
+);
 
-const SkeletonProgressBar = styled.div`
-  margin-bottom: 24px;
-  width: 100%;
-  height: 20px;
-  border-radius: 4px;
-  background: #e0e0e0;
-  background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
-  background-size: 200px 100%;
-  background-repeat: no-repeat;
-  animation: ${skeletonAnimation} 1.5s infinite ease-in-out;
-`;
+const ShuffleIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1024 1024"
+    fill="currentColor"
+    strokeWidth={1.5}
+    width="22"
+    height="22"
+  >
+    <path d="M740.2 362.6 798 362.6l0 94.6 162-166.4L798 128l0 108-57.8 0c-165.4 0-258.8 123.8-341.2 233-74 98.2-138 190.8-241.2 190.8L64 659.8l0 126.6 93.8 0c165.4 0 258.8-131.6 341.2-240.8C573 447.4 636.8 362.6 740.2 362.6zM306.4 435c7-9.2 14.2-18.6 21.4-28.2 17.6-23.2 36-47.8 56-72.2-59.2-55.8-130.6-97-226-97L64 237.6l0 126.6c0 0 26.6-1.2 93.8 0C222.8 365.6 263.6 392.4 306.4 435zM798 660.8l-57.8 0c-63 0-111.4-31.6-156.4-78.6-4.4 6-9 12-13.6 18-19.8 26.2-41 54.4-64.4 82.2 60.8 59.8 134.4 105 234.4 105L798 787.4 798 896l162-162.8-162-166.4L798 660.8z" />
+  </svg>
+);
 
-const SkeletonDescriptionBox = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  align-items: center;
-  @media only screen and (max-width: 639px) {
-  }
-`;
+const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width="18"
+    height="18"
+  >
+    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+  </svg>
+);
 
-const SkeletonAvatar = styled.div`
-  margin-right: 16px;
-  height: 64px;
-  width: 64px;
-  border-radius: 50%;
-  background: #f0f0f0;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200px 100%;
-  animation: ${skeletonAnimation} 1.5s infinite;
-`;
-
-const SkeletonDescriptionWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-const SkeletonAuthorName = styled.p`
-  margin-bottom: 16px;
-  height: 16px;
-  width: 280px;
-  background: #f0f0f0;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200px 100%;
-  animation: ${skeletonAnimation} 1.5s infinite;
-  border-radius: 4px;
-  @media only screen and (max-width: 639px) {
-  }
-`;
-
-const SkeletonDescription = styled.div`
-  height: 40px;
-  width: 440px;
-  background: #f0f0f0;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200px 100%;
-  animation: ${skeletonAnimation} 1.5s infinite;
-  border-radius: 8px;
-  @media only screen and (max-width: 639px) {
-    width: 360px;
-  }
-`;
+CardContent.propTypes = {
+  currentTemplate: PropTypes.shape({
+    templateName: PropTypes.string.isRequired,
+    frontFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(["text", "image"]).isRequired,
+        required: PropTypes.bool.isRequired,
+        position: PropTypes.shape({
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
+        }).isRequired,
+        style: PropTypes.shape({
+          width: PropTypes.string.isRequired,
+          height: PropTypes.string.isRequired,
+          fontSize: PropTypes.string,
+          fontWeight: PropTypes.string,
+          color: PropTypes.string,
+          textAlign: PropTypes.string,
+        }).isRequired,
+      })
+    ).isRequired,
+    backFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(["text", "image"]).isRequired,
+        required: PropTypes.bool.isRequired,
+        position: PropTypes.shape({
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
+        }).isRequired,
+        style: PropTypes.shape({
+          width: PropTypes.string.isRequired,
+          height: PropTypes.string.isRequired,
+          fontSize: PropTypes.string,
+          fontWeight: PropTypes.string,
+          color: PropTypes.string,
+          textAlign: PropTypes.string,
+        }).isRequired,
+      })
+    ).isRequired,
+  }).isRequired,
+  currentStyle: PropTypes.shape({
+    styleId: PropTypes.string,
+    userId: PropTypes.string.isRequired,
+    styleName: PropTypes.string.isRequired,
+    borderStyle: PropTypes.oneOf(["none", "solid", "dashed", "dotted"]),
+    borderColor: PropTypes.string,
+    borderWidth: PropTypes.string,
+    borderRadius: PropTypes.string,
+    backgroundColor: PropTypes.string.isRequired,
+    fontFamily: PropTypes.string.isRequired,
+    animation: PropTypes.oneOf(["verticalFlip", "horizontalFlip", "fade"])
+      .isRequired,
+  }).isRequired,
+  currentCard: PropTypes.shape({
+    cardId: PropTypes.string.isRequired,
+    cardSetId: PropTypes.string.isRequired,
+    userId: PropTypes.string.isRequired,
+    frontFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        value: PropTypes.string.isRequired,
+      })
+    ).isRequired,
+    backFields: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        value: PropTypes.string.isRequired,
+      })
+    ).isRequired,
+    createdAt: PropTypes.object.isRequired,
+  }).isRequired,
+};

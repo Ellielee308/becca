@@ -165,7 +165,7 @@ function UserProfile() {
       <CollectionSection>
         <TitleBar>
           <StarIcon />
-          <Title>收藏卡牌組</Title>
+          <Title>收藏的卡牌組</Title>
         </TitleBar>
         <Split />
         <Collection />

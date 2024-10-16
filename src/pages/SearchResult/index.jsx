@@ -101,7 +101,7 @@ function SearchResult() {
 export default SearchResult;
 
 const Background = styled.div`
-  background-color: rgb(225, 229, 242);
+  background-color: #e0ecf8;
   height: fit-content;
   padding: 80px 14px 20px 14px;
 `;
