@@ -1515,9 +1515,9 @@ const getResponsiveFontSize = (fontSizeValue) => {
 const CardViewWrapper = styled.div`
   align-self: center;
   display: block;
-  margin: 32px 0px;
+  margin: 12px 0px;
   width: 100%;
-  max-width: 600px;
+  max-width: 580px;
   perspective: 1000px;
   transform-style: preserve-3d;
   cursor: pointer;
