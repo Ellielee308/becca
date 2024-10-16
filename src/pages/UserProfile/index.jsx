@@ -210,7 +210,7 @@ function UserProfile() {
 export default UserProfile;
 
 const Wrapper = styled.div`
-  padding: 80px 80px;
+  padding: 80px 80px 40px 80px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -719,7 +719,6 @@ const CalendarWrapper = styled.div`
 `;
 
 const CollectionSection = styled.div`
-  height: 600px;
   width: 100%;
 `;
 
