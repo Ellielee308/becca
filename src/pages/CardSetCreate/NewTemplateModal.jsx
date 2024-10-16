@@ -61,10 +61,10 @@ const NewTemplateModal = ({
   const [messageApi, contextHolder] = message.useMessage();
   const [newTemplateData, setNewTemplateData] = useState({
     fieldTemplateId: "", //自動生成
-    templateName: "",
+    templateName: "正面附有詞性",
     frontFields: [
       {
-        name: "Front Text",
+        name: "單字",
         type: "text",
         required: true,
         position: { x: 200, y: 150 },
@@ -81,7 +81,7 @@ const NewTemplateModal = ({
     ],
     backFields: [
       {
-        name: "Back Text",
+        name: "釋義",
         type: "text",
         required: true,
         position: { x: 200, y: 150 },
@@ -1037,7 +1037,7 @@ const fontSizeDropDownStyle = {
 
 // AddNewFieldModal
 const AddFieldModal = ({ onClose, onSave }) => {
-  const [fieldName, setFieldName] = useState("新欄位");
+  const [fieldName, setFieldName] = useState("詞性");
   const [fieldType, setFieldType] = useState("text"); // 預設為文字
   const [fieldSide, setFieldSide] = useState("frontFields"); // 預設為正面
   const [isRequired, setIsRequired] = useState(false);
