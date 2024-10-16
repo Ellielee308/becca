@@ -372,7 +372,7 @@ const AccountInfo = styled.div`
 const EditNameWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  gap: 10px;
   width: 180px;
 `;
 

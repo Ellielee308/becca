@@ -1,8 +1,10 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { register, login } from "../utils/api";
+import { register, login, signInWithGoogle } from "../utils/api";
 import { Tooltip } from "antd";
+import googleIcon from "./images/googleIcon.png";
+import { useUser } from "../context/UserContext";
 
 const LoginModal = ({ onClose, isLoginMode }) => {
   const [isLogin, setIsLogin] = useState(true); // 控制登入或註冊模式
@@ -12,6 +14,7 @@ const LoginModal = ({ onClose, isLoginMode }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [invalidField, setInvalidField] = useState([]);
+  const { user, setUser } = useUser();
 
   useEffect(() => {
     if (isLoginMode === false) {
@@ -159,6 +162,17 @@ const LoginModal = ({ onClose, isLoginMode }) => {
         <ToggleText onClick={toggleMode}>
           {isLogin ? "沒有帳號？立即註冊" : "已經有帳號？立即登入"}
         </ToggleText>
+        {/* 分隔線 */}
+        <Divider>
+          <DividerSplit />
+          <DividerText>或</DividerText>
+          <DividerSplit />
+        </Divider>
+        {/* Google 登入按鈕 */}
+        <GoogleLoginButton onClick={() => signInWithGoogle(onClose, setUser)}>
+          <GoogleIconImage src={googleIcon} />
+          透過 Google 登入
+        </GoogleLoginButton>
       </ModalContent>
     </ModalOverlay>
   );
@@ -241,22 +255,26 @@ const Input = styled.input`
 `;
 
 const SubmitButton = styled.button`
-  background: #4e98dd;
+  background: #3d5a80;
   color: white;
   border: none;
   padding: 10px;
   font-size: 16px;
   border-radius: 5px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   cursor: pointer;
+  transition: background-color 0.3s ease;
   &:hover {
-    background: #367bb5;
+    background: #4a88c6;
   }
 `;
 
 const ToggleText = styled.p`
-  margin-top: 20px;
+  margin-top: 14px;
   color: #4e98dd;
+  font-size: 12px;
   cursor: pointer;
+  font-family: "Noto Sans TC", sans-serif;
   &:hover {
     text-decoration: underline;
   }
@@ -266,12 +284,61 @@ const ErrorText = styled.p`
   font-size: 12px;
   color: red;
   margin-bottom: 8px;
+  font-family: "Noto Sans TC", sans-serif;
 `;
 
 const InformationIconContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const Divider = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40px 0 20px 0;
+`;
+
+const DividerSplit = styled.div`
+  width: 100%;
+  border-bottom: 1px solid #666;
+`;
+
+const DividerText = styled.div`
+  margin: 0 18px 0 18px;
+  font-size: 14px;
+  color: #666;
+`;
+
+const GoogleLoginButton = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  padding: 6px;
+  font-size: 14px;
+  color: #666;
+  background-color: #fff;
+  border: none;
+  border: 1px solid #666;
+  font-family: "Noto Sans TC", sans-serif;
+  border-radius: 5px;
+  font-size: 14px;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
+  &:hover {
+    background-color: #f0f0f0; /* 淡灰色背景 */
+    color: #333; /* 字體變深 */
+    border-color: #333; /* 邊框變深 */
+  }
+`;
+
+const GoogleIconImage = styled.img`
+  width: 32px;
+  height: 32px;
 `;
 
 const InformationCircle = () => (

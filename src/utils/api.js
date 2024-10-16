@@ -22,6 +22,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 
 export async function getUserDocument(userId) {
@@ -1027,5 +1029,51 @@ export const updateUsername = async (userId, newUsername) => {
     console.log("更新用戶名稱成功：", newUsername);
   } catch (error) {
     console.error("更新用戶名稱失敗：", error);
+  }
+};
+
+export const signInWithGoogle = async (onClose, setUser) => {
+  const provider = new GoogleAuthProvider();
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+
+    // 獲取 Google 登入的使用者資訊
+    const user = result.user;
+
+    // 檢查 Firestore 中是否已經有該用戶的資料
+    const userDocRef = doc(db, "users", user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+      // 如果沒有該用戶的資料，則創建新文檔
+      await setDoc(userDocRef, {
+        email: user.email,
+        username: user.displayName || "Unknown", // Google 登入可能會有顯示名稱
+        createdAt: serverTimestamp(),
+        activeDays: [Timestamp.now()],
+        userId: user.uid,
+        profilePicture:
+          user.photoURL ||
+          "https://firebasestorage.googleapis.com/v0/b/becca-24.appspot.com/o/photo-placeholder.jpg?alt=media&token=6f95796c-a80d-4028-ab85-c284d3276a4a", // 預設圖片
+      });
+      console.log("Google 登入成功，並在 Firestore 中創建用戶資料");
+      // 手動更新 user 狀態
+      setUser({
+        email: user.email,
+        username: user.displayName,
+        profilePicture: user.photoURL,
+        userId: user.uid,
+        activeDays: [Timestamp.now()],
+      });
+    } else {
+      console.log("該用戶已存在於 Firestore 中");
+    }
+
+    // 成功登入後，關閉 modal
+    onClose();
+  } catch (error) {
+    console.error("Google 登入失敗：", error.message);
+    throw error;
   }
 };
