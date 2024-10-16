@@ -234,7 +234,7 @@ const QuestionCardWrapper = styled.div`
   font-family: ${(props) => props.$style.fontFamily};
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15);
   @media only screen and (max-width: 639px) {
-    width: 90vw;
+    width: 65vw;
     aspect-ratio: 3 / 2;
     height: auto;
   }
@@ -278,6 +278,9 @@ const ChoiceCard = styled.div`
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
     transform: scale(0.98); /* 輕微縮放效果 */
   }
+  @media only screen and (max-width: 639px) {
+    min-height: 100px;
+  }
 `;
 
 const Note = styled.p`
@@ -287,6 +290,9 @@ const Note = styled.p`
   display: flex;
   align-items: center;
   gap: 6px;
+  @media only screen and (max-width: 639px) {
+    font-size: 12px;
+  }
 `;
 
 const ClickIcon = () => (
