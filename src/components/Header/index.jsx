@@ -34,7 +34,6 @@ function Header() {
   const handleLogOut = async () => {
     try {
       await signOut(auth);
-      console.log("用戶登出");
       setUser(null); // 清除用戶狀態，更新 UI
       navigate("/"); // 重定向到首頁
     } catch (error) {

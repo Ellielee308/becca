@@ -79,11 +79,9 @@ const LoginModal = ({ onClose, isLoginMode }) => {
     try {
       if (isLogin) {
         await login(email, password);
-        console.log("已透過 Modal 登入成功");
         onClose();
       } else {
         await register(email, password, username);
-        console.log("已透過 Modal 註冊成功");
         onClose();
       }
     } catch (err) {

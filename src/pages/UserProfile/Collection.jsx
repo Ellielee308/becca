@@ -33,7 +33,6 @@ function Collection() {
               }
             })
           );
-          console.log("獲取用戶收藏和樣式成功：", collectionWithDetails);
           setUserCollection(collectionWithDetails);
         }
       } catch (error) {

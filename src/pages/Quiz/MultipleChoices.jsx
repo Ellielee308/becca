@@ -27,7 +27,6 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
       const questionNumber = quizData.questionQty;
       const shuffledCards = [...cardsData].sort(() => 0.5 - Math.random());
       const selectedQuestionCards = shuffledCards.slice(0, questionNumber);
-      console.log(selectedQuestionCards);
       setQuizQuestions(selectedQuestionCards);
     }
   }, [quizData, cardsData]);
@@ -49,21 +48,17 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
       const allOptions = [...incorrectOptions, correctOption].sort(
         () => 0.5 - Math.random()
       );
-      console.log("選項：", allOptions);
       setOptions(allOptions);
     }
   }, [quizQuestions, cardsData, currentQuestionNumber]);
 
   const handleAnswerSelect = (selectedOption) => {
-    console.log(selectedOption);
     setSelectedAnswer(selectedOption);
 
     const correctAnswer = quizQuestions[currentQuestionNumber];
     if (selectedOption.cardId === correctAnswer.cardId) {
-      console.log("答對了！");
       setCorrectAttempt((prev) => prev + 1);
     } else {
-      console.log("答錯了！");
       setWrongCards((prev) => [...prev, correctAnswer]);
     }
     // 延遲進入下一個問題，並重置選擇狀態
@@ -92,21 +87,13 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
 
   useEffect(() => {
     let interval;
-    console.log(
-      "Timer effect running. randomCardPairs:",
-      quizQuestions.length,
-      "isGameOver:",
-      isGameOver
-    );
     if (quizQuestions.length > 0 && !isGameOver) {
-      console.log("Starting timer");
       interval = setInterval(() => {
         setTimer((prevTime) => {
           return prevTime + 10;
         });
       }, 10);
     } else {
-      console.log("Clearing timer");
       clearInterval(interval);
     }
     return () => clearInterval(interval);

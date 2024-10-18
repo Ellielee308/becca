@@ -27,28 +27,19 @@ function Matching({ quizData, cardsData, template, style }) {
       // 打亂正反面後的卡牌對
       const randomizedCardPairs = cardPairs.sort(() => 0.5 - Math.random());
 
-      console.log("題目組：", randomizedCardPairs);
       setRandomCardPairs(randomizedCardPairs);
     }
   }, [quizData, cardsData]);
 
   useEffect(() => {
     let interval;
-    console.log(
-      "Timer effect running. randomCardPairs:",
-      randomCardPairs.length,
-      "isGameOver:",
-      isGameOver
-    );
     if (randomCardPairs.length > 0 && !isGameOver) {
-      console.log("Starting timer");
       interval = setInterval(() => {
         setTimer((prevTime) => {
           return prevTime + 10;
         });
       }, 10);
     } else {
-      console.log("Clearing timer");
       clearInterval(interval);
     }
     return () => clearInterval(interval);

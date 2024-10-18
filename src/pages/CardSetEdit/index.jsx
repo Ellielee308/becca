@@ -124,7 +124,6 @@ function CardSetEdit() {
           setSelectedStyle(selectedStyle || {});
           setTemplate(cardSetTemplate);
           setCardContent(orderedCards);
-          console.log("卡牌組資料獲取成功！");
         } catch (error) {
           console.error("獲取卡牌資料失敗：", error);
         }
@@ -167,7 +166,6 @@ function CardSetEdit() {
     );
 
     if (isLabelExist) {
-      console.log("標籤已存在，不允許重複創建：", newLabel);
       messageApi.error("標籤已存在，不允許重複創建");
       return;
     }
@@ -175,7 +173,6 @@ function CardSetEdit() {
     // 檢查是否含有特殊字元（允許字母、數字、空格，以及其他語言字符）
     const specialCharRegex = /^[\p{L}\p{N}\s]+$/u;
     if (!specialCharRegex.test(newLabel)) {
-      console.log("標籤名稱含有不允許的特殊字元，創建失敗：", newLabel);
       messageApi.error("標籤名稱含有不允許的特殊字元，創建失敗");
       return;
     }
@@ -184,7 +181,6 @@ function CardSetEdit() {
         name: newLabel,
         createdBy: user.userId,
       });
-      console.log("標籤已新增至資料庫：", newLabel);
 
       const newOption = { value: newLabelId, label: newLabel };
       setLabelOptions((prevOptions) => [...prevOptions, newOption]);
@@ -198,85 +194,6 @@ function CardSetEdit() {
       console.error("新增標籤失敗：", error);
     }
   };
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   let newInvalidFields = [];
-
-  //   if (cardSetData.title === "") {
-  //     newInvalidFields.push("title");
-  //   }
-  //   if (cardSetData.purpose === "") {
-  //     newInvalidFields.push("purpose");
-  //   }
-  //   if (cardSetData.visibility === "") {
-  //     newInvalidFields.push("visibility");
-  //   }
-  //   if (cardSetData.styleId === "") {
-  //     newInvalidFields.push("styleId");
-  //   }
-  //   if (cardSetData.fieldTemplateId === "") {
-  //     newInvalidFields.push("fieldTemplateId");
-  //   }
-  //   if (cardSetData.purpose === "languageLearning") {
-  //     if (!cardSetData.learningLanguage)
-  //       newInvalidFields.push("learningLanguage");
-  //     if (!cardSetData.interfaceLanguage)
-  //       newInvalidFields.push("interfaceLanguage");
-  //   }
-
-  //   setInvalidFields(newInvalidFields);
-  //   if (newInvalidFields.length > 0) return;
-  //   //檢查卡牌組是否至少有一張
-  //   if (cardContent.length < 1) {
-  //     alert("字卡至少需要一張！");
-  //     return;
-  //   }
-  //   // 檢驗正面是否必填格都有填
-  //   for (let i = 0; i < template.frontFields.length; i++) {
-  //     if (template.frontFields[i].required === true) {
-  //       for (let y = 0; y < cardContent.length; y++) {
-  //         // 檢查前端卡片的對應欄位是否有值
-  //         if (
-  //           !cardContent[y].frontFields[i] ||
-  //           cardContent[y].frontFields[i].value.trim() === ""
-  //         ) {
-  //           alert("卡片有必填項未填！");
-  //           return;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   // 檢驗背面是否必填格都有填
-  //   for (let i = 0; i < template.backFields.length; i++) {
-  //     if (template.backFields[i].required === true) {
-  //       for (let y = 0; y < cardContent.length; y++) {
-  //         // 檢查背面卡片的對應欄位是否有值
-  //         if (
-  //           !cardContent[y].backFields[i] ||
-  //           cardContent[y].backFields[i].value.trim() === ""
-  //         ) {
-  //           alert("卡片有必填項未填！");
-  //           return;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   //真正的提交邏輯
-  //   try {
-  //     await updateCardSetWithNewCards(
-  //       cardSetData,
-  //       cardContent,
-  //       user.userId,
-  //       deletedCards
-  //     );
-  //     alert("卡牌組更新成功！");
-  //     navigate(`/cardset/${cardSetId}`);
-  //   } catch (error) {
-  //     console.error("更新過程出現錯誤：", error);
-  //     alert("更新失敗，請重試。");
-  //   }
-  // };
 
   // 處理第一步提交
   const handleFirstStepSubmit = (event) => {

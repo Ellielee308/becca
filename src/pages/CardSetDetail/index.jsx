@@ -68,15 +68,7 @@ function CardSetDetail() {
         if (fetchedCardSetData.userId) {
           const ownerData = await getUserDocument(fetchedCardSetData.userId);
           setOwnerData(ownerData);
-        } else {
-          console.error("無效的 userId");
         }
-
-        // 同時獲取該卡牌組的標籤資料
-        // const fetchedCardSetLabelsData = await getLabelsOfCardSet(cardSetId);
-        // if (!fetchedCardSetLabelsData) throw new Error("Labels not found");
-        // console.log("獲取該卡牌組標籤成功：", fetchedCardSetLabelsData);
-        // setLabels(fetchedCardSetLabelsData);
       } catch (error) {
         console.error("獲取卡牌組資料或標籤失敗：", error);
       }

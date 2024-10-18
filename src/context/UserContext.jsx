@@ -14,7 +14,6 @@ export const UserProvider = ({ children }) => {
       if (currentUser) {
         try {
           const userData = await getUserDocument(currentUser.uid);
-          console.log("獲取已登入用戶資料：", userData);
           setUser(userData);
           await updateActiveDays(currentUser.uid);
         } catch (error) {

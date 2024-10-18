@@ -21,7 +21,6 @@ function MultipleChoices({
   const [correctAttempt, setCorrectAttempt] = useState(0);
 
   const handleAnswerSelect = async (selectedOption) => {
-    console.log(selectedOption);
     setSelectedAnswer(selectedOption);
 
     const correctAnswerId =
@@ -30,13 +29,9 @@ function MultipleChoices({
     let newCorrectAttempt = correctAttempt;
 
     if (selectedOption.cardId === correctAnswerId) {
-      console.log("答對了！");
       newCorrectAttempt += 1;
       setCorrectAttempt(newCorrectAttempt);
-    } else {
-      console.log("答錯了！");
     }
-
     // 更新 Firestore 中的參賽者文檔
     try {
       await updateParticipantDoc(participantId, {
@@ -58,7 +53,6 @@ function MultipleChoices({
             gameEndedAt: serverTimestamp(),
             currentScore: newCorrectAttempt,
           });
-          console.log("已成功記錄玩家完成狀態");
         } catch (error) {
           console.error("記錄完成狀態失敗：", error);
         }

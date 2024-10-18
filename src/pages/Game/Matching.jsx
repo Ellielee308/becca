@@ -26,7 +26,6 @@ function Matching({
         await updateParticipantDoc(participantId, {
           currentScore: newScore,
         });
-        console.log("Successfully updated participant's score");
       } catch (error) {
         console.error("Failed to update player score:", error);
       }
@@ -81,7 +80,6 @@ function Matching({
             gameEndedAt: serverTimestamp(),
             currentScore: matchedPairs.length / 2,
           });
-          console.log("玩家已完成遊戲，已更新分數和時間");
         } catch (error) {
           console.error("更新玩家分數失敗：", error);
         }

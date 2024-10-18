@@ -44,7 +44,6 @@ function Game() {
       if (user && gameId && !hasJoinedGame && !isJoining.current) {
         try {
           isJoining.current = true;
-          console.log("嘗試加入遊戲...");
           const participantId = await joinCompetition(
             gameId,
             user.username,
@@ -52,11 +51,6 @@ function Game() {
           );
           setHasJoinedGame(true);
           setParticipantId(participantId);
-          console.log(
-            `${isHost ? "房主" : "玩家"} "${user.username}" ${
-              isHost ? "自動" : ""
-            }加入遊戲，ID：${participantId}！`
-          );
         } catch (error) {
           console.error("加入遊戲失敗：", error);
         } finally {
@@ -72,11 +66,9 @@ function Game() {
       if (!gameId || loading) return;
 
       try {
-        console.log("開始獲取遊戲數據...");
         const gameData = await getGameDoc(gameId);
         if (gameData) {
           setGameData(gameData);
-          console.log("成功獲取遊戲數據:", gameData);
 
           const [gameQuestionData, cardSetData, cardsData] = await Promise.all([
             getGameQuestions(gameData.gameQuestionId),
@@ -97,7 +89,6 @@ function Game() {
 
           if (user) {
             setIsGameHost(user.userId === gameData.hostUserId);
-            console.log("檢查用戶是否已在遊戲中...");
 
             // 檢查玩家是否已經在遊戲中
             const isPlayerInGame =
@@ -107,10 +98,8 @@ function Game() {
               );
 
             if (!isPlayerInGame && !hasJoinedGame) {
-              console.log("用戶不在遊戲中，嘗試加入...");
               await joinGame(user.userId === gameData.hostUserId);
             } else if (isPlayerInGame) {
-              console.log("用戶已在遊戲中");
               setHasJoinedGame(true);
               const existingPlayer = gameData.players.find(
                 (player) => player.username === user.username
@@ -158,11 +147,6 @@ function Game() {
           const data = docSnapshot.data();
           setGameData(data);
           setPlayers(data.players || []);
-
-          // 當遊戲狀態變更為 "completed" 時，通知玩家遊戲結束
-          if (data.status === "completed") {
-            console.log("遊戲時間結束！");
-          }
         }
       });
 
@@ -184,11 +168,6 @@ function Game() {
         querySnapshot.forEach((doc) => {
           participants.push({ id: doc.id, ...doc.data() });
         });
-
-        if (participants.length === 0) {
-          console.log("沒有參與者，等待玩家加入");
-          return;
-        }
 
         const allParticipantsFinished = participants.every(
           (participant) =>
@@ -246,7 +225,6 @@ function Game() {
       const participantId = await joinCompetition(gameId, username, user);
       setHasJoinedGame(true);
       setParticipantId(participantId);
-      console.log(`玩家 "${username}" 加入遊戲，ID：${participantId}！`);
       message.success(`玩家 "${username}" 已成功加入遊戲！`);
     } catch (error) {
       console.error("加入遊戲失敗：", error);
@@ -258,8 +236,6 @@ function Game() {
     if (gameId && isGameHost && gameData.status === "waiting") {
       try {
         await updateGameStatus(gameId, "in-progress");
-        console.log("遊戲已開始！");
-        // 開始計時器
         startGameTimer();
       } catch (error) {
         console.error("無法開始遊戲：", error);
@@ -277,8 +253,6 @@ function Game() {
     const intervalId = setInterval(async () => {
       if (remainingTime <= 0) {
         clearInterval(intervalId);
-        console.log("遊戲時間到，遊戲結束！");
-
         // 更新遊戲狀態為「completed」
         try {
           await updateGameStatus(gameId, "completed");

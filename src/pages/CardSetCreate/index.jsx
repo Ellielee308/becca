@@ -91,12 +91,10 @@ function CardSetCreate() {
   }, [selectedTemplate]);
 
   useEffect(() => {
-    console.log("目前的用戶資料：", user);
     if (user) {
       const fetchUserCardStyles = async () => {
         try {
           const userCardStyles = await getUserCardStyles(user.userId); // 等待異步結果
-          console.log("用戶的卡片樣式(含預設)：", userCardStyles);
           setAllStyles(userCardStyles);
 
           const cardStyleOptions = userCardStyles.map((userCardStyle) => ({
@@ -140,7 +138,6 @@ function CardSetCreate() {
       const fetchUserCardTemplates = async () => {
         try {
           const userCardTemplates = await getUserCardTemplates(user.userId);
-          console.log("用戶的卡片模板(含預設)：", userCardTemplates);
           setAllTemplates(userCardTemplates);
 
           // 定義模板的排序順序
@@ -245,7 +242,6 @@ function CardSetCreate() {
     );
 
     if (isLabelExist) {
-      console.log("標籤已存在，不允許重複創建：", newLabel);
       messageApi.error("標籤已存在，不允許重複創建");
       return;
     }
@@ -253,7 +249,6 @@ function CardSetCreate() {
     // 檢查是否含有特殊字元（允許字母、數字、空格，以及其他語言字符）
     const specialCharRegex = /^[\p{L}\p{N}\s]+$/u;
     if (!specialCharRegex.test(newLabel)) {
-      console.log("標籤名稱含有不允許的特殊字元，創建失敗：", newLabel);
       messageApi.error("標籤名稱含有不允許的特殊字元，創建失敗");
       return;
     }
@@ -262,8 +257,6 @@ function CardSetCreate() {
         name: newLabel,
         createdBy: user.userId,
       });
-      console.log("標籤已新增至資料庫：", newLabel);
-
       const newOption = { value: newLabelId, label: newLabel };
       setLabelOptions((prevOptions) => [...prevOptions, newOption]);
 

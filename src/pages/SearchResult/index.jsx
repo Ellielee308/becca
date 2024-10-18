@@ -32,10 +32,7 @@ function SearchResult() {
               };
             })
           );
-          console.log("搜尋結果：", searchResultsWithUserDetails);
           setSearchResults(searchResultsWithUserDetails);
-        } else {
-          console.log("查無搜尋結果");
         }
       } catch (error) {
         console.error("搜尋失敗：", error);
