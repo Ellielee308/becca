@@ -1,6 +1,6 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { createContext, useContext, useEffect, useState } from "react";
 import { getUserDocument, updateActiveDays } from "../utils/api";
-import { onAuthStateChanged } from "firebase/auth"; // 引入 Firebase 的監聽函數
 import { auth } from "../utils/firebaseConfig";
 
 const UserContext = createContext();

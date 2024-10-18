@@ -1,22 +1,21 @@
-import styled, { css } from "styled-components";
-import React, { useState, useRef } from "react";
+import { Input, message } from "antd";
 import PropTypes from "prop-types";
-import Select from "react-select";
+import React, { useRef, useState } from "react";
 import { Rnd } from "react-rnd";
-import imageIcon from "./images/photo.png";
-import { message } from "antd";
-import { Input } from "antd";
-const { TextArea } = Input;
+import Select from "react-select";
+import styled, { css } from "styled-components";
+import { useUser } from "../../context/UserContext.jsx";
+import { saveCardTemplate } from "../../utils/api";
 import {
-  TrashIcon,
   BoldIcon,
   ItalicIcon,
-  TextAlignRightIcon,
   TextAlignCenterIcon,
   TextAlignLeftIcon,
+  TextAlignRightIcon,
+  TrashIcon,
 } from "./icon";
-import { saveCardTemplate } from "../../utils/api";
-import { useUser } from "../../context/UserContext.jsx";
+import imageIcon from "./images/photo.png";
+const { TextArea } = Input;
 
 const fontSizeOptions = [
   {

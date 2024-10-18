@@ -1,7 +1,7 @@
-import styled from "styled-components";
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { search, getUserDocument } from "../../utils/api";
+import { Link, useParams } from "react-router-dom";
+import styled from "styled-components";
+import { getUserDocument, search } from "../../utils/api";
 
 function SearchResult() {
   const { keyword } = useParams();

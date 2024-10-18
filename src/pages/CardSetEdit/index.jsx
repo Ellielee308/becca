@@ -1,25 +1,24 @@
-import styled from "styled-components";
+import { ConfigProvider, message, Result, Steps } from "antd";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useUser } from "../../context/UserContext.jsx";
-import CreatableSelect from "react-select/creatable";
+import { Link, useParams } from "react-router-dom";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
+import styled from "styled-components";
+import NewStyleModal from "../../components/NewStyleModal.jsx";
+import Preview from "../../components/Preview.jsx";
+import { useUser } from "../../context/UserContext.jsx";
 import {
+  addNewLabel,
   getCardSet,
   getCardsOfCardSet,
   getTemplate,
   getUserCardStyles,
   getUserLabels,
-  addNewLabel,
   updateCardSetWithNewCards,
 } from "../../utils/api";
-import Preview from "../../components/Preview.jsx";
-import TemplatePreview from "../CardSetEdit/TemplatePreview.jsx";
 import CardContent from "../CardSetEdit/CardContent.jsx";
-import NewStyleModal from "../../components/NewStyleModal.jsx";
+import TemplatePreview from "../CardSetEdit/TemplatePreview.jsx";
 import { languageOptions } from "./options.js";
-import { Link } from "react-router-dom";
-import { ConfigProvider, Steps, message, Result } from "antd";
 
 const customTheme = {
   token: {

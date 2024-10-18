@@ -1,15 +1,15 @@
+import { Input, message } from "antd";
+import { useEffect, useState } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import styled, { keyframes } from "styled-components";
 import { useUser } from "../../context/UserContext.jsx";
-import { useEffect, useState } from "react";
 import {
-  getUserCardSetCount,
   getCompletedQuizzesCount,
+  getUserCardSetCount,
   updateProfilePicture,
   updateUsername,
 } from "../../utils/api.js";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import { message, Input } from "antd";
 import Collection from "./Collection.jsx";
 
 function UserProfile() {

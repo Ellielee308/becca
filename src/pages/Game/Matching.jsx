@@ -1,12 +1,12 @@
-import styled from "styled-components";
-import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
-import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
 import { serverTimestamp } from "firebase/firestore";
+import PropTypes from "prop-types";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { getParticipantDoc, updateParticipantDoc } from "../../utils/api";
+import bronzedMedal from "./images/MedalBronze.png";
 import goldenMedal from "./images/MedalGolden.png";
 import silverMedal from "./images/MedalSilver.png";
-import bronzedMedal from "./images/MedalBronze.png";
 
 function Matching({
   gameData,

@@ -1,15 +1,15 @@
-import styled from "styled-components";
-import { useEffect, useState, useRef } from "react";
+import { Skeleton } from "antd";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import LoginModal from "../../components/LoginModal.jsx";
 import { useUser } from "../../context/UserContext.jsx";
 import { getCardSet, getStyle } from "../../utils/api";
-import LoginModal from "../../components/LoginModal.jsx";
-import quizSVG from "./images/quiz.svg";
-import gameSVG from "./images/game.svg";
-import searchSVG from "./images/search.svg";
 import customizeSVG from "./images/customize.svg";
+import gameSVG from "./images/game.svg";
 import learningSVG from "./images/learning.svg";
-import { Skeleton } from "antd";
+import quizSVG from "./images/quiz.svg";
+import searchSVG from "./images/search.svg";
 
 function Home() {
   const { user, loading } = useUser();

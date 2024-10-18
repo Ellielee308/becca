@@ -1,9 +1,9 @@
-import styled from "styled-components";
-import { useState } from "react";
-import PropTypes from "prop-types";
-import { TrashIcon, PlusIcon } from "./icon";
-import { uploadImageToStorage, translateText } from "../../utils/api";
 import { Input } from "antd";
+import PropTypes from "prop-types";
+import { useState } from "react";
+import styled from "styled-components";
+import { translateText, uploadImageToStorage } from "../../utils/api";
+import { PlusIcon, TrashIcon } from "./icon";
 const { TextArea } = Input;
 
 export default function CardContent({

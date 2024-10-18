@@ -1,12 +1,12 @@
-import styled, { css } from "styled-components";
+import { serverTimestamp } from "firebase/firestore";
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
-import { updateParticipantDoc, getParticipantDoc } from "../../utils/api";
-import { serverTimestamp } from "firebase/firestore";
+import styled, { css } from "styled-components";
+import { getParticipantDoc, updateParticipantDoc } from "../../utils/api";
+import bronzedMedal from "./images/MedalBronze.png";
 import goldenMedal from "./images/MedalGolden.png";
 import silverMedal from "./images/MedalSilver.png";
-import bronzedMedal from "./images/MedalBronze.png";
 
 function MultipleChoices({
   gameData,

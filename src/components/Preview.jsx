@@ -1,6 +1,6 @@
-import styled, { css } from "styled-components";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import styled, { css } from "styled-components";
 import imageIcon from "./images/photo.png";
 
 export default function Preview({ currentStyle, currentTemplate }) {

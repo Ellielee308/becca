@@ -1,14 +1,14 @@
-import styled, { keyframes } from "styled-components";
-import { useUser } from "../../context/UserContext.jsx";
+import { Modal, message } from "antd";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import styled, { keyframes } from "styled-components";
+import { useUser } from "../../context/UserContext.jsx";
 import {
-  getUserCollection,
   getCardSet,
   getStyle,
+  getUserCollection,
   unfavoriteCardSet,
 } from "../../utils/api";
-import { Modal, message } from "antd";
 
 function Collection() {
   const { user } = useUser();

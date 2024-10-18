@@ -1,7 +1,7 @@
-import styled, { css } from "styled-components";
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import styled, { css } from "styled-components";
 import { updateQuiz } from "../../utils/api";
 
 function Matching({ quizData, cardsData, template, style }) {

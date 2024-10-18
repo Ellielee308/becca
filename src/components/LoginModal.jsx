@@ -1,10 +1,10 @@
-import styled from "styled-components";
-import { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { register, login, signInWithGoogle } from "../utils/api";
 import { Tooltip } from "antd";
-import googleIcon from "./images/googleIcon.png";
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
+import styled from "styled-components";
 import { useUser } from "../context/UserContext";
+import { login, register, signInWithGoogle } from "../utils/api";
+import googleIcon from "./images/googleIcon.png";
 
 const LoginModal = ({ onClose, isLoginMode }) => {
   const [isLogin, setIsLogin] = useState(true); // 控制登入或註冊模式

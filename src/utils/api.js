@@ -1,30 +1,30 @@
-import { db, storage, auth } from "./firebaseConfig";
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  serverTimestamp,
-  arrayUnion,
-  getDoc,
-  query,
-  where,
-  getDocs,
-  setDoc,
-  Timestamp,
-  getCountFromServer,
-  arrayRemove,
-  deleteDoc,
-  writeBatch,
-  runTransaction,
-} from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   GoogleAuthProvider,
+  signInWithEmailAndPassword,
   signInWithPopup,
 } from "firebase/auth";
+import {
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  getCountFromServer,
+  getDoc,
+  getDocs,
+  query,
+  runTransaction,
+  serverTimestamp,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { auth, db, storage } from "./firebaseConfig";
 
 export async function getUserDocument(userId) {
   if (!userId) {

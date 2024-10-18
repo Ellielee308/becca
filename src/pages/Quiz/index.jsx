@@ -1,12 +1,12 @@
-import styled from "styled-components";
-import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import styled from "styled-components";
 import {
-  getQuiz,
   getCardSet,
   getCardsOfCardSet,
-  getTemplate,
+  getQuiz,
   getStyle,
+  getTemplate,
 } from "../../utils/api";
 import Matching from "./Matching";
 import MultipleChoices from "./MultipleChoices";

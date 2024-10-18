@@ -1,23 +1,23 @@
-import styled from "styled-components";
+import { ConfigProvider, message, Result, Skeleton, Steps } from "antd";
 import { useEffect, useState } from "react";
-import { useUser } from "../../context/UserContext.jsx";
-import CreatableSelect from "react-select/creatable";
-import Select from "react-select";
-import { languageOptions } from "./testOptions.js";
-import TemplatePreview from "./TemplatePreview.jsx";
-import Preview from "../../components/Preview.jsx";
-import CardContent from "./CardContent.jsx";
-import NewStyleModal from "../../components/NewStyleModal.jsx";
-import NewTemplateModal from "./NewTemplateModal.jsx";
-import {
-  getUserCardStyles,
-  addNewLabel,
-  getUserCardTemplates,
-  uploadCardSetWithCards,
-  getUserLabels,
-} from "../../utils/api.js";
 import { Link } from "react-router-dom";
-import { ConfigProvider, Steps, message, Result, Skeleton } from "antd";
+import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
+import styled from "styled-components";
+import NewStyleModal from "../../components/NewStyleModal.jsx";
+import Preview from "../../components/Preview.jsx";
+import { useUser } from "../../context/UserContext.jsx";
+import {
+  addNewLabel,
+  getUserCardStyles,
+  getUserCardTemplates,
+  getUserLabels,
+  uploadCardSetWithCards,
+} from "../../utils/api.js";
+import CardContent from "./CardContent.jsx";
+import NewTemplateModal from "./NewTemplateModal.jsx";
+import TemplatePreview from "./TemplatePreview.jsx";
+import { languageOptions } from "./testOptions.js";
 
 const customTheme = {
   token: {

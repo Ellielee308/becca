@@ -1,16 +1,16 @@
-import styled from "styled-components";
+import { message } from "antd";
 import PropTypes from "prop-types";
-import Select from "react-select";
 import { useEffect, useState } from "react";
 import { TwitterPicker } from "react-color";
+import Select from "react-select";
+import styled from "styled-components";
 import { useUser } from "../context/UserContext.jsx";
-import { message } from "antd";
+import { saveCardStyle } from "../utils/api.js";
+import Card from "./Card.jsx";
+import backgroundColorIcon from "./images/backgroundColor.png";
+import borderColorIcon from "./images/borderColorIcon.png";
 import borderRadiusIcon from "./images/borderRadius.png";
 import borderThicknessIcon from "./images/lineThickness.png";
-import borderColorIcon from "./images/borderColorIcon.png";
-import backgroundColorIcon from "./images/backgroundColor.png";
-import Card from "./Card.jsx";
-import { saveCardStyle } from "../utils/api.js";
 
 const borderStyleOptions = [
   { value: "none", label: "無" },

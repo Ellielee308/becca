@@ -1,6 +1,6 @@
-import styled from "styled-components";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import styled from "styled-components";
 
 const Card = ({ currentStyle }) => {
   const [isFlipped, setIsFlipped] = useState(false);

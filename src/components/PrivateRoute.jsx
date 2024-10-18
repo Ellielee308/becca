@@ -1,7 +1,7 @@
-import { useUser } from "../context/UserContext";
-import { Navigate } from "react-router-dom";
 import { message } from "antd";
 import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useUser();

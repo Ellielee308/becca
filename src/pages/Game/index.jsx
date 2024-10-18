@@ -1,23 +1,23 @@
-import styled from "styled-components";
+import { message } from "antd";
+import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
+import { QRCodeSVG } from "qrcode.react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState, useCallback, useRef } from "react";
+import styled from "styled-components";
+import { useUser } from "../../context/UserContext.jsx";
 import {
-  getGameDoc,
-  getGameQuestions,
   getCardSet,
   getCardsOfCardSet,
-  getTemplate,
+  getGameDoc,
+  getGameQuestions,
   getStyle,
+  getTemplate,
   joinCompetition,
   updateGameStatus,
 } from "../../utils/api";
-import { useUser } from "../../context/UserContext.jsx";
-import { QRCodeSVG } from "qrcode.react";
-import { doc, collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../utils/firebaseConfig.js";
 import Matching from "./Matching";
 import MultipleChoices from "./MultipleChoices";
-import { message } from "antd";
 
 function Game() {
   const { gameId } = useParams();

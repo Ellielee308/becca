@@ -1,22 +1,22 @@
-import styled, { css, keyframes } from "styled-components";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { ConfigProvider, message, Modal, Result, Tooltip } from "antd";
 import PropTypes from "prop-types";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import styled, { css, keyframes } from "styled-components";
+import { useUser } from "../../context/UserContext.jsx";
 import {
+  deleteCardSet,
+  favoriteCardSet,
   getCardSet,
+  getCardsOfCardSet,
   getStyle,
   getTemplate,
-  getCardsOfCardSet,
   getUserDocument,
   isCardSetFavorited,
   unfavoriteCardSet,
-  favoriteCardSet,
-  deleteCardSet,
 } from "../../utils/api";
-import CreateQuizModal from "./CreateQuizModal";
 import CreateGameModal from "./CreateGameModal";
-import { useUser } from "../../context/UserContext.jsx";
-import { ConfigProvider, message, Result, Tooltip, Modal } from "antd";
+import CreateQuizModal from "./CreateQuizModal";
 
 function CardSetDetail() {
   const { cardSetId } = useParams();

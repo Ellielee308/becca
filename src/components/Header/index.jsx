@@ -1,11 +1,10 @@
-import styled from "styled-components";
-import { Link, NavLink } from "react-router-dom";
-import { useUser } from "../../context/UserContext.jsx";
-import { useState, useEffect } from "react";
-import LoginModal from "../LoginModal.jsx";
 import { signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { useUser } from "../../context/UserContext.jsx";
 import { auth } from "../../utils/firebaseConfig.js";
-import { useNavigate } from "react-router-dom";
+import LoginModal from "../LoginModal.jsx";
 import beccaLogo from "./images/becca-logo.png";
 
 function Header() {

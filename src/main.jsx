@@ -1,20 +1,20 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import App from "./App.jsx";
 import Layout from "./components/Layout.jsx";
-import Home from "./pages/Home";
-import UserProfile from "./pages/UserProfile";
-import UserCardSets from "./pages/UserCardSets";
-import CardSetDetail from "./pages/CardSetDetail";
+import PrivateRoute from "./components/PrivateRoute";
+import { UserProvider } from "./context/UserContext";
 import CardSetCreate from "./pages/CardSetCreate";
+import CardSetDetail from "./pages/CardSetDetail";
 import CardSetEdit from "./pages/CardSetEdit";
+import Game from "./pages/Game";
+import Home from "./pages/Home";
 import Quiz from "./pages/Quiz";
 import SearchResult from "./pages/SearchResult";
-import PrivateRoute from "./components/PrivateRoute";
+import UserCardSets from "./pages/UserCardSets";
 import UserCollection from "./pages/UserCollection";
-import Game from "./pages/Game";
-import { UserProvider } from "./context/UserContext";
+import UserProfile from "./pages/UserProfile";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
