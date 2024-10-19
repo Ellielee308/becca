@@ -29,7 +29,7 @@ import { auth, db, storage } from "./firebaseConfig";
 export async function getUserDocument(userId) {
   if (!userId) {
     console.error("用戶 ID 無效");
-    return null; // 檢查 userId 是否有效
+    return null;
   }
 
   try {
@@ -47,10 +47,10 @@ export async function getUserDocument(userId) {
   }
 }
 
-export async function saveCardStyle(data) {
+export async function saveCardStyle(newCardStyleData) {
   try {
     const docRef = await addDoc(collection(db, "cardStyles"), {
-      ...data,
+      ...newCardStyleData,
       createdAt: serverTimestamp(),
     });
     await updateDoc(doc(db, "cardStyles", docRef.id), { styleId: docRef.id });
@@ -77,9 +77,8 @@ export async function getUserCardStyles(userId) {
 export async function addNewLabel(labelData) {
   const labelsCollectionRef = collection(db, "labels");
   try {
-    // 先生成一個新的 document ID
     const newLabelRef = doc(labelsCollectionRef);
-    const labelId = newLabelRef.id; // 獲取新生成的 document ID
+    const labelId = newLabelRef.id;
     await setDoc(newLabelRef, { ...labelData, labelId });
     return labelId;
   } catch (error) {
@@ -103,58 +102,11 @@ export async function getUserLabels(userId) {
   }
 }
 
-export async function getLabelsOfCardSet(cardSetId) {
-  try {
-    // 取得指定牌組的文件
-    const cardSetRef = doc(db, "cardSets", cardSetId);
-    const cardSetSnapshot = await getDoc(cardSetRef);
-
-    if (!cardSetSnapshot.exists()) {
-      throw new Error(`Card set with id ${cardSetId} does not exist`);
-    }
-
-    // 取得 labels 陣列
-    const { labels } = cardSetSnapshot.data();
-    if (!labels || labels.length === 0) {
-      return []; // 如果沒有標籤，回傳空陣列
-    }
-
-    // Firestore 的 `in` 查詢最多支持 10 個項目，我們檢查是否超過
-    if (labels.length > 10) {
-      throw new Error("Too many labels, Firestore in query supports only 10.");
-    }
-
-    // 使用 labels 陣列中的 labelId 查詢 labels 集合
-    const labelsCollectionRef = collection(db, "labels");
-    const q = query(labelsCollectionRef, where("labelId", "in", labels));
-
-    const querySnapshot = await getDocs(q);
-
-    // 取得每個 label 的資料
-    const labelData = [];
-    querySnapshot.forEach((doc) => {
-      labelData.push(doc.data());
-    });
-
-    // 確認是否所有的 `labelId` 都有對應的資料
-    if (labelData.length !== labels.length) {
-      console.warn(
-        `Some labels not found in the labels collection. Expected: ${labels.length}, found: ${labelData.length}`
-      );
-    }
-
-    return labelData; // 回傳標籤資料陣列
-  } catch (error) {
-    console.error("Error fetching labels of card set:", error);
-    return [];
-  }
-}
 export async function getUserCardTemplates(userId) {
   const cardFields = [];
   const cardFieldsRef = collection(db, "cardFields");
 
   try {
-    // 查詢指定 userId 的模板（包括預設的 userId: "default"）
     const q = query(cardFieldsRef, where("userId", "in", [userId, "default"]));
     const querySnapshot = await getDocs(q);
 
@@ -169,10 +121,10 @@ export async function getUserCardTemplates(userId) {
   }
 }
 
-export async function saveCardTemplate(data) {
+export async function saveCardTemplate(newCardTemplateData) {
   try {
     const docRef = await addDoc(collection(db, "cardFields"), {
-      ...data,
+      ...newCardTemplateData,
       createdAt: serverTimestamp(),
     });
 
@@ -185,14 +137,11 @@ export async function saveCardTemplate(data) {
   }
 }
 
-export async function uploadImageToStorage(file) {
-  const storageRef = ref(storage, `images/${file.name}-${Date.now()}`);
+export async function uploadImageToStorage(imageFile) {
+  const storageRef = ref(storage, `images/${imageFile.name}-${Date.now()}`);
   try {
-    // 將圖片上傳至 Firebase Storage
-    const snapshot = await uploadBytes(storageRef, file);
-    // 獲取上傳圖片的下載 URL
+    const snapshot = await uploadBytes(storageRef, imageFile);
     const downloadURL = await getDownloadURL(snapshot.ref);
-    // 返回下載 URL
     return downloadURL;
   } catch (error) {
     console.error("圖片上傳失敗:", error);
@@ -200,10 +149,10 @@ export async function uploadImageToStorage(file) {
   }
 }
 
-export async function saveCardSet(data) {
+export async function saveCardSet(newCardSetData) {
   try {
     const docRef = await addDoc(collection(db, "cardSets"), {
-      ...data,
+      ...newCardSetData,
       createdAt: serverTimestamp(),
     });
     await updateDoc(doc(db, "cardSets", docRef.id), { cardSetId: docRef.id });
@@ -217,39 +166,40 @@ export async function saveCardSet(data) {
 export async function updateCardSetCardOrder(cardSetId, orderArray) {
   try {
     await updateDoc(doc(db, "cardSets", cardSetId), { cardOrder: orderArray });
-    return true; // 返回 true 表示成功
+    return true;
   } catch (error) {
     console.error("更新卡牌順序失敗：", error);
-    return null; // 返回 null 表示失敗
+    return null;
   }
 }
 
-export async function saveCard(data, cardSetId) {
+export async function saveCard(cardData, cardSetId) {
   try {
-    const docRef = await addDoc(collection(db, "cards"), {
-      ...data,
+    const docRef = doc(collection(db, "cards"));
+    await setDoc(docRef, {
+      ...cardData,
+      cardSetId,
       createdAt: serverTimestamp(),
-      cardSetId: cardSetId,
+      cardId: docRef.id,
     });
-    await updateDoc(doc(db, "cards", docRef.id), { cardId: docRef.id });
+
     return docRef.id;
   } catch (error) {
     console.error("儲存牌組失敗 ", error);
     return null;
   }
 }
+
 export async function uploadCardSetWithCards(cardSetData, cardContent, userId) {
   if (!userId) {
     throw new Error("儲存卡片失敗：無效的用戶");
   }
   try {
-    // 1. 儲存卡牌組資料並獲得 cardSetId
     const cardSetId = await saveCardSet(cardSetData);
     if (!cardSetId) {
       throw new Error("卡牌組儲存失敗");
     }
 
-    // 2. 逐張卡片儲存，並獲取每張卡片的 cardId
     const cardIds = [];
     for (const card of cardContent) {
       const cardData = {
@@ -257,16 +207,18 @@ export async function uploadCardSetWithCards(cardSetData, cardContent, userId) {
         frontFields: card.frontFields,
         backFields: card.backFields,
       };
-      const cardId = await saveCard(cardData, cardSetId); // 儲存每張卡片
+      const cardId = await saveCard(cardData, cardSetId);
       if (!cardId) {
         throw new Error("卡片儲存失敗");
       }
-      cardIds.push(cardId); // 儲存卡片ID到陣列中
+      cardIds.push(cardId);
     }
 
-    // 3. 更新卡牌組的 cardOrder 來保存卡牌順序
-    const updateResult = await updateCardSetCardOrder(cardSetId, cardIds);
-    if (!updateResult) {
+    const updateCardSetCardOrderResult = await updateCardSetCardOrder(
+      cardSetId,
+      cardIds
+    );
+    if (!updateCardSetCardOrderResult) {
       throw new Error("更新卡牌組順序失敗");
     }
     return cardSetId;
@@ -346,13 +298,13 @@ export async function getUserAllCardSets(userId) {
   }
 }
 
-export async function createQuiz(data) {
+export async function createQuiz(quizData) {
   if (
-    !data ||
-    typeof data !== "object" ||
-    !data.userId ||
-    !data.cardSetId ||
-    !data.quizType
+    !quizData ||
+    typeof quizData !== "object" ||
+    !quizData.userId ||
+    !quizData.cardSetId ||
+    !quizData.quizType
   ) {
     console.error("無效的測驗資料！請確保 userId, cardSetId, quizType 存在。");
     return null;
@@ -360,7 +312,7 @@ export async function createQuiz(data) {
   const quizzesRef = collection(db, "quizzes");
   try {
     const docRef = await addDoc(quizzesRef, {
-      ...data,
+      ...quizData,
       createdAt: serverTimestamp(),
     });
     await updateDoc(doc(db, "quizzes", docRef.id), { quizId: docRef.id });
@@ -450,7 +402,6 @@ export async function updateActiveDays(userId) {
 
       const lastActiveDay = activeDays[activeDays.length - 1];
       if (!lastActiveDay || !lastActiveDay.isEqual(todayTimestamp)) {
-        // 如果不是今天，則添加今天的日期
         await updateDoc(userRef, {
           activeDays: arrayUnion(todayTimestamp),
         });
@@ -497,7 +448,6 @@ export async function getUserCardSetCount(currentUserId) {
 
   try {
     const snapshot = await getCountFromServer(q);
-
     return snapshot.data().count;
   } catch (error) {
     console.error("Error fetching card set count:", error);
@@ -529,7 +479,7 @@ export async function updateProfilePicture(userId, file) {
     return;
   }
 
-  const storageRef = ref(storage, `profilePictures/${userId}/${file.name}`); // 設定 Storage 路徑
+  const storageRef = ref(storage, `profilePictures/${userId}/${file.name}`);
 
   try {
     await uploadBytes(storageRef, file);
@@ -629,10 +579,8 @@ export async function isCardSetFavorited(userId, cardSetId) {
 export async function unfavoriteCardSet(userId, cardSetId) {
   try {
     const userDocRef = doc(db, "users", userId);
-
-    // 使用 arrayRemove 從 favorites 中移除指定的 cardSetId
     await updateDoc(userDocRef, {
-      favorites: arrayRemove(cardSetId), // 移除 cardSetId
+      favorites: arrayRemove(cardSetId),
     });
   } catch (error) {
     console.error("Failed to unfavorite card set:", error);
@@ -685,14 +633,13 @@ export async function updateCardSetWithNewCards(
     throw new Error("儲存卡片失敗：無效的用戶");
   }
 
+  const currentCardSetId = cardSetData.cardSetId;
   try {
-    // 1. 更新卡牌組資料
-    await updateCardSet(cardSetData.cardSetId, cardSetData);
+    await updateCardSet(currentCardSetId, cardSetData);
 
     const newCardIds = [];
-    const batch = writeBatch(db); // 使用批量寫入
+    const batch = writeBatch(db);
 
-    // 2. 處理卡片內容（新增和更新）
     for (const card of cardContent) {
       if (card.isNew) {
         const cardData = {
@@ -700,32 +647,28 @@ export async function updateCardSetWithNewCards(
           frontFields: card.frontFields,
           backFields: card.backFields,
         };
-        const cardId = await saveCard(cardData, cardSetData.cardSetId); // 假設 saveCard 新增卡片
-        newCardIds.push(cardId); // 將新卡片的 ID 存入
+        const cardId = await saveCard(cardData, currentCardSetId);
+        newCardIds.push(cardId);
       } else {
         const cardRef = doc(db, "cards", card.cardId);
-        batch.update(cardRef, card); // 使用批量更新現有卡片
+        batch.update(cardRef, card);
       }
     }
 
-    // 3. 更新卡牌組中的 cardOrder，加入新卡片的 ID
-    const cardSetRef = doc(db, "cardSets", cardSetData.cardSetId);
+    const cardSetRef = doc(db, "cardSets", currentCardSetId);
     batch.update(cardSetRef, {
-      cardOrder: arrayUnion(...newCardIds), // 展開 newCardIds 以將每個新卡片 ID 添加到 cardOrder
+      cardOrder: arrayUnion(...newCardIds),
     });
 
-    // 4. 處理刪除的卡片
     for (const deletedCardId of deletedCards) {
       const cardRef = doc(db, "cards", deletedCardId);
-      batch.delete(cardRef); // 批量刪除卡片
+      batch.delete(cardRef);
 
-      // 從 cardOrder 中移除刪除的卡片 ID
       batch.update(cardSetRef, {
         cardOrder: arrayRemove(deletedCardId),
       });
     }
 
-    // 5. 提交批量操作
     await batch.commit();
   } catch (error) {
     console.error("更新卡牌組失敗：", error.message);
@@ -765,11 +708,11 @@ export async function deleteCardSet(cardSetId) {
   }
 }
 
-export async function createGameDoc(data) {
+export async function createGameDoc(newGameData) {
   try {
     const gamesCollectionRef = collection(db, "games");
     const docRef = await addDoc(gamesCollectionRef, {
-      ...data,
+      ...newGameData,
       createdAt: serverTimestamp(),
       status: "waiting",
     });
@@ -780,11 +723,11 @@ export async function createGameDoc(data) {
   }
 }
 
-export async function uploadGameQuestionDoc(data) {
+export async function uploadGameQuestionDoc(gameQuestionData) {
   try {
     const gameQuestionCollectionRef = collection(db, "gameQuestions");
     const docRef = await addDoc(gameQuestionCollectionRef, {
-      ...data,
+      ...gameQuestionData,
       gameQuestionId: "",
     });
     await updateDoc(docRef, { gameQuestionId: docRef.id });
@@ -808,7 +751,6 @@ export async function createGameWithQuestion(gameData, questionData) {
       throw new Error("創建遊戲題目失敗");
     }
 
-    // 將 gameQuestionId 更新到 game 文檔中
     const gameDocRef = doc(db, "games", gameId);
     await updateDoc(gameDocRef, { gameQuestionId });
     return gameId;
@@ -855,14 +797,13 @@ export async function joinCompetition(gameId, username, user) {
       "https://firebasestorage.googleapis.com/v0/b/becca-24.appspot.com/o/beccaDogs%2Fbecca2.png?alt=media&token=dedb5821-7be7-4875-b5d9-92e261c6bb13",
       "https://firebasestorage.googleapis.com/v0/b/becca-24.appspot.com/o/beccaDogs%2Fbecca3.png?alt=media&token=8221eb3f-5d13-4315-9963-3560332ce51f",
     ];
-    // 選擇一個隨機頭像
+
     const randomAvatar =
       publicAvatars[Math.floor(Math.random() * publicAvatars.length)];
 
     const participantAvatar = user ? user.profilePicture : randomAvatar;
 
     await runTransaction(db, async (transaction) => {
-      // 創建參賽者文檔
       const participantsCollectionRef = collection(db, "participants");
       const participantData = {
         participantId: "",
@@ -874,13 +815,10 @@ export async function joinCompetition(gameId, username, user) {
       };
       const docRef = await addDoc(participantsCollectionRef, participantData);
 
-      // 獲取參賽者 ID
       participantId = docRef.id;
 
-      // 更新 participantId
       transaction.update(docRef, { participantId });
 
-      // 更新遊戲的 players 列表
       const gameRef = doc(db, "games", gameId);
       transaction.update(gameRef, {
         players: arrayUnion({
@@ -891,10 +829,10 @@ export async function joinCompetition(gameId, username, user) {
         }),
       });
     });
-    return participantId; // 返回 participantId
+    return participantId;
   } catch (error) {
     console.error("加入競賽失敗：", error);
-    return null; // 返回 null 表示失敗
+    return null;
   }
 }
 
@@ -911,10 +849,10 @@ export async function updateGameStatus(gameId, status) {
   }
 }
 
-export async function updateParticipantDoc(participantId, data) {
+export async function updateParticipantDoc(participantId, participantData) {
   try {
     const participantDocRef = doc(db, "participants", participantId);
-    await updateDoc(participantDocRef, data);
+    await updateDoc(participantDocRef, participantData);
   } catch (error) {
     console.error("更新玩家成績失敗：", error);
   }
@@ -948,24 +886,20 @@ export const updateUsername = async (userId, newUsername) => {
   }
 };
 
-export const signInWithGoogle = async (onClose, setUser) => {
+export const signInWithGoogle = async (closeModal, setUser) => {
   const provider = new GoogleAuthProvider();
 
   try {
     const result = await signInWithPopup(auth, provider);
-
-    // 獲取 Google 登入的使用者資訊
     const user = result.user;
 
-    // 檢查 Firestore 中是否已經有該用戶的資料
     const userDocRef = doc(db, "users", user.uid);
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
-      // 如果沒有該用戶的資料，則創建新文檔
       await setDoc(userDocRef, {
         email: user.email,
-        username: user.displayName || "Unknown", // Google 登入可能會有顯示名稱
+        username: user.displayName || "Unknown",
         createdAt: serverTimestamp(),
         activeDays: [Timestamp.now()],
         userId: user.uid,
@@ -973,17 +907,17 @@ export const signInWithGoogle = async (onClose, setUser) => {
           user.photoURL ||
           "https://firebasestorage.googleapis.com/v0/b/becca-24.appspot.com/o/photo-placeholder.jpg?alt=media&token=6f95796c-a80d-4028-ab85-c284d3276a4a", // 預設圖片
       });
-      // 手動更新 user 狀態
+
       setUser({
         email: user.email,
         username: user.displayName,
-        profilePicture: user.photoURL,
-        userId: user.uid,
         activeDays: [Timestamp.now()],
+        userId: user.uid,
+        profilePicture: user.photoURL,
       });
     }
-    // 成功登入後，關閉 modal
-    onClose();
+
+    closeModal();
   } catch (error) {
     console.error("Google 登入失敗：", error.message);
     throw error;
