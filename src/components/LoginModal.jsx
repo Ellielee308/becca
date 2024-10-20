@@ -14,7 +14,7 @@ const LoginModal = ({ onClose, isLoginMode }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [invalidField, setInvalidField] = useState([]);
-  const { user, setUser } = useUser();
+  const { setUser } = useUser();
 
   useEffect(() => {
     if (isLoginMode === false) {
@@ -50,17 +50,14 @@ const LoginModal = ({ onClose, isLoginMode }) => {
     setError("");
     let errors = [];
 
-    // 檢查 email
     if (!validateEmail(email)) {
       errors.push("email");
     }
 
-    // 檢查密碼
     if (!validatePassword(password)) {
       errors.push("password");
     }
 
-    // 註冊時檢查用戶名
     if (!isLogin) {
       if (!username.trim()) {
         errors.push("username");
@@ -69,7 +66,6 @@ const LoginModal = ({ onClose, isLoginMode }) => {
       }
     }
 
-    // 若有錯誤，則不提交表單
     if (errors.length > 0) {
       setInvalidField(errors);
       setLoading(false);
@@ -107,6 +103,7 @@ const LoginModal = ({ onClose, isLoginMode }) => {
         <CloseButton onClick={onClose}>×</CloseButton>
         <ModalHeader>{isLogin ? "登入" : "註冊"}</ModalHeader>
         <Form onSubmit={handleSubmit}>
+          <TestAccount>測試帳號：test@gmail.com</TestAccount>
           <InfoWrapper>
             <Title>Email</Title>
             <Tooltip title="請輸入有效的電子信箱地址">
@@ -121,6 +118,7 @@ const LoginModal = ({ onClose, isLoginMode }) => {
               $isInvalid={invalidField.includes("email")}
             />
           </InfoWrapper>
+          <TestAccount>測試密碼：123456</TestAccount>
           <InfoWrapper>
             <Title>密碼</Title>
             <Tooltip title="密碼至少需有 6 個字元">
@@ -160,13 +158,11 @@ const LoginModal = ({ onClose, isLoginMode }) => {
         <ToggleText onClick={toggleMode}>
           {isLogin ? "沒有帳號？立即註冊" : "已經有帳號？立即登入"}
         </ToggleText>
-        {/* 分隔線 */}
         <Divider>
           <DividerSplit />
           <DividerText>或</DividerText>
           <DividerSplit />
         </Divider>
-        {/* Google 登入按鈕 */}
         <GoogleLoginButton onClick={() => signInWithGoogle(onClose, setUser)}>
           <GoogleIconImage src={googleIcon} />
           透過 Google 登入
@@ -248,7 +244,7 @@ const Input = styled.input`
   border-radius: 5px;
   outline: none;
   &:focus {
-    border-color: #4e98dd; /* 當焦點時變化顏色 */
+    border-color: #4e98dd;
   }
 `;
 
@@ -283,6 +279,14 @@ const ErrorText = styled.p`
   color: red;
   margin-bottom: 8px;
   font-family: "Noto Sans TC", sans-serif;
+`;
+
+const TestAccount = styled.p`
+  font-size: 12px;
+  margin-bottom: 8px;
+  text-align: end;
+  font-family: "Noto Sans TC", sans-serif;
+  color: #4e98dd;
 `;
 
 const InformationIconContainer = styled.div`
@@ -328,9 +332,9 @@ const GoogleLoginButton = styled.button`
   transition: background-color 0.3s ease, color 0.3s ease,
     border-color 0.3s ease;
   &:hover {
-    background-color: #f0f0f0; /* 淡灰色背景 */
-    color: #333; /* 字體變深 */
-    border-color: #333; /* 邊框變深 */
+    background-color: #f0f0f0;
+    color: #333;
+    border-color: #333;
   }
 `;
 
