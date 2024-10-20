@@ -446,7 +446,8 @@ const StyleNameInput = styled.input`
   padding: 0px 5px;
   border: solid 1px #c1c0c0;
   border-radius: 4px;
-  font-size: 18px;
+  font-size: 16px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   &:focus {
     outline: 2px solid #2684ff;
   }
@@ -458,7 +459,7 @@ const StyleOptionsWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 5px 5px;
-  margin-top: 30px;
+  margin-top: 16px;
   height: 50px;
   width: 100%;
   border: solid 1px #f3f3f3;
@@ -486,7 +487,7 @@ const SelectBorderStyles = {
   }),
   menu: (provided) => ({
     ...provided,
-    zIndex: 1000, // 選單的 z-index，以防止被其他元素遮蓋
+    zIndex: 1000,
   }),
 };
 
@@ -541,7 +542,7 @@ const SelectFont = {
   }),
   menu: (provided) => ({
     ...provided,
-    zIndex: 1000, // 選單的 z-index，以防止被其他元素遮蓋
+    zIndex: 1000,
   }),
 };
 
@@ -552,15 +553,15 @@ const SelectAnimation = {
   }),
   menu: (provided) => ({
     ...provided,
-    zIndex: 1000, // 選單的 z-index，以防止被其他元素遮蓋
+    zIndex: 1000,
   }),
 };
 
 const PickerContainer = styled.div`
-  position: fixed; /* 懸浮在其他元素上 */
+  position: fixed;
   top: ${({ top }) => top}px;
   left: ${({ left }) => left}px;
-  z-index: 1000; /* 確保在最上層 */
+  z-index: 1000;
 `;
 
 const SaveButton = styled.input`

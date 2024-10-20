@@ -59,7 +59,7 @@ const NewTemplateModal = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [newTemplateData, setNewTemplateData] = useState({
-    fieldTemplateId: "", //自動生成
+    fieldTemplateId: "",
     templateName: "正面附有詞性",
     frontFields: [
       {
@@ -574,7 +574,8 @@ const TemplateNameInput = styled.input`
   padding: 0px 5px;
   border: solid 1px #c1c0c0;
   border-radius: 4px;
-  font-size: 18px;
+  font-size: 16px;
+  font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   &:focus {
     outline: 2px solid #2684ff;
   }
@@ -815,12 +816,12 @@ const TrashIconContainer = styled.div`
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  color: #ff4d4f; // 鮮豔紅色來顯示刪除圖標
+  color: #ff4d4f;
   transition: transform 0.3s;
 
   &:hover {
     transform: scale(1.1);
-    color: #d32f2f; // hover 時讓顏色更深
+    color: #d32f2f;
   }
 `;
 
@@ -1027,19 +1028,18 @@ const ColorInput = styled.input`
 const fontSizeDropDownStyle = {
   dropdownIndicator: (provided) => ({
     ...provided,
-    padding: 4, // 調整箭頭的間距
+    padding: 4,
     svg: {
-      width: 12, // 修改箭頭圖標的寬度
-      height: 12, // 修改箭頭圖標的高度
+      width: 12,
+      height: 12,
     },
   }),
 };
 
-// AddNewFieldModal
 const AddFieldModal = ({ onClose, onSave }) => {
   const [fieldName, setFieldName] = useState("詞性");
-  const [fieldType, setFieldType] = useState("text"); // 預設為文字
-  const [fieldSide, setFieldSide] = useState("frontFields"); // 預設為正面
+  const [fieldType, setFieldType] = useState("text");
+  const [fieldSide, setFieldSide] = useState("frontFields");
   const [isRequired, setIsRequired] = useState(false);
   const [invalidFieldName, setInvalidFieldName] = useState(false);
 
