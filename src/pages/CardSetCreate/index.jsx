@@ -807,7 +807,6 @@ const Wrapper = styled.div`
   margin: 0 auto;
   padding: 30px 20px;
   max-width: 1160px;
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
   border: 1px solid #e6e3e1;
   border-radius: 8px;
   background-color: white;
@@ -901,21 +900,11 @@ const Submit = styled.input`
   line-height: 16px;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: white;
-  /* background: linear-gradient(to right, #63b3ed, #4299e1); 漸層的天藍色 */
   background-color: #3d5a80;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-
-  /* &:hover {
-    background-color: #3182ce;
-  } */
-
-  /* &:active {
-    background: linear-gradient(to right, #3182ce, #2b6cb0); 
-    transform: translateY(2px); 
-  } */
 `;
 
 const selectStyles = (isInvalid) => ({
@@ -931,24 +920,6 @@ const selectStyles = (isInvalid) => ({
     },
   }),
 });
-
-const EditIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="32"
-    height="32"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-    />
-  </svg>
-);
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -1121,5 +1092,23 @@ const SkeletonButtonWrapper = styled.div`
   display: flex;
   flex-direction: row;
   gap: 30px;
-  width: 100%; // 確保寬度被撐開
+  width: 100%;
 `;
+
+const EditIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width="32"
+    height="32"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+    />
+  </svg>
+);

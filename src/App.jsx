@@ -30,7 +30,6 @@ function App() {
       <GlobalStyle />
       <Header />
       <Outlet />
-      {/* <Footer /> */}
     </>
   );
 }
