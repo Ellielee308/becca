@@ -376,8 +376,8 @@ const NewTemplateModal = ({
               </TextStyleEditorPlaceholder>
             )}
             <CardWrapper ref={cardRef}>
-              <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
-                <FrontCard isFlipped={isFlipped} currentStyle={currentStyle}>
+              <FlipCard $isFlipped={isFlipped} $currentStyle={currentStyle}>
+                <FrontCard $isFlipped={isFlipped} $currentStyle={currentStyle}>
                   {newTemplateData.frontFields.map((field, index) => (
                     <Rnd
                       key={index}
@@ -407,7 +407,7 @@ const NewTemplateModal = ({
                     >
                       <FieldContainer
                         style={field.style}
-                        isSelected={
+                        $isSelected={
                           selectedField &&
                           selectedField.side === "frontFields" &&
                           selectedField.index === index
@@ -418,7 +418,7 @@ const NewTemplateModal = ({
                     </Rnd>
                   ))}
                 </FrontCard>
-                <BackCard isFlipped={isFlipped} currentStyle={currentStyle}>
+                <BackCard $isFlipped={isFlipped} $currentStyle={currentStyle}>
                   {newTemplateData.backFields.map((field, index) => (
                     <Rnd
                       key={index}
@@ -448,7 +448,7 @@ const NewTemplateModal = ({
                     >
                       <FieldContainer
                         style={field.style}
-                        isSelected={
+                        $isSelected={
                           selectedField &&
                           selectedField.side === "backFields" &&
                           selectedField.index === index
@@ -645,7 +645,7 @@ const FlipCard = styled.div`
   height: 100%;
   transform-style: preserve-3d;
   transition: ${(props) => {
-    switch (props.currentStyle.animation) {
+    switch (props.$currentStyle.animation) {
       case "fade":
         return "opacity 0.5s ease-in-out";
       default:
@@ -653,16 +653,16 @@ const FlipCard = styled.div`
     }
   }};
   transform: ${(props) => {
-    switch (props.currentStyle.animation) {
+    switch (props.$currentStyle.animation) {
       case "horizontalFlip":
-        return props.isFlipped ? "rotateY(180deg)" : "rotateY(0)";
+        return props.$isFlipped ? "rotateY(180deg)" : "rotateY(0)";
       case "fade":
         return "none";
       default:
-        return props.isFlipped ? "rotateX(180deg)" : "rotateX(0)";
+        return props.$isFlipped ? "rotateX(180deg)" : "rotateX(0)";
     }
   }};
-  border-radius: ${(props) => props.currentStyle.borderRadius};
+  border-radius: ${(props) => props.$currentStyle.borderRadius};
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15);
 `;
 
@@ -675,18 +675,18 @@ const FrontCard = styled.div`
   gap: 16px;
   width: 100%;
   height: 100%;
-  outline-style: ${(props) => props.currentStyle.borderStyle};
-  outline-color: ${(props) => props.currentStyle.borderColor};
-  outline-width: ${(props) => props.currentStyle.borderWidth};
-  background-color: ${(props) => props.currentStyle.backgroundColor};
-  border-radius: ${(props) => props.currentStyle.borderRadius};
+  outline-style: ${(props) => props.$currentStyle.borderStyle};
+  outline-color: ${(props) => props.$currentStyle.borderColor};
+  outline-width: ${(props) => props.$currentStyle.borderWidth};
+  background-color: ${(props) => props.$currentStyle.backgroundColor};
+  border-radius: ${(props) => props.$currentStyle.borderRadius};
   backface-visibility: hidden;
-  font-family: ${(props) => props.currentStyle.fontFamily};
+  font-family: ${(props) => props.$currentStyle.fontFamily};
   font-size: 32px;
   opacity: ${(props) =>
-    props.currentStyle.animation === "fade" && props.isFlipped ? 0 : 1};
+    props.$currentStyle.animation === "fade" && props.$isFlipped ? 0 : 1};
   transition: ${(props) =>
-    props.currentStyle.animation === "fade"
+    props.$currentStyle.animation === "fade"
       ? "opacity 0.5s ease-in-out"
       : "none"};
 `;
@@ -700,15 +700,15 @@ const BackCard = styled.div`
   gap: 16px;
   width: 100%;
   height: 100%;
-  outline-style: ${(props) => props.currentStyle.borderStyle};
-  outline-color: ${(props) => props.currentStyle.borderColor};
-  outline-width: ${(props) => props.currentStyle.borderWidth};
-  background-color: ${(props) => props.currentStyle.backgroundColor};
-  border-radius: ${(props) => props.currentStyle.borderRadius};
+  outline-style: ${(props) => props.$currentStyle.borderStyle};
+  outline-color: ${(props) => props.$currentStyle.borderColor};
+  outline-width: ${(props) => props.$currentStyle.borderWidth};
+  background-color: ${(props) => props.$currentStyle.backgroundColor};
+  border-radius: ${(props) => props.$currentStyle.borderRadius};
   backface-visibility: hidden;
-  font-family: ${(props) => props.currentStyle.fontFamily};
+  font-family: ${(props) => props.$currentStyle.fontFamily};
   transform: ${(props) => {
-    switch (props.currentStyle.animation) {
+    switch (props.$currentStyle.animation) {
       case "horizontalFlip":
         return "rotateY(180deg)";
       case "fade":
@@ -719,12 +719,12 @@ const BackCard = styled.div`
   }};
   font-size: 32px;
   opacity: ${(props) =>
-    props.currentStyle.animation === "fade" ? (props.isFlipped ? 1 : 0) : 1};
+    props.$currentStyle.animation === "fade" ? (props.$isFlipped ? 1 : 0) : 1};
   transition: ${(props) =>
-    props.currentStyle.animation === "fade"
+    props.$currentStyle.animation === "fade"
       ? "opacity 0.5s ease-in-out"
       : "none"};
-  z-index: ${(props) => (props.isFlipped ? 3000 : 0)};
+  z-index: ${(props) => (props.$isFlipped ? 3000 : 0)};
 `;
 
 const FieldContainer = styled.div`
@@ -732,7 +732,7 @@ const FieldContainer = styled.div`
   display: flex;
   justify-content: ${(props) => props.style.textAlign || "center"};
   align-items: center;
-  border: ${(props) => (props.isSelected ? "2px dotted black" : "none")};
+  border: ${(props) => (props.$isSelected ? "2px dotted black" : "none")};
   cursor: move;
   ${(props) =>
     props.style &&
@@ -913,7 +913,7 @@ const TextStyleEditor = ({ field, onUpdate }) => {
         onChange={(option) => handleStyleChange({ fontSize: option.value })}
       ></Select>
       <TextStyleIconContainer
-        isSelected={field.style.fontWeight === "bold"}
+        $isSelected={field.style.fontWeight === "bold"}
         onClick={() =>
           handleStyleChange({
             fontWeight: field.style.fontWeight === "bold" ? "normal" : "bold",
@@ -923,7 +923,7 @@ const TextStyleEditor = ({ field, onUpdate }) => {
         <CardSetCreateBoldIcon />
       </TextStyleIconContainer>
       <TextStyleIconContainer
-        isSelected={field.style.fontStyle === "italic"}
+        $isSelected={field.style.fontStyle === "italic"}
         onClick={() =>
           handleStyleChange({
             fontStyle: field.style.fontStyle === "italic" ? "normal" : "italic",
@@ -938,19 +938,19 @@ const TextStyleEditor = ({ field, onUpdate }) => {
         onChange={(e) => handleStyleChange({ color: e.target.value })}
       />
       <TextStyleIconContainer
-        isSelected={field.style.textAlign === "left"}
+        $isSelected={field.style.textAlign === "left"}
         onClick={() => handleStyleChange({ textAlign: "left" })}
       >
         <CardSetCreateTextAlignLeftIcon />
       </TextStyleIconContainer>
       <TextStyleIconContainer
-        isSelected={field.style.textAlign === "center"}
+        $isSelected={field.style.textAlign === "center"}
         onClick={() => handleStyleChange({ textAlign: "center" })}
       >
         <CardSetCreateTextAlignCenterIcon />
       </TextStyleIconContainer>
       <TextStyleIconContainer
-        isSelected={field.style.textAlign === "right"}
+        $isSelected={field.style.textAlign === "right"}
         onClick={() => handleStyleChange({ textAlign: "right" })}
       >
         <CardSetCreateTextAlignRightIcon />
@@ -965,8 +965,8 @@ TextStyleEditor.propTypes = {
     type: PropTypes.oneOf(["text", "image"]).isRequired,
     required: PropTypes.bool.isRequired,
     position: PropTypes.shape({
-      x: PropTypes.number.isRequired,
-      y: PropTypes.number.isRequired,
+      x: PropTypes.string.isRequired,
+      y: PropTypes.string.isRequired,
     }).isRequired,
     style: PropTypes.shape({
       width: PropTypes.string.isRequired,
@@ -1002,10 +1002,10 @@ const TextStyleIconContainer = styled.div`
   align-items: center;
   width: 28px;
   height: 28px;
-  border: ${(props) => (props.isSelected ? "1px solid #2c2b2b" : "none")};
+  border: ${(props) => (props.$isSelected ? "1px solid #2c2b2b" : "none")};
   background-color: ${(props) =>
-    props.isSelected ? "#c7c6c6" : "transparent"};
-  border-radius: ${(props) => (props.isSelected ? "5px" : "none")};
+    props.$isSelected ? "#c7c6c6" : "transparent"};
+  border-radius: ${(props) => (props.$isSelected ? "5px" : "none")};
   cursor: pointer;
   position: relative;
 `;

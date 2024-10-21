@@ -131,7 +131,7 @@ function Matching({ quizData, cardsData, template, style }) {
     if (isMatched) return "green";
     if (isSelected && pairStatus === "success") return "green";
     if (isSelected && pairStatus === "fail") return "red";
-    if (isSelected) return "#4e98dd"; // 選中狀態，藍色
+    if (isSelected) return "#4e98dd";
     return "none";
   };
 
@@ -172,16 +172,15 @@ function Matching({ quizData, cardsData, template, style }) {
                   side: randomCard.side,
                 }),
                 pairStatus
-              )} // 動態設置 outline 顏色
+              )}
             >
               <CardContent>
                 {randomCard.side === "front"
                   ? template.frontFields.map((frontField, index) => (
                       <FieldContainer
                         key={index}
-                        currentstyle={frontField.style}
-                        currentposition={frontField.position}
-                        // actualCardWidth={cardWidth} // 傳入實際卡片寬度
+                        $currentStyle={frontField.style}
+                        $currentPosition={frontField.position}
                       >
                         {renderFieldContent(
                           frontField,
@@ -194,9 +193,8 @@ function Matching({ quizData, cardsData, template, style }) {
                   : template.backFields.map((backField, index) => (
                       <FieldContainer
                         key={index}
-                        currentstyle={backField.style}
-                        currentposition={backField.position}
-                        // actualCardWidth={cardWidth} // 傳入實際卡片寬度
+                        $currentStyle={backField.style}
+                        $currentPosition={backField.position}
                       >
                         {renderFieldContent(
                           backField,
@@ -242,14 +240,14 @@ const renderFieldContent = (field, value) => {
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
-  left: ${(props) => props.currentposition.x};
-  top: ${(props) => props.currentposition.y};
-  justify-content: ${(props) => props.currentstyle.textAlign || "center"};
+  left: ${(props) => props.$currentPosition.x};
+  top: ${(props) => props.$currentPosition.y};
+  justify-content: ${(props) => props.$currentStyle.textAlign || "center"};
   align-items: center;
   width: ${(props) =>
-    props.currentstyle.width ? props.currentstyle.width : "auto"};
+    props.$currentStyle.width ? props.$currentStyle.width : "auto"};
   height: ${(props) =>
-    props.currentstyle.height ? props.currentstyle.height : "auto"};
+    props.$currentStyle.height ? props.$currentStyle.height : "auto"};
   font-size: 14px;
   @media (min-width: 640px) {
     font-size: 16px;
@@ -257,9 +255,9 @@ const FieldContainer = styled.div`
   @media (min-width: 1024px) {
     font-size: 18px;
   }
-  font-weight: ${(props) => props.currentstyle.fontWeight || "normal"};
-  color: ${(props) => props.currentstyle.color || "#333"};
-  font-style: ${(props) => props.currentstyle.fontStyle || "normal"};
+  font-weight: ${(props) => props.$currentStyle.fontWeight || "normal"};
+  color: ${(props) => props.$currentStyle.color || "#333"};
+  font-style: ${(props) => props.$currentStyle.fontStyle || "normal"};
   user-select: none;
 `;
 
@@ -286,7 +284,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
       sizes = { small: "28px", medium: "30px", large: "42px" };
       break;
     default:
-      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+      sizes = { small: "16px", medium: "20px", large: "24px" };
   }
 
   return css`
@@ -343,8 +341,7 @@ const CardWrapper = styled.div`
   background-color: ${(props) => props.$style.backgroundColor};
   opacity: ${(props) =>
     props.$isMatched ? "0" : props.$isSelected ? "1" : "0.7"};
-  pointer-events: ${(props) =>
-    props.$isMatched ? "none" : "auto"}; /* 配對後禁用互動 */
+  pointer-events: ${(props) => (props.$isMatched ? "none" : "auto")};
   border-style: ${(props) => props.$style.borderStyle};
   border-width: ${(props) => props.$style.borderWidth};
   border-color: ${(props) => props.$style.borderColor};
@@ -495,14 +492,14 @@ const LeaveButton = styled.div`
   background-color: #f59873;
   cursor: pointer;
   user-select: none;
-  color: #ffffff; // 文字顏色設為白色
+  color: #ffffff;
   font-size: 16px;
   font-weight: 500;
-  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   &:hover {
-    background-color: #f57d51; // 當懸停時，改變背景顏色
-    color: #ffffff; // 保持白色字體
+    background-color: #f57d51;
+    color: #ffffff;
   }
 `;
 
@@ -517,6 +514,6 @@ const CustomLink = styled(Link)`
 
 QuizResultModal.propTypes = {
   timer: PropTypes.number.isRequired,
-  accuracy: PropTypes.number.isRequired,
+  accuracy: PropTypes.string.isRequired,
   cardSetId: PropTypes.string.isRequired,
 };

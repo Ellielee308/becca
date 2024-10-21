@@ -171,9 +171,8 @@ function Matching({
                   ? template.frontFields.map((frontField, index) => (
                       <FieldContainer
                         key={index}
-                        currentstyle={frontField.style}
-                        currentposition={frontField.position}
-                        // actualCardWidth={cardWidth} // 傳入實際卡片寬度
+                        $currentStyle={frontField.style}
+                        $currentPosition={frontField.position}
                       >
                         {renderFieldContent(
                           frontField,
@@ -186,9 +185,8 @@ function Matching({
                   : template.backFields.map((backField, index) => (
                       <FieldContainer
                         key={index}
-                        currentstyle={backField.style}
-                        currentposition={backField.position}
-                        // actualCardWidth={cardWidth} // 傳入實際卡片寬度
+                        $currentStyle={backField.style}
+                        $currentPosition={backField.position}
                       >
                         {renderFieldContent(
                           backField,
@@ -235,14 +233,14 @@ const renderFieldContent = (field, value) => {
 const FieldContainer = styled.div`
   position: absolute;
   display: flex;
-  left: ${(props) => props.currentposition.x};
-  top: ${(props) => props.currentposition.y};
-  justify-content: ${(props) => props.currentstyle.textAlign || "center"};
+  left: ${(props) => props.$currentPosition.x};
+  top: ${(props) => props.$currentPosition.y};
+  justify-content: ${(props) => props.$currentStyle.textAlign || "center"};
   align-items: center;
   width: ${(props) =>
-    props.currentstyle.width ? props.currentstyle.width : "auto"};
+    props.$currentStyle.width ? props.$currentStyle.width : "auto"};
   height: ${(props) =>
-    props.currentstyle.height ? props.currentstyle.height : "auto"};
+    props.$currentStyle.height ? props.$currentStyle.height : "auto"};
   font-size: 14px;
   @media (min-width: 640px) {
     font-size: 16px;
@@ -250,9 +248,9 @@ const FieldContainer = styled.div`
   @media (min-width: 1024px) {
     font-size: 18px;
   }
-  font-weight: ${(props) => props.currentstyle.fontWeight || "normal"};
-  color: ${(props) => props.currentstyle.color || "#333"};
-  font-style: ${(props) => props.currentstyle.fontStyle || "normal"};
+  font-weight: ${(props) => props.$currentStyle.fontWeight || "normal"};
+  color: ${(props) => props.$currentStyle.color || "#333"};
+  font-style: ${(props) => props.$currentStyle.fontStyle || "normal"};
   user-select: none;
 `;
 
@@ -290,8 +288,7 @@ const CardWrapper = styled.div`
   background-color: ${(props) => props.$style.backgroundColor};
   opacity: ${(props) =>
     props.$isMatched ? "0" : props.$isSelected ? "1" : "0.7"};
-  pointer-events: ${(props) =>
-    props.$isMatched ? "none" : "auto"}; /* 配對後禁用互動 */
+  pointer-events: ${(props) => (props.$isMatched ? "none" : "auto")};
   border-style: ${(props) => props.$style.borderStyle};
   border-width: ${(props) => props.$style.borderWidth};
   border-color: ${(props) => props.$style.borderColor};

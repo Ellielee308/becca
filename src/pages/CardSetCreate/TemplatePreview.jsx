@@ -170,8 +170,8 @@ TemplatePreview.propTypes = {
         type: PropTypes.oneOf(["text", "image"]).isRequired,
         required: PropTypes.bool.isRequired,
         position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
         }).isRequired,
         style: PropTypes.shape({
           width: PropTypes.string.isRequired,
@@ -189,8 +189,8 @@ TemplatePreview.propTypes = {
         type: PropTypes.oneOf(["text", "image"]).isRequired,
         required: PropTypes.bool.isRequired,
         position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
         }).isRequired,
         style: PropTypes.shape({
           width: PropTypes.string.isRequired,

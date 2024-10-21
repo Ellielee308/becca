@@ -209,7 +209,7 @@ const NewStyleModal = ({ onClose, onStyleAdded, styleNames }) => {
               />
               <ColorGroup>
                 <RadiusIconWrapper
-                  isSelected={style.borderRadius !== ""}
+                  $isSelected={style.borderRadius !== ""}
                   onClick={handleRadiusChange}
                 >
                   <IconImage src={borderRadiusIcon} />
@@ -511,8 +511,8 @@ const RadiusIconWrapper = styled.div`
   align-items: center;
   width: 36px;
   height: 36px;
-  border: ${(props) => (props.isSelected ? "1px solid #c1c0c0" : "none")};
-  border-radius: ${(props) => (props.isSelected ? "5px" : "none")};
+  border: ${(props) => (props.$isSelected ? "1px solid #c1c0c0" : "none")};
+  border-radius: ${(props) => (props.$isSelected ? "5px" : "none")};
   cursor: pointer;
   position: relative;
 `;

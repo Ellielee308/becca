@@ -11,8 +11,8 @@ export default function Preview({ currentStyle, currentTemplate }) {
   };
   return (
     <Wrapper onClick={handleFlip}>
-      <FlipCard isFlipped={isFlipped} currentStyle={currentStyle}>
-        <FrontCard isFlipped={isFlipped} currentStyle={currentStyle}>
+      <FlipCard $isFlipped={isFlipped} $currentStyle={currentStyle}>
+        <FrontCard $isFlipped={isFlipped} $currentStyle={currentStyle}>
           {currentTemplate.frontFields.map((field, index) => (
             <FieldContainer
               key={index}
@@ -23,7 +23,7 @@ export default function Preview({ currentStyle, currentTemplate }) {
             </FieldContainer>
           ))}
         </FrontCard>
-        <BackCard isFlipped={isFlipped} currentStyle={currentStyle}>
+        <BackCard $isFlipped={isFlipped} $currentStyle={currentStyle}>
           {currentTemplate.backFields.map((field, index) => (
             <FieldContainer
               key={index}
@@ -48,8 +48,8 @@ Preview.propTypes = {
         type: PropTypes.oneOf(["text", "image"]).isRequired,
         required: PropTypes.bool.isRequired,
         position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
         }).isRequired,
         style: PropTypes.shape({
           width: PropTypes.string.isRequired,
@@ -67,8 +67,8 @@ Preview.propTypes = {
         type: PropTypes.oneOf(["text", "image"]).isRequired,
         required: PropTypes.bool.isRequired,
         position: PropTypes.shape({
-          x: PropTypes.number.isRequired,
-          y: PropTypes.number.isRequired,
+          x: PropTypes.string.isRequired,
+          y: PropTypes.string.isRequired,
         }).isRequired,
         style: PropTypes.shape({
           width: PropTypes.string.isRequired,
@@ -169,7 +169,7 @@ const FlipCard = styled.div`
   height: 100%;
   transform-style: preserve-3d;
   transition: ${(props) => {
-    switch (props.currentStyle.animation) {
+    switch (props.$currentStyle.animation) {
       case "fade":
         return "opacity 0.5s ease-in-out";
       default:
@@ -177,26 +177,26 @@ const FlipCard = styled.div`
     }
   }};
   transform: ${(props) => {
-    switch (props.currentStyle.animation) {
+    switch (props.$currentStyle.animation) {
       case "horizontalFlip":
-        return props.isFlipped ? "rotateY(180deg)" : "rotateY(0)";
+        return props.$isFlipped ? "rotateY(180deg)" : "rotateY(0)";
       case "fade":
         return "none";
-      default: // "vertical"
-        return props.isFlipped ? "rotateX(180deg)" : "rotateX(0)";
+      default:
+        return props.$isFlipped ? "rotateX(180deg)" : "rotateX(0)";
     }
   }};
-  border-radius: ${(props) => props.currentStyle.borderRadius};
+  border-radius: ${(props) => props.$currentStyle.borderRadius};
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15);
   &:hover {
     transform: ${(props) => {
-      switch (props.currentStyle.animation) {
+      switch (props.$currentStyle.animation) {
         case "horizontalFlip":
-          return props.isFlipped ? "rotateY(175deg)" : "rotateY(2deg)";
+          return props.$isFlipped ? "rotateY(175deg)" : "rotateY(2deg)";
         case "fade":
           return "none";
-        default: // "vertical"
-          return props.isFlipped ? "rotateX(175deg)" : "rotateX(2deg)";
+        default:
+          return props.$isFlipped ? "rotateX(175deg)" : "rotateX(2deg)";
       }
     }};
     box-shadow: 0 20px 20px rgba(50, 60, 60, 0.2);
@@ -212,18 +212,18 @@ const FrontCard = styled.div`
   gap: 16px;
   width: 100%;
   height: 100%;
-  outline-style: ${(props) => props.currentStyle.borderStyle};
-  outline-color: ${(props) => props.currentStyle.borderColor};
-  outline-width: ${(props) => props.currentStyle.borderWidth};
-  background-color: ${(props) => props.currentStyle.backgroundColor};
-  border-radius: ${(props) => props.currentStyle.borderRadius};
+  outline-style: ${(props) => props.$currentStyle.borderStyle};
+  outline-color: ${(props) => props.$currentStyle.borderColor};
+  outline-width: ${(props) => props.$currentStyle.borderWidth};
+  background-color: ${(props) => props.$currentStyle.backgroundColor};
+  border-radius: ${(props) => props.$currentStyle.borderRadius};
   backface-visibility: hidden;
-  font-family: ${(props) => props.currentStyle.fontFamily};
+  font-family: ${(props) => props.$currentStyle.fontFamily};
   font-size: 32px;
   opacity: ${(props) =>
-    props.currentStyle.animation === "fade" && props.isFlipped ? 0 : 1};
+    props.$currentStyle.animation === "fade" && props.$isFlipped ? 0 : 1};
   transition: ${(props) =>
-    props.currentStyle.animation === "fade"
+    props.$currentStyle.animation === "fade"
       ? "opacity 0.5s ease-in-out"
       : "none"};
 `;
@@ -237,15 +237,15 @@ const BackCard = styled.div`
   gap: 16px;
   width: 100%;
   height: 100%;
-  outline-style: ${(props) => props.currentStyle.borderStyle};
-  outline-color: ${(props) => props.currentStyle.borderColor};
-  outline-width: ${(props) => props.currentStyle.borderWidth};
-  background-color: ${(props) => props.currentStyle.backgroundColor};
-  border-radius: ${(props) => props.currentStyle.borderRadius};
+  outline-style: ${(props) => props.$currentStyle.borderStyle};
+  outline-color: ${(props) => props.$currentStyle.borderColor};
+  outline-width: ${(props) => props.$currentStyle.borderWidth};
+  background-color: ${(props) => props.$currentStyle.backgroundColor};
+  border-radius: ${(props) => props.$currentStyle.borderRadius};
   backface-visibility: hidden;
-  font-family: ${(props) => props.currentStyle.fontFamily};
+  font-family: ${(props) => props.$currentStyle.fontFamily};
   transform: ${(props) => {
-    switch (props.currentStyle.animation) {
+    switch (props.$currentStyle.animation) {
       case "horizontalFlip":
         return "rotateY(180deg)";
       case "fade":
@@ -256,12 +256,12 @@ const BackCard = styled.div`
   }};
   font-size: 32px;
   opacity: ${(props) =>
-    props.currentStyle.animation === "fade" ? (props.isFlipped ? 1 : 0) : 1};
+    props.$currentStyle.animation === "fade" ? (props.$isFlipped ? 1 : 0) : 1};
   transition: ${(props) =>
-    props.currentStyle.animation === "fade"
+    props.$currentStyle.animation === "fade"
       ? "opacity 0.5s ease-in-out"
       : "none"};
-  z-index: ${(props) => (props.isFlipped ? 3000 : 0)};
+  z-index: ${(props) => (props.$isFlipped ? 3000 : 0)};
 `;
 
 const FieldContainer = styled.div`

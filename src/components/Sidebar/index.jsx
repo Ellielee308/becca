@@ -12,7 +12,6 @@ function Sidebar() {
   const handleLogOut = async () => {
     try {
       await signOut(auth);
-      console.log("用戶登出");
       setUser(null);
       navigate("/");
     } catch (error) {

@@ -245,19 +245,19 @@ function Home() {
         </SectionTitle>
         <CarouselButtonGroup>
           <LanguageButton
-            active={selectedLanguage === "english"}
+            $active={selectedLanguage === "english"}
             onClick={() => setSelectedLanguage("english")}
           >
             英語
           </LanguageButton>
           <LanguageButton
-            active={selectedLanguage === "japanese"}
+            $active={selectedLanguage === "japanese"}
             onClick={() => setSelectedLanguage("japanese")}
           >
             日語
           </LanguageButton>
           <LanguageButton
-            active={selectedLanguage === "korean"}
+            $active={selectedLanguage === "korean"}
             onClick={() => setSelectedLanguage("korean")}
           >
             韓文
@@ -584,18 +584,17 @@ const CarouselButtonGroup = styled.div`
 const LanguageButton = styled.button`
   padding: 6px 16px;
   font-family: "Noto Sans TC", sans-serif;
-  background-color: ${(props) => (props.active ? "#3d5a80" : "#fff")};
-  color: ${(props) => (props.active ? "#fff" : "#3d5a80")};
+  background-color: ${(props) => (props.$active ? "#3d5a80" : "#fff")};
+  color: ${(props) => (props.$active ? "#fff" : "#3d5a80")};
   border-radius: 100vw;
   width: 70px;
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.5s ease;
-  border: ${(props) => (props.active ? "none" : "1px solid #e6e3e1")};
+  border: ${(props) => (props.$active ? "none" : "1px solid #e6e3e1")};
 
   &:hover {
-    background-color: ${(props) =>
-      props.active ? "#3d5a80" : "#d0d7e3"}; // 使用 hover 顏色
+    background-color: ${(props) => (props.$active ? "#3d5a80" : "#d0d7e3")};
   }
   @media (max-width: 379px) {
     padding: 6px 12px;

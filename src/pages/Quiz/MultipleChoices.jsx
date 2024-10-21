@@ -39,8 +39,8 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
       const currentCard = quizQuestions[currentQuestionNumber];
 
       let incorrectOptions = cardsData
-        .filter((card) => card.cardId !== currentCard.cardId) //過濾正確答案
-        .sort(() => 0.5 - Math.random()) //打亂順序
+        .filter((card) => card.cardId !== currentCard.cardId)
+        .sort(() => 0.5 - Math.random())
         .slice(0, 3);
 
       const correctOption = { ...currentCard };
@@ -630,7 +630,7 @@ const CustomLink = styled(Link)`
 
 QuizResultModal.propTypes = {
   timer: PropTypes.number.isRequired,
-  accuracy: PropTypes.number.isRequired,
+  accuracy: PropTypes.string.isRequired,
   cardSetId: PropTypes.string.isRequired,
   template: PropTypes.object,
   wrongCards: PropTypes.array,

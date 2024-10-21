@@ -175,7 +175,7 @@ function Header() {
         />
       )}
       {showSidebar && <Overlay onClick={toggleSidebar} />}
-      <Sidebar showSidebar={showSidebar}>
+      <Sidebar $showSidebar={showSidebar}>
         <SidebarContent>
           <CloseSidebarButton onClick={toggleSidebar}>
             <HeaderCloseIcon />
@@ -478,7 +478,7 @@ const MobileLinkToCardSetNew = styled(Link)`
 const Sidebar = styled.div`
   position: fixed;
   top: 0;
-  left: ${(props) => (props.showSidebar ? "0" : "-100%")};
+  left: ${(props) => (props.$showSidebar ? "0" : "-100%")};
   width: 250px;
   height: 100%;
   background-color: #fff;

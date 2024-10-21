@@ -546,15 +546,13 @@ const UserCalendar = ({ activeDays }) => {
   const [activeView, setActiveView] = useState(new Date());
   const [highlightedDates, setHighlightedDates] = useState([]);
 
-  // 處理 activeDays 數據並轉換成 Date 格式
   useEffect(() => {
     if (activeDays) {
-      const days = activeDays.map((day) => new Date(day.seconds * 1000)); // 將 Firebase Timestamp 轉換為 Date
+      const days = activeDays.map((day) => new Date(day.seconds * 1000));
       setHighlightedDates(days);
     }
   }, [activeDays]);
 
-  // 處理月份切換
   const handleActiveStartDateChange = ({ activeStartDate }) => {
     if (activeStartDate) {
       setActiveView(activeStartDate);
@@ -563,7 +561,6 @@ const UserCalendar = ({ activeDays }) => {
 
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
-      // 檢查是否為未來日期
       const isInFuture = date > new Date();
 
       const isActive = highlightedDates.some(
@@ -578,7 +575,6 @@ const UserCalendar = ({ activeDays }) => {
         date.getFullYear() === activeView.getFullYear();
 
       if (belongsToDisplayedMonth) {
-        // 如果是未來日期，不添加任何背景色
         if (isInFuture) {
           return "future-date";
         }
@@ -889,7 +885,6 @@ const ExampleText = styled.div`
 `;
 
 /* Skeleton */
-// 定義骨架動畫
 const skeletonLoading = keyframes`
   0% {
     background-position: -200px 0;
@@ -899,7 +894,6 @@ const skeletonLoading = keyframes`
   }
 `;
 
-// Skeleton Avatar
 const SkeletonAvatar = styled.div`
   height: 160px;
   width: 160px;
@@ -909,7 +903,6 @@ const SkeletonAvatar = styled.div`
   animation: ${skeletonLoading} 1.5s infinite;
 `;
 
-// Skeleton Account Item
 const SkeletonAccountItem = styled.div`
   margin-bottom: 10px;
   height: 24px;
@@ -920,7 +913,6 @@ const SkeletonAccountItem = styled.div`
   animation: ${skeletonLoading} 1.5s infinite;
 `;
 
-// Skeleton Calendar
 const SkeletonCalendar = styled.div`
   margin: 12px auto 0 auto;
   width: 360px;
