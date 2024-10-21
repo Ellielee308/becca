@@ -1,8 +1,11 @@
 import { Input } from "antd";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import {
+  CardSetCreatePlusIcon,
+  CardSetCreateTrashIcon,
+} from "../../assets/icons";
 import { translateText, uploadImageToStorage } from "../../utils/api";
-import { PlusIcon, TrashIcon } from "./icon";
 const { TextArea } = Input;
 
 export default function CardContent({
@@ -49,12 +52,9 @@ export default function CardContent({
     if (!file) return;
 
     try {
-      // 將圖片上傳到 Firebase Storage 並獲取圖片 URL
       const imageUrl = await uploadImageToStorage(file);
-
-      // 更新 cardContent 狀態
       const newCardContent = [...cardContent];
-      newCardContent[cardIndex][side][fieldIndex].value = imageUrl; // 將圖片 URL 存入對應欄位
+      newCardContent[cardIndex][side][fieldIndex].value = imageUrl;
       setCardContent(newCardContent);
     } catch (error) {
       console.error("圖片上傳失敗：", error);
@@ -70,7 +70,6 @@ export default function CardContent({
       isPurposeLanguageLearning &&
       interfaceLanguage
     ) {
-      // 調用翻譯 API，根據 interfaceLanguage 翻譯成相應的語言
       const translatedText = await translateText(
         textToTranslate,
         interfaceLanguage
@@ -78,15 +77,15 @@ export default function CardContent({
 
       const newSuggestedTranslations = [...suggestedTranslations];
       newSuggestedTranslations[cardIndex] = translatedText;
-      setSuggestedTranslations(newSuggestedTranslations); // 單獨存儲建議翻譯
+      setSuggestedTranslations(newSuggestedTranslations);
     }
   };
 
   const handleSuggestionClick = (cardIndex, fieldIndex) => {
     const newCardContent = [...cardContent];
     newCardContent[cardIndex].backFields[fieldIndex].value =
-      suggestedTranslations[cardIndex]; // 填入建議翻譯
-    setCardContent(newCardContent); // 更新狀態
+      suggestedTranslations[cardIndex];
+    setCardContent(newCardContent);
   };
 
   return (
@@ -96,11 +95,8 @@ export default function CardContent({
           <TitleBar>
             <Heading>{cardIndex + 1}</Heading>
             <ButtonGroupWrapper>
-              {/* <ButtonIconContainer>
-                <DragIcon />
-              </ButtonIconContainer> */}
               <ButtonIconContainer onClick={() => handleDeleteCard(cardIndex)}>
-                <TrashIcon />
+                <CardSetCreateTrashIcon />
               </ButtonIconContainer>
             </ButtonGroupWrapper>
           </TitleBar>
@@ -179,7 +175,6 @@ export default function CardContent({
               <SideHeading>背面</SideHeading>
               {currentTemplate.templateName ? (
                 (() => {
-                  // 找到第一個 text 類型的 backField 的 index
                   const firstTextInputIndex =
                     currentTemplate.backFields.findIndex(
                       (field) => field.type === "text"
@@ -256,7 +251,7 @@ export default function CardContent({
       <NewCardWrapper onClick={handleAddNewCard}>
         <NewCardHeading>
           <PlusButton>
-            <PlusIcon />
+            <CardSetCreatePlusIcon />
           </PlusButton>
           <PlusLabel>新增新卡片</PlusLabel>
         </NewCardHeading>

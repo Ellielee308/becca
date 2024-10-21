@@ -2,9 +2,23 @@ import { signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import {
+  FolderIcon,
+  HeaderCloseIcon,
+  HeaderMobileMenuIcon,
+  HeaderPlusIcon,
+  HeaderSearchIcon,
+  HeaderSearchIconMobile,
+  HeaderSubMenuFolderIcon,
+  HeaderSubMenuHomeIcon,
+  HeaderSubMenuLogOutIcon,
+  HeaderSubMenuPlusIcon,
+  HomeIcon,
+  LogOutIcon,
+} from "../../assets/icons/index.jsx";
 import { useUser } from "../../context/UserContext.jsx";
 import { auth } from "../../utils/firebaseConfig.js";
-import LoginModal from "../LoginModal.jsx";
+import LoginModal from "../LoginModal";
 import beccaLogo from "./images/becca-logo.png";
 
 function Header() {
@@ -18,23 +32,23 @@ function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY; // 滾動的垂直距離
-      const newOpacity = Math.max(1 - scrollY / 300, 0.8); // 設定透明度，最小值為0.5
+      const scrollY = window.scrollY;
+      const newOpacity = Math.max(1 - scrollY / 300, 0.8);
       setOpacity(newOpacity);
     };
 
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll); // 清除滾動事件監聽器
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   const handleLogOut = async () => {
     try {
       await signOut(auth);
-      setUser(null); // 清除用戶狀態，更新 UI
-      navigate("/"); // 重定向到首頁
+      setUser(null);
+      navigate("/");
     } catch (error) {
       console.error("登出失敗:", error.message);
     }
@@ -64,7 +78,7 @@ function Header() {
       <MenuLogoWrapper>
         {!loading && user && (
           <MobileMenuContainer onClick={toggleSidebar}>
-            <MobileMenu />
+            <HeaderMobileMenuIcon />
           </MobileMenuContainer>
         )}
         <Link to="/">
@@ -73,7 +87,7 @@ function Header() {
       </MenuLogoWrapper>
       {showMobileSearchBar && (
         <MobileSearchSection>
-          <SearchIcon />
+          <HeaderSearchIcon />
           <form onSubmit={handleSearch}>
             <SearchInput
               placeholder="搜尋 Flashcards"
@@ -82,12 +96,12 @@ function Header() {
             />
           </form>
           <CloseIconContainer onClick={handleCloseMobileSearch}>
-            <CloseIcon />
+            <HeaderCloseIcon />
           </CloseIconContainer>
         </MobileSearchSection>
       )}
       <SearchSection>
-        <SearchIcon />
+        <HeaderSearchIcon />
         <form onSubmit={handleSearch}>
           <SearchInput
             placeholder="搜尋 Flashcards"
@@ -98,13 +112,13 @@ function Header() {
       </SearchSection>
       <NavigateWrapper>
         <MobileSearchTrigger onClick={handleClickMobileSearchTrigger}>
-          <SearchIconMobile />
+          <HeaderSearchIconMobile />
         </MobileSearchTrigger>
         {!loading && user ? (
           <>
             <LinkToCardSetNew to="/cardset/new">
               <IconContainer>
-                <PlusIcon />
+                <HeaderPlusIcon />
               </IconContainer>
             </LinkToCardSetNew>
             <NavItemWrapper>
@@ -123,25 +137,25 @@ function Header() {
                   <NavWrapper>
                     <StyledLink to="/user/me/profile">
                       <SubMenuItem>
-                        <SubMenuHomeIcon />
+                        <HeaderSubMenuHomeIcon />
                         <p>用戶總覽</p>
                       </SubMenuItem>
                     </StyledLink>
                     <StyledLink to="/user/me/cardsets">
                       <SubMenuItem>
-                        <SubMenuFolderOpenIcon />
+                        <HeaderSubMenuFolderIcon />
                         <p>卡牌組</p>
                       </SubMenuItem>
                     </StyledLink>
                     <MobileLinkToCardSetNew to="/cardset/new">
                       <SubMenuItem>
-                        <SubMenuPlusIcon />
+                        <HeaderSubMenuPlusIcon />
                         <p>新增卡牌組</p>
                       </SubMenuItem>
                     </MobileLinkToCardSetNew>
                   </NavWrapper>
                   <SubMenuItem onClick={handleLogOut}>
-                    <SubMenuLogOutIcon />
+                    <HeaderSubMenuLogOutIcon />
                     <p>登出</p>
                   </SubMenuItem>
                 </SubMenu>
@@ -164,7 +178,7 @@ function Header() {
       <Sidebar showSidebar={showSidebar}>
         <SidebarContent>
           <CloseSidebarButton onClick={toggleSidebar}>
-            <CloseIcon />
+            <HeaderCloseIcon />
           </CloseSidebarButton>
           <MenuLogoWrapper>
             <LogoImg src={beccaLogo} alt="Logo" />
@@ -175,13 +189,9 @@ function Header() {
               <NavItemName>總覽</NavItemName>
             </StyledNavLink>
             <StyledNavLink to="/user/me/cardsets" onClick={toggleSidebar}>
-              <FolderOpenIcon />
+              <FolderIcon />
               <NavItemName>卡牌組</NavItemName>
             </StyledNavLink>
-            {/* <StyledNavLink to="/user/me/collection" onClick={toggleSidebar}>
-              <StarIcon />
-              <NavItemName>收藏</NavItemName>
-            </StyledNavLink> */}
           </NavLinkWrapper>
           <LogOutButton
             onClick={() => {
@@ -210,9 +220,8 @@ const Wrapper = styled.div`
   height: 60px;
   width: 100%;
   background: rgba(255, 255, 255, 1);
-  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
   border-bottom: 1px solid #e6e3e1;
-  transition: background 0.2s ease-in-out; /* 讓透明度變化更加平滑 */
+  transition: background 0.2s ease-in-out;
   z-index: 100;
   @media only screen and (min-width: 640px) {
     padding: 10px 10px 10px 20px;
@@ -248,24 +257,6 @@ const MobileMenuContainer = styled.div`
   }
 `;
 
-const MobileMenu = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="24"
-    height="24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-    />
-  </svg>
-);
-
 const IconContainer = styled.div`
   height: 36px;
   width: 36px;
@@ -275,24 +266,6 @@ const IconContainer = styled.div`
   background-color: #3d5a80;
   border-radius: 4px;
 `;
-
-const PlusIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="#FFF"
-    width="24"
-    height="24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 4.5v15m7.5-7.5h-15"
-    />
-  </svg>
-);
 
 const LoginTrigger = styled.div`
   display: flex;
@@ -325,13 +298,13 @@ const ProfilePictureWrapper = styled.div`
   &:hover > div {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0); /* 取消位移，顯示選單 */
+    transform: translateY(0);
   }
 `;
 
 const SubMenu = styled.div`
   position: absolute;
-  top: 132%; /* 放在頭像正下方 */
+  top: 132%;
   right: 0;
   background-color: white;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
@@ -340,7 +313,7 @@ const SubMenu = styled.div`
   min-width: 220px;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px); /* 初始狀態下稍微下移 */
+  transform: translateY(10px);
   transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
   z-index: 100;
 `;
@@ -359,7 +332,7 @@ const SubMenuProfilePicture = styled.img`
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #d3d3d3; // 添加灰色框線
+  border: 2px solid #d3d3d3;
 `;
 
 const SubMenuProfileTextWrapper = styled.div`
@@ -415,14 +388,14 @@ const ProfilePicture = styled.img`
   height: 42px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #d3d3d3; // 添加灰色框線
+  border: 2px solid #d3d3d3;
 `;
 
 const SearchSection = styled.div`
-  position: absolute; /* 設定為絕對定位 */
-  top: 50%; /* 水平垂直居中 */
+  position: absolute;
+  top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* 將元素的左上角移到中心點 */
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: row;
   height: 40px;
@@ -447,24 +420,6 @@ const SearchInput = styled.input`
     outline: none;
   }
 `;
-
-const SearchIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-    />
-  </svg>
-);
 
 const MobileSearchTrigger = styled.div`
   display: flex;
@@ -497,24 +452,6 @@ const MobileSearchSection = styled.div`
   }
 `;
 
-const SearchIconMobile = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="28"
-    height="28"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-    />
-  </svg>
-);
-
 const CloseIconContainer = styled.div`
   display: flex;
   align-items: center;
@@ -523,24 +460,6 @@ const CloseIconContainer = styled.div`
   height: 40px;
   margin-left: auto;
 `;
-
-const CloseIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 18 18 6M6 6l12 12"
-    />
-  </svg>
-);
 
 const LinkToCardSetNew = styled(Link)`
   display: none;
@@ -628,60 +547,6 @@ const NavItemName = styled.div`
   margin-left: 12px;
 `;
 
-const FolderOpenIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"
-    />
-  </svg>
-);
-
-const HomeIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-    />
-  </svg>
-);
-
-const StarIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-    />
-  </svg>
-);
-
 const Overlay = styled.div`
   position: fixed;
   top: 0;
@@ -694,24 +559,6 @@ const Overlay = styled.div`
     display: none;
   }
 `;
-
-const LogOutIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
-    />
-  </svg>
-);
 
 const LogOutButton = styled.div`
   display: flex;
@@ -741,75 +588,3 @@ const LogOutButton = styled.div`
     background-color: #c5e0ee;
   }
 `;
-
-const SubMenuHomeIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="18"
-    height="18"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-    />
-  </svg>
-);
-
-const SubMenuFolderOpenIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="18"
-    height="18"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"
-    />
-  </svg>
-);
-
-const SubMenuPlusIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="18"
-    height="18"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 4.5v15m7.5-7.5h-15"
-    />
-  </svg>
-);
-
-const SubMenuLogOutIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="18"
-    height="18"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
-    />
-  </svg>
-);

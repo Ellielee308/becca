@@ -1,4 +1,5 @@
 import { message } from "antd";
+import PropTypes from "prop-types";
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
@@ -20,6 +21,10 @@ const PrivateRoute = ({ children }) => {
   }
 
   return children;
+};
+
+PrivateRoute.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default PrivateRoute;

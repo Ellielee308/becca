@@ -4,8 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import styled from "styled-components";
-import NewStyleModal from "../../components/NewStyleModal.jsx";
-import Preview from "../../components/Preview.jsx";
+import NewStyleModal from "../../components/NewStyleModal";
+import Preview from "../../components/Preview";
 import { useUser } from "../../context/UserContext.jsx";
 import {
   addNewLabel,

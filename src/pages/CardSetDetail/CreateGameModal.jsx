@@ -74,7 +74,6 @@ const CreateGameModal = ({
     let questions;
     let questionData;
 
-    // 根據 quizType 生成題目
     if (newGameData.quizType === "matching") {
       questions = createMatchingQuestions(cards);
       questionData = { quizType: "matching", questions };
@@ -96,54 +95,46 @@ const CreateGameModal = ({
     }
   };
 
-  // 生成選擇題的問題和選項
   const createMultipleChoicesQuestions = (cards) => {
     const questionNumber = newGameData.questionQty;
     const shuffledCards = [...cards].sort(() => 0.5 - Math.random());
     const selectedQuestionCards = shuffledCards.slice(0, questionNumber);
 
     const questionData = selectedQuestionCards.map((currentCard) => {
-      // 過濾掉正確答案，生成錯誤選項
       let incorrectOptions = cards
         .filter((card) => card.cardId !== currentCard.cardId)
         .sort(() => 0.5 - Math.random())
         .slice(0, 3);
 
-      // 正確答案
       const correctOption = { ...currentCard };
-
-      // 將錯誤選項和正確答案混合
       const allOptions = [...incorrectOptions, correctOption].sort(
         () => 0.5 - Math.random()
       );
 
       return {
         questionId: currentCard.cardId,
-        frontFields: currentCard.frontFields, // 保留該卡的所有 frontFields 資料
+        frontFields: currentCard.frontFields,
         options: allOptions.map((option) => ({
           cardId: option.cardId,
-          backFields: option.backFields, // 保留選項卡的所有 backFields 資料
+          backFields: option.backFields,
         })),
-        correctAnswerId: correctOption.cardId, // 正確選項的卡片 ID
+        correctAnswerId: correctOption.cardId,
       };
     });
 
     return questionData;
   };
 
-  // 生成配對題的問題和卡片對
   const createMatchingQuestions = (cards) => {
     const pairNumbers = newGameData.questionQty;
     const shuffledCards = [...cards].sort(() => 0.5 - Math.random());
     const selectedPairs = shuffledCards.slice(0, pairNumbers);
 
-    // 把每一張卡片拆分為正面和背面作為不同的卡片對
     const cardPairs = selectedPairs.flatMap((card) => [
       { cardId: card.cardId, fields: card.frontFields, side: "front" },
       { cardId: card.cardId, fields: card.backFields, side: "back" },
     ]);
 
-    // 打亂這些卡片對
     const randomizedCardPairs = cardPairs.sort(() => 0.5 - Math.random());
 
     return randomizedCardPairs;
@@ -355,7 +346,7 @@ const CreateButton = styled.input`
   padding: 12px 24px;
   font-size: 16px;
   color: white;
-  background-color: #3d5a80; /* 按鈕背景顏色 */
+  background-color: #3d5a80;
   border: none;
   border-radius: 8px;
   margin-top: auto;
@@ -364,16 +355,16 @@ const CreateButton = styled.input`
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
 
   &:hover {
-    background-color: #4a88c6; /* 滑過時的顏色 */
+    background-color: #4a88c6;
   }
 
   &:active {
-    transform: scale(0.95); /* 點擊時輕微縮小 */
+    transform: scale(0.95);
   }
 
   &:disabled {
-    background-color: #bfbfbf; /* 禁用時的背景顏色 */
-    cursor: not-allowed; /* 禁用時的鼠標樣式 */
+    background-color: #bfbfbf;
+    cursor: not-allowed;
   }
 `;
 
@@ -392,8 +383,6 @@ const GameTimeInput = ({ onTimeChange }) => {
   const handleMinutesChange = (e) => {
     const value = Math.max(0, Math.min(59, parseInt(e.target.value) || 0));
     setMinutes(value);
-
-    // 使用最新的狀態值來調用 onTimeChange 回調
     setTimeout(() => {
       onTimeChange(value, seconds);
     }, 0);
@@ -402,8 +391,6 @@ const GameTimeInput = ({ onTimeChange }) => {
   const handleSecondsChange = (e) => {
     const value = Math.max(0, Math.min(59, parseInt(e.target.value) || 0));
     setSeconds(value);
-
-    // 使用最新的狀態值來調用 onTimeChange 回調
     setTimeout(() => {
       onTimeChange(minutes, value);
     }, 0);

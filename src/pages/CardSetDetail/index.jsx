@@ -3,6 +3,23 @@ import PropTypes from "prop-types";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled, { css, keyframes } from "styled-components";
+import {
+  ArrowDown,
+  ArrowUp,
+  CardSetDetailEditIcon,
+  CardSetDetailLabelIcon,
+  CardSetDetailMoreIcon,
+  CardSetDetailShareIcon,
+  CardSetetailTrashIcon,
+  FilledStarIcon,
+  LeftArrowIcon,
+  ListIcon,
+  MultiplePlayersIcon,
+  PuzzleIcon,
+  RightArrowIcon,
+  ShuffleIcon,
+  StarIcon,
+} from "../../assets/icons";
 import { useUser } from "../../context/UserContext.jsx";
 import {
   deleteCardSet,
@@ -54,17 +71,14 @@ function CardSetDetail() {
         setTemplate(cardTemplate);
 
         const unorderedCards = await getCardsOfCardSet(cardSetId);
-
-        // 根據 cardSetData.cardOrder 陣列中的順序重排卡片
         const orderedCards = fetchedCardSetData.cardOrder
           .map((cardId) =>
             unorderedCards.find((card) => card.cardId === cardId)
           )
-          .filter(Boolean); // 過濾掉可能未找到的卡片
+          .filter(Boolean);
 
         setCards(orderedCards);
 
-        // 確認 userId 是否有效
         if (fetchedCardSetData.userId) {
           const ownerData = await getUserDocument(fetchedCardSetData.userId);
           setOwnerData(ownerData);
@@ -79,7 +93,7 @@ function CardSetDetail() {
 
   useEffect(() => {
     const checkIfFavorited = async () => {
-      const favorited = await isCardSetFavorited(user.userId, cardSetId); // 假設你有這個函數
+      const favorited = await isCardSetFavorited(user.userId, cardSetId);
       setIsFavorited(favorited);
     };
     if (user) {
@@ -91,21 +105,16 @@ function CardSetDetail() {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // 如果點擊發生在選單或按鈕內部，則不關閉
       if (
         event.target.closest(".more-actions-container") ||
         event.target.closest(".sub-menu")
       ) {
         return;
       }
-      // 如果點擊發生在外部，關閉選單
       setIsMenuOpen(false);
     };
-
-    // 監聽 mousedown 事件來捕捉點擊
     document.addEventListener("mousedown", handleClickOutside);
 
-    // 清除監聽器
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -141,7 +150,6 @@ function CardSetDetail() {
 
   const handleSwitchCardWithKeyboard = useCallback(
     (event) => {
-      // 檢查當前是否聚焦在輸入框或文本框中
       const tagName = event.target.tagName.toLowerCase();
       if (tagName === "input" || tagName === "textarea") {
         return;
@@ -172,7 +180,6 @@ function CardSetDetail() {
     const copyText = `https://becca-24.web.app/cardset/${cardSetId}`;
 
     if (navigator.clipboard && window.isSecureContext) {
-      // 使用 Clipboard API
       navigator.clipboard
         .writeText(copyText)
         .then(() => {
@@ -180,7 +187,7 @@ function CardSetDetail() {
         })
         .catch((error) => {
           console.error("無法複製分享連結：", error);
-          message.error("複製失敗，請重試"); // 顯示錯誤信息
+          message.error("複製失敗，請重試");
         });
     } else {
       console.error("無法複製分享連結：沒有clipboard API");
@@ -242,20 +249,20 @@ function CardSetDetail() {
       centered: true,
       okButtonProps: {
         style: {
-          backgroundColor: "#3d5a80", // 自定義確定按鈕顏色
+          backgroundColor: "#3d5a80",
           color: "white",
-          outline: "none", // 移除 outline
-          border: "none", // 移除按鈕邊框
-          boxShadow: "none", // 禁用按鈕陰影
+          outline: "none",
+          border: "none",
+          boxShadow: "none",
         },
       },
       cancelButtonProps: {
         style: {
-          backgroundColor: "#c9c5c5", // 自定義取消按鈕顏色
+          backgroundColor: "#c9c5c5",
           color: "white",
-          outline: "none", // 移除 outline
-          border: "none", // 移除按鈕邊框
-          boxShadow: "none", // 禁用按鈕陰影
+          outline: "none",
+          border: "none",
+          boxShadow: "none",
         },
       },
       onOk: async () => {
@@ -268,7 +275,7 @@ function CardSetDetail() {
           console.error("刪除卡牌組失敗：", error);
           message.error("刪除卡牌失敗，請稍後再試！");
         } finally {
-          setIsDeleting(false); // 無論成功與否都重置刪除狀態
+          setIsDeleting(false);
         }
       },
     });
@@ -389,7 +396,7 @@ function CardSetDetail() {
               <ActionWrapper>
                 <LabelWrapper>
                   <LabelIconContainer>
-                    <LabelIcon />
+                    <CardSetDetailLabelIcon />
                   </LabelIconContainer>
                   <LabelNameContainer>
                     {cardSetData.labels.length > 0 ? (
@@ -420,23 +427,23 @@ function CardSetDetail() {
                       className="more-actions-container"
                       onClick={toggleMenu}
                     >
-                      <MoreIcon />
+                      <CardSetDetailMoreIcon />
                       {isMenuOpen && (
                         <SubMenu className="sub-menu">
                           <SubMenuItem onClick={() => copyShareUrl(cardSetId)}>
-                            <ShareIcon />
+                            <CardSetDetailShareIcon />
                             <SubMenuItemText>分享</SubMenuItemText>
                           </SubMenuItem>
                           {user.userId === ownerData.userId && (
                             <>
                               <SubMenuItem onClick={handleNavigateToEdit}>
-                                <EditIcon />
+                                <CardSetDetailEditIcon />
                                 <SubMenuItemText>編輯</SubMenuItemText>
                               </SubMenuItem>
                               <SubMenuItem
                                 onClick={() => handleDeleteCardSet(cardSetId)}
                               >
-                                <TrashIcon />
+                                <CardSetetailTrashIcon />
                                 <SubMenuItemText $isDelete>
                                   刪除
                                 </SubMenuItemText>
@@ -763,17 +770,14 @@ const ArrowIconContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${(props) =>
-    props.disabled ? "#aaa" : "#fff"}; // 使用亮色作為文字顏色
-  background: ${(props) =>
-    props.disabled ? "#d8d6d6" : "#3d5a80"}; // 深色背景來增加對比
+  color: ${(props) => (props.disabled ? "#aaa" : "#fff")};
+  background: ${(props) => (props.disabled ? "#d8d6d6" : "#3d5a80")};
   border-radius: 50%;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   transition: all 0.3s;
 
   &:hover {
-    background: ${(props) =>
-      props.disabled ? "#d8d6d6" : "#293a50"}; // 增加深色在 hover 時的效果
+    background: ${(props) => (props.disabled ? "#d8d6d6" : "#293a50")};
   }
 
   @media only screen and (max-width: 639px) {
@@ -800,7 +804,7 @@ const MobileActionBar = styled.div`
 
 const CardSetDetailsWrapper = styled.div`
   width: 100%;
-  margin: 20px auto; /* 上下邊距 */
+  margin: 20px auto;
   @media only screen and (min-width: 640px) {
     width: 60%;
   }
@@ -816,17 +820,17 @@ const CardNumberWrapper = styled.div`
 
 const ProgressBar = styled.div`
   height: 10px;
-  background-color: #e0e0e0; /* 背景顏色 */
+  background-color: #e0e0e0;
   border-radius: 5px;
-  margin: 20px auto; /* 上下邊距 */
+  margin: 20px auto;
 `;
 
 const Progress = styled.div`
   height: 100%;
-  width: ${(props) => props.width}; /* 根據進度設置寬度 */
-  background-color: #76c7c0; /* 完成顏色 */
+  width: ${(props) => props.width};
+  background-color: #76c7c0;
   border-radius: 5px;
-  transition: width 0.3s ease; /* 動畫效果 */
+  transition: width 0.3s ease;
 `;
 
 const ActionWrapper = styled.div`
@@ -889,9 +893,9 @@ const ShuffleTrigger = styled.div`
   border-radius: 50%;
   background-color: ${(props) =>
     props.$isActive ? "#3d5a80" : "rgba(255, 255, 255, 0.6)"};
-  color: ${(props) => (props.$isActive ? "#fff" : "#000")}; // 改變字體顏色
+  color: ${(props) => (props.$isActive ? "#fff" : "#000")};
   box-shadow: ${(props) =>
-    props.$isActive ? "0px 4px 8px rgba(0, 0, 0, 0.2)" : "none"}; // 加陰影
+    props.$isActive ? "0px 4px 8px rgba(0, 0, 0, 0.2)" : "none"};
   cursor: pointer;
   transition: background-color 0.3s ease, border 0.3s ease, box-shadow 0.3s ease,
     color 0.3s ease;
@@ -990,7 +994,7 @@ const ProfilePicture = styled.img`
   width: 64px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #d3d3d3; // 添加灰色框線
+  border: 2px solid #d3d3d3;
 `;
 
 const SectionTitleWrapper = styled.div`
@@ -1031,7 +1035,7 @@ const GameOptionButton = styled.div`
   }
 
   &:active {
-    transform: scale(0.98); /* 點擊時輕微縮小 */
+    transform: scale(0.98);
   }
   @media only screen and (max-width: 934px) {
     flex: 1;
@@ -1136,7 +1140,7 @@ const SideMenu = styled.div`
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   @media only screen and (max-width: 1023px) {
-    display: none; // 隱藏側邊選單於小螢幕
+    display: none;
   }
   @media only screen and (min-width: 1440px) {
     width: 278px;
@@ -1175,13 +1179,13 @@ const SideMenuQuiz = styled.div`
   color: #ffffff;
   font-size: 16px;
   font-weight: 500;
-  background-color: #3498db; // 使用明亮的藍色來提高視覺吸引力
+  background-color: #3498db;
   transition: all 0.3s;
   text-align: center;
   cursor: pointer;
 
   &:hover {
-    background-color: #2980b9; // 當用戶懸停時，變為深藍色
+    background-color: #2980b9;
     color: #ffffff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
@@ -1204,13 +1208,13 @@ const SideMenuGame = styled.div`
   text-decoration: none;
   font-size: 16px;
   font-weight: 500;
-  background-color: #f39c12; // 使用暖橙色來突出多人遊戲部分
+  background-color: #f39c12;
   transition: all 0.3s;
   text-align: center;
   cursor: pointer;
 
   &:hover {
-    background-color: #e67e22; // 當用戶懸停時，變為較深的橙色
+    background-color: #e67e22;
     color: #ffffff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
@@ -1266,7 +1270,7 @@ const CardSetButton = styled.div`
   color: #ffffff;
   font-size: 16px;
   font-weight: 500;
-  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   &:hover {
     background-color: #889ccd;
@@ -1508,7 +1512,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
       sizes = { small: "29px", medium: "30px", large: "42px" };
       break;
     default:
-      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+      sizes = { small: "16px", medium: "20px", large: "24px" };
   }
 
   return css`
@@ -1557,7 +1561,7 @@ const FlipCard = styled.div`
         return props.isFlipped ? "rotateY(180deg)" : "rotateY(0)";
       case "fade":
         return "none";
-      default: // "vertical"
+      default:
         return props.isFlipped ? "rotateX(180deg)" : "rotateX(0)";
     }
   }};
@@ -1570,7 +1574,7 @@ const FlipCard = styled.div`
           return props.isFlipped ? "rotateY(175deg)" : "rotateY(2deg)";
         case "fade":
           return "none";
-        default: // "vertical"
+        default:
           return props.isFlipped ? "rotateX(175deg)" : "rotateX(2deg)";
       }
     }};
@@ -1627,7 +1631,7 @@ const BackCard = styled.div`
         return "rotateY(180deg)";
       case "fade":
         return "none";
-      default: // "vertical"
+      default:
         return "rotateX(180deg)";
     }
   }};
@@ -1667,263 +1671,6 @@ const Image = styled.img`
   object-fit: ${(props) => props.$style?.objectFit || "cover"};
   display: block;
 `;
-
-const LeftArrowIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="32"
-    height="32"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.75 19.5 8.25 12l7.5-7.5"
-    />
-  </svg>
-);
-
-const RightArrowIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="32"
-    height="32"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m8.25 4.5 7.5 7.5-7.5 7.5"
-    />
-  </svg>
-);
-
-const LabelIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    width="18"
-    height="18"
-  >
-    <path
-      fillRule="evenodd"
-      d="M5.25 2.25a3 3 0 0 0-3 3v4.318a3 3 0 0 0 .879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 0 0 5.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 0 0-2.122-.879H5.25ZM6.375 7.5a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
-
-const PuzzleIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="currentColor"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="24"
-    height="24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"
-    />
-  </svg>
-);
-
-const ListIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="24"
-    height="24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-    />
-  </svg>
-);
-
-const StarIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="32"
-    height="32"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-    />
-  </svg>
-);
-
-const FilledStarIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="currentColor"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="32"
-    height="32"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-    />
-  </svg>
-);
-
-const MultiplePlayersIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="currentColor"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="24"
-    height="24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-    />
-  </svg>
-);
-
-const ArrowDown = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m19.5 8.25-7.5 7.5-7.5-7.5"
-    />
-  </svg>
-);
-
-const ArrowUp = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m4.5 15.75 7.5-7.5 7.5 7.5"
-    />
-  </svg>
-);
-
-const ShareIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="18"
-    height="18"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"
-    />
-  </svg>
-);
-
-const MoreIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="26"
-    height="26"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-    />
-  </svg>
-);
-
-const TrashIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="red"
-    width="18"
-    height="18"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-    />
-  </svg>
-);
-
-const ShuffleIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 1024 1024"
-    fill="currentColor"
-    strokeWidth={1.5}
-    width="22"
-    height="22"
-  >
-    <path d="M740.2 362.6 798 362.6l0 94.6 162-166.4L798 128l0 108-57.8 0c-165.4 0-258.8 123.8-341.2 233-74 98.2-138 190.8-241.2 190.8L64 659.8l0 126.6 93.8 0c165.4 0 258.8-131.6 341.2-240.8C573 447.4 636.8 362.6 740.2 362.6zM306.4 435c7-9.2 14.2-18.6 21.4-28.2 17.6-23.2 36-47.8 56-72.2-59.2-55.8-130.6-97-226-97L64 237.6l0 126.6c0 0 26.6-1.2 93.8 0C222.8 365.6 263.6 392.4 306.4 435zM798 660.8l-57.8 0c-63 0-111.4-31.6-156.4-78.6-4.4 6-9 12-13.6 18-19.8 26.2-41 54.4-64.4 82.2 60.8 59.8 134.4 105 234.4 105L798 787.4 798 896l162-162.8-162-166.4L798 660.8z" />
-  </svg>
-);
-
-const EditIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    width="18"
-    height="18"
-  >
-    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
-  </svg>
-);
 
 CardContent.propTypes = {
   currentTemplate: PropTypes.shape({

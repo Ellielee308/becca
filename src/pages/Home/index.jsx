@@ -2,7 +2,7 @@ import { Skeleton } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import LoginModal from "../../components/LoginModal.jsx";
+import LoginModal from "../../components/LoginModal";
 import { useUser } from "../../context/UserContext.jsx";
 import { getCardSet, getStyle } from "../../utils/api";
 import customizeSVG from "./images/customize.svg";

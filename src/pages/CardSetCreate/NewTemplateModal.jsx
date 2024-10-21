@@ -4,16 +4,17 @@ import React, { useRef, useState } from "react";
 import { Rnd } from "react-rnd";
 import Select from "react-select";
 import styled, { css } from "styled-components";
-import { useUser } from "../../context/UserContext.jsx";
-import { saveCardTemplate } from "../../utils/api";
 import {
-  BoldIcon,
-  ItalicIcon,
-  TextAlignCenterIcon,
-  TextAlignLeftIcon,
-  TextAlignRightIcon,
-  TrashIcon,
-} from "./icon";
+  CardSetCreateBoldIcon,
+  CardSetCreateItalicIcon,
+  CardSetCreateTextAlignCenterIcon,
+  CardSetCreateTextAlignLeftIcon,
+  CardSetCreateTextAlignRightIcon,
+  CardSetCreateTrashIcon,
+  EditIcon,
+} from "../../assets/icons";
+import { useUser } from "../../context/UserContext";
+import { saveCardTemplate } from "../../utils/api";
 import imageIcon from "./images/photo.png";
 const { TextArea } = Input;
 
@@ -103,7 +104,6 @@ const NewTemplateModal = ({
     setSelectedField(null);
   };
 
-  // 通用更新
   const handleFieldUpdate = (side, index, updatedField) => {
     const updatedFields = [...newTemplateData[side]];
     updatedFields[index] = { ...updatedFields[index], ...updatedField };
@@ -114,16 +114,12 @@ const NewTemplateModal = ({
     }));
   };
 
-  // 處理拖曳結束事件
   const handleFieldDrag = (side, index, position) => {
     handleFieldUpdate(side, index, { position });
   };
 
-  // 處理調整大小結束事件
   const handleFieldResize = (side, index, newStyle) => {
     const updatedFields = [...newTemplateData[side]];
-
-    // 保留原有的 style 屬性，僅更新新的寬度和高度
     const currentStyle = updatedFields[index].style;
     updatedFields[index].style = { ...currentStyle, ...newStyle };
 
@@ -142,9 +138,7 @@ const NewTemplateModal = ({
     }));
   };
 
-  // 處理欄位刪除
   const handleDeleteField = (side, index) => {
-    // 檢查是否刪除的是目前選中的欄位
     if (side === selectedField?.side && index === selectedField?.index) {
       setSelectedField(null);
     }
@@ -157,7 +151,7 @@ const NewTemplateModal = ({
   };
 
   const handleFieldClick = (side, index, fieldType) => {
-    setSelectedField({ side, index, fieldType }); // 設定選中的欄位
+    setSelectedField({ side, index, fieldType });
   };
 
   const handleSubmit = async () => {
@@ -183,10 +177,8 @@ const NewTemplateModal = ({
       return;
     }
 
-    // 取得 CardWrapper 的大小
     const cardRect = cardRef.current.getBoundingClientRect();
 
-    // 計算百分比位置和大小
     const updatedFrontFields = newTemplateData.frontFields.map((field) => ({
       ...field,
       position: {
@@ -256,7 +248,7 @@ const NewTemplateModal = ({
       });
     } finally {
       setTimeout(() => {
-        setIsSaving(false); // 確保表單關閉後才允許再次提交
+        setIsSaving(false);
       }, 2000);
     }
   };
@@ -320,7 +312,7 @@ const NewTemplateModal = ({
                       <TrashIconContainer
                         onClick={() => handleDeleteField("frontFields", index)}
                       >
-                        <TrashIcon />
+                        <CardSetCreateTrashIcon />
                       </TrashIconContainer>
                     </React.Fragment>
                   ))}
@@ -355,7 +347,7 @@ const NewTemplateModal = ({
                       <TrashIconContainer
                         onClick={() => handleDeleteField("backFields", index)}
                       >
-                        <TrashIcon />
+                        <CardSetCreateTrashIcon />
                       </TrashIconContainer>
                     </React.Fragment>
                   ))}
@@ -396,20 +388,20 @@ const NewTemplateModal = ({
                       position={{ x: field.position.x, y: field.position.y }}
                       onClick={() =>
                         handleFieldClick("frontFields", index, field.type)
-                      } // 追蹤點擊事件
+                      }
                       onDragStop={(e, d) => {
                         handleFieldDrag("frontFields", index, {
                           x: d.x,
                           y: d.y,
                         });
-                        handleFieldClick("frontFields", index, field.type); // 拖曳後選取
+                        handleFieldClick("frontFields", index, field.type);
                       }}
                       onResizeStop={(e, direction, ref, delta, position) => {
                         handleFieldResize("frontFields", index, {
                           width: ref.style.width,
                           height: ref.style.height,
                         });
-                        handleFieldClick("frontFields", index, field.type); // 調整大小後選取
+                        handleFieldClick("frontFields", index, field.type);
                       }}
                       bounds="parent"
                     >
@@ -437,20 +429,20 @@ const NewTemplateModal = ({
                       position={{ x: field.position.x, y: field.position.y }}
                       onClick={() =>
                         handleFieldClick("backFields", index, field.type)
-                      } // 追蹤點擊事件
+                      }
                       onDragStop={(e, d) => {
                         handleFieldDrag("backFields", index, {
                           x: d.x,
                           y: d.y,
                         });
-                        handleFieldClick("backFields", index, field.type); // 拖曳後選取
+                        handleFieldClick("backFields", index, field.type);
                       }}
                       onResizeStop={(e, direction, ref, delta, position) => {
                         handleFieldResize("backFields", index, {
                           width: ref.style.width,
                           height: ref.style.height,
                         });
-                        handleFieldClick("backFields", index, field.type); // 調整大小後選取
+                        handleFieldClick("backFields", index, field.type);
                       }}
                       bounds="parent"
                     >
@@ -538,7 +530,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
       sizes = { small: "29px", medium: "30px", large: "42px" };
       break;
     default:
-      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+      sizes = { small: "16px", medium: "20px", large: "24px" };
   }
 
   return css`
@@ -666,7 +658,7 @@ const FlipCard = styled.div`
         return props.isFlipped ? "rotateY(180deg)" : "rotateY(0)";
       case "fade":
         return "none";
-      default: // "vertical"
+      default:
         return props.isFlipped ? "rotateX(180deg)" : "rotateX(0)";
     }
   }};
@@ -721,7 +713,7 @@ const BackCard = styled.div`
         return "rotateY(180deg)";
       case "fade":
         return "none";
-      default: // "vertical"
+      default:
         return "rotateX(180deg)";
     }
   }};
@@ -768,10 +760,10 @@ const SideField = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
-  background-color: #f8f8f8; // 柔和的背景色
+  background-color: #f8f8f8;
   padding: 16px;
-  border-radius: 8px; // 圓角
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // 增加陰影
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const FieldHeading = styled.h4`
@@ -871,7 +863,6 @@ const AddFieldButton = styled.div`
   }
 `;
 
-// 用於顯示圖片的樣式
 const ImageWrapper = styled.div`
   position: relative;
   display: inline-block;
@@ -879,7 +870,6 @@ const ImageWrapper = styled.div`
   height: 100%;
 `;
 
-// 用於顯示圖片的樣式
 const ImageExample = styled.img`
   max-width: 100%;
   max-height: 100%;
@@ -930,7 +920,7 @@ const TextStyleEditor = ({ field, onUpdate }) => {
           })
         }
       >
-        <BoldIcon />
+        <CardSetCreateBoldIcon />
       </TextStyleIconContainer>
       <TextStyleIconContainer
         isSelected={field.style.fontStyle === "italic"}
@@ -940,7 +930,7 @@ const TextStyleEditor = ({ field, onUpdate }) => {
           })
         }
       >
-        <ItalicIcon />
+        <CardSetCreateItalicIcon />
       </TextStyleIconContainer>
       <ColorInput
         type="color"
@@ -951,19 +941,19 @@ const TextStyleEditor = ({ field, onUpdate }) => {
         isSelected={field.style.textAlign === "left"}
         onClick={() => handleStyleChange({ textAlign: "left" })}
       >
-        <TextAlignLeftIcon />
+        <CardSetCreateTextAlignLeftIcon />
       </TextStyleIconContainer>
       <TextStyleIconContainer
         isSelected={field.style.textAlign === "center"}
         onClick={() => handleStyleChange({ textAlign: "center" })}
       >
-        <TextAlignCenterIcon />
+        <CardSetCreateTextAlignCenterIcon />
       </TextStyleIconContainer>
       <TextStyleIconContainer
         isSelected={field.style.textAlign === "right"}
         onClick={() => handleStyleChange({ textAlign: "right" })}
       >
-        <TextAlignRightIcon />
+        <CardSetCreateTextAlignRightIcon />
       </TextStyleIconContainer>
     </TextStyleWrapper>
   );
@@ -998,7 +988,7 @@ const TextStyleWrapper = styled.div`
   margin: 0 auto;
   border-radius: 4px;
   padding: 4px;
-  background-color: rgba(0, 0, 0, 0.3); // 半透明的黑色背景
+  background-color: rgba(0, 0, 0, 0.3);
   width: fit-content;
   gap: 2px;
   @media only screen and (max-width: 939px) {
@@ -1053,7 +1043,7 @@ const AddFieldModal = ({ onClose, onSave }) => {
       name: fieldName,
       type: fieldType,
       required: isRequired,
-      position: fieldType === "text" ? { x: 200, y: 150 } : { x: 200, y: 100 }, // 新欄位的默認位置
+      position: fieldType === "text" ? { x: 200, y: 150 } : { x: 200, y: 100 },
       style:
         fieldType === "text"
           ? {
@@ -1129,14 +1119,13 @@ AddFieldModal.propTypes = {
   onSave: PropTypes.func,
 };
 
-// Overlay 遮罩層
 const Overlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.1); // 半透明黑色遮罩
+  background: rgba(0, 0, 0, 0.1);
   z-index: 2000;
 `;
 
@@ -1156,11 +1145,11 @@ const AddFieldModalContent = styled.div`
   overflow-y: auto;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   @media only screen and (max-width: 939px) {
-    width: 90%; // 讓它在小螢幕中更加自適應
+    width: 90%;
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); // 將元件置於螢幕正中央
+    transform: translate(-50%, -50%);
   }
 `;
 
@@ -1184,21 +1173,3 @@ const IsRequiredWrapper = styled.div`
   align-items: center;
   height: 28px;
 `;
-
-const EditIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="24"
-    height="24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-    />
-  </svg>
-);

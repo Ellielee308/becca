@@ -30,10 +30,10 @@ function Game() {
   const [template, setTemplate] = useState(null);
   const [username, setUsername] = useState("");
   const [isGameHost, setIsGameHost] = useState(false);
-  const [isDataLoading, setIsDataLoading] = useState(true); //Game資料是否還在Loading
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const [hasJoinedGame, setHasJoinedGame] = useState(false);
-  const [players, setPlayers] = useState([]); // 即時保存所有玩家資料
-  const [participantId, setParticipantId] = useState(null); //目前玩家participantId
+  const [players, setPlayers] = useState([]);
+  const [participantId, setParticipantId] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
@@ -90,7 +90,6 @@ function Game() {
           if (user) {
             setIsGameHost(user.userId === gameData.hostUserId);
 
-            // 檢查玩家是否已經在遊戲中
             const isPlayerInGame =
               Array.isArray(gameData.players) &&
               gameData.players.some(
@@ -124,7 +123,7 @@ function Game() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  // 監聽遊戲中的玩家列表變化
+
   useEffect(() => {
     if (gameId) {
       const gameRef = doc(db, "games", gameId);
@@ -150,7 +149,6 @@ function Game() {
         }
       });
 
-      // 在組件卸載時取消監聽
       return () => unsubscribe();
     }
   }, [gameId]);
@@ -245,15 +243,14 @@ function Game() {
     }
   };
 
-  // 啟動遊戲計時器
   const startGameTimer = () => {
-    const { timeLimit } = gameData; // timeLimit 是以秒為單位
+    const { timeLimit } = gameData;
     let remainingTime = timeLimit;
 
     const intervalId = setInterval(async () => {
       if (remainingTime <= 0) {
         clearInterval(intervalId);
-        // 更新遊戲狀態為「completed」
+
         try {
           await updateGameStatus(gameId, "completed");
         } catch (error) {
@@ -266,19 +263,17 @@ function Game() {
   };
 
   const formatTimeLimit = (timeLimitInSeconds) => {
-    const minutes = Math.floor(timeLimitInSeconds / 60); // 計算分鐘
-    const seconds = timeLimitInSeconds % 60; // 計算剩餘的秒數
+    const minutes = Math.floor(timeLimitInSeconds / 60);
+    const seconds = timeLimitInSeconds % 60;
     return `${minutes} 分 ${seconds} 秒`;
   };
 
   useEffect(() => {
     if (gameData && gameData.startedAt && !hasJoinedGame) {
-      // 顯示提示訊息
       message.warning("遊戲已開始，無法加入！");
-      // 延遲一段時間後再導航
       setTimeout(() => {
-        navigate("/"); // 導航至首頁或其他頁面
-      }, 1500); // 等待 1.5 秒，讓訊息顯示完畢
+        navigate("/");
+      }, 1500);
     }
   }, [gameData, hasJoinedGame, navigate]);
 
@@ -310,21 +305,19 @@ function Game() {
           {formatTimeLimit(gameData.timeLimit)}
         </QuizTypeDescription>
       </QuizDescription>
-      {/* 分享按鈕和 QR 碼 */}
       {gameData.status === "waiting" && (
         <ShareContainer>
           <QRCodeSVG value={window.location.href} size={128} />
           <ShareButton onClick={handleShareClick}>複製遊戲連結</ShareButton>
         </ShareContainer>
       )}
-      {/* 顯示目前的玩家列表 */}
       {gameData.status === "waiting" && (
         <PlayersList>
           <Lable>目前玩家</Lable>
           <PlayersGridContainer>
             {players
-              .slice() // 創建副本以避免改變原始陣列
-              .sort((a, b) => Date.parse(a.joinedAt) - Date.parse(b.joinedAt)) // 按照 `joinedAt` 排序
+              .slice()
+              .sort((a, b) => Date.parse(a.joinedAt) - Date.parse(b.joinedAt))
               .map((player, index) => (
                 <PlayerItem key={index}>
                   <ProfilePicture src={player.profilePicture} />
@@ -334,7 +327,6 @@ function Game() {
           </PlayersGridContainer>
         </PlayersList>
       )}
-      {/* 未登入用戶名輸入框 */}
       {!user && !hasJoinedGame && gameData.status === "waiting" && (
         <JoinGameContainer>
           <JoinGameForm
@@ -520,7 +512,7 @@ const PlayersList = styled.div`
 const PlayersGridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 10px; /* 減少項目之間的間距 */
+  gap: 10px;
   margin: 10px auto;
   width: 80%;
 

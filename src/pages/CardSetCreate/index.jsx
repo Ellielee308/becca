@@ -4,8 +4,9 @@ import { Link } from "react-router-dom";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import styled from "styled-components";
-import NewStyleModal from "../../components/NewStyleModal.jsx";
-import Preview from "../../components/Preview.jsx";
+import { CardSetCreateEditIcon } from "../../assets/icons";
+import NewStyleModal from "../../components/NewStyleModal";
+import Preview from "../../components/Preview";
 import { useUser } from "../../context/UserContext.jsx";
 import {
   addNewLabel,
@@ -17,16 +18,6 @@ import {
 import CardContent from "./CardContent.jsx";
 import NewTemplateModal from "./NewTemplateModal.jsx";
 import TemplatePreview from "./TemplatePreview.jsx";
-import { languageOptions } from "./testOptions.js";
-
-const customTheme = {
-  token: {
-    colorPrimary: "#3d5a80",
-    borderRadius: 8,
-    fontFamily: "'TaiwanPearl-Regular', 'Noto Sans TC', sans-serif;",
-    fontSize: 16,
-  },
-};
 
 function CardSetCreate() {
   const { user, loading } = useUser();
@@ -73,16 +64,16 @@ function CardSetCreate() {
       selectedTemplate.frontFields &&
       selectedTemplate.backFields
     ) {
-      const newCardContent = Array(3) // 假設要產生3張卡片
+      const newCardContent = Array(3)
         .fill(null)
         .map(() => ({
           frontFields: selectedTemplate.frontFields.map((field) => ({
             name: field.name,
-            value: "", // 初始化為空值
+            value: "",
           })),
           backFields: selectedTemplate.backFields.map((field) => ({
             name: field.name,
-            value: "", // 初始化為空值
+            value: "",
           })),
         }));
       setCardContent(newCardContent);
@@ -94,7 +85,7 @@ function CardSetCreate() {
     if (user) {
       const fetchUserCardStyles = async () => {
         try {
-          const userCardStyles = await getUserCardStyles(user.userId); // 等待異步結果
+          const userCardStyles = await getUserCardStyles(user.userId);
           setAllStyles(userCardStyles);
 
           const cardStyleOptions = userCardStyles.map((userCardStyle) => ({
@@ -103,17 +94,13 @@ function CardSetCreate() {
           }));
 
           const defaultStyleId = "rvM8Fc1efHo7Ho7kf1gT";
-
-          // 將預設樣式排在第一個
           cardStyleOptions.sort((a, b) => {
-            if (a.value === defaultStyleId) return -1; // 預設樣式排在第一
+            if (a.value === defaultStyleId) return -1;
             if (b.value === defaultStyleId) return 1;
             return 0;
           });
-
           setStyleOptions(cardStyleOptions);
 
-          // 設置預設樣式為選中的樣式
           const defaultStyle = cardStyleOptions.find(
             (option) => option.value === defaultStyleId
           );
@@ -140,11 +127,10 @@ function CardSetCreate() {
           const userCardTemplates = await getUserCardTemplates(user.userId);
           setAllTemplates(userCardTemplates);
 
-          // 定義模板的排序順序
           const templateOrder = [
-            "nHtBt7t26umO6NPqP4YC", // 預設模板
-            "GTpFoUK1bYzNEeniNTbr", // 正面附例句
-            "0Z4xgB2uBqUJIgmRXuTi", // 背面附圖片
+            "nHtBt7t26umO6NPqP4YC",
+            "GTpFoUK1bYzNEeniNTbr",
+            "0Z4xgB2uBqUJIgmRXuTi",
           ];
 
           const cardTemplateOptions = userCardTemplates.map(
@@ -154,28 +140,24 @@ function CardSetCreate() {
             })
           );
 
-          // 根據定義的順序排序選項
           cardTemplateOptions.sort((a, b) => {
             const orderA = templateOrder.indexOf(a.value);
             const orderB = templateOrder.indexOf(b.value);
 
-            // 如果都在排序順序中，則按順序排
             if (orderA !== -1 && orderB !== -1) {
               return orderA - orderB;
             }
-            // 如果只有一個在排序順序中，則讓它排在前面
+
             if (orderA !== -1) return -1;
             if (orderB !== -1) return 1;
-            // 如果都不在排序順序中，保持原有順序
             return 0;
           });
 
           setTemplateOptions(cardTemplateOptions);
           const defaultTemplate = cardTemplateOptions.find(
-            (option) => option.value === "nHtBt7t26umO6NPqP4YC" //預設模板
+            (option) => option.value === "nHtBt7t26umO6NPqP4YC"
           );
 
-          // 設置預設模板為選中的模板
           if (defaultTemplate) {
             setSelectedTemplateOption(defaultTemplate);
             setSelectedTemplate(
@@ -213,7 +195,7 @@ function CardSetCreate() {
 
   const handleStyleChange = (selectedOption) => {
     if (selectedOption.value === "newStyle") {
-      setShowNewStyleModal(true); // 當選擇「新增樣式…」時顯示 Modal
+      setShowNewStyleModal(true);
     } else {
       setSelectedStyleOption(selectedOption);
       const selectedStyleObject = allStyles.find(
@@ -236,7 +218,6 @@ function CardSetCreate() {
   };
 
   const handleCreateLabel = async (newLabel) => {
-    // 檢查標籤是否已存在
     const isLabelExist = labelOptions.some(
       (option) => option.label.toLowerCase() === newLabel.toLowerCase()
     );
@@ -246,7 +227,6 @@ function CardSetCreate() {
       return;
     }
 
-    // 檢查是否含有特殊字元（允許字母、數字、空格，以及其他語言字符）
     const specialCharRegex = /^[\p{L}\p{N}\s]+$/u;
     if (!specialCharRegex.test(newLabel)) {
       messageApi.error("標籤名稱含有不允許的特殊字元，創建失敗");
@@ -276,7 +256,7 @@ function CardSetCreate() {
         message.warning("請先選擇樣式！");
         return;
       } else {
-        setShowNewTemplateModal(true); // 當選擇「新增樣式…」時顯示 Modal}
+        setShowNewTemplateModal(true);
       }
     } else {
       setSelectedTemplateOption(selectedOption);
@@ -302,7 +282,6 @@ function CardSetCreate() {
     setCardSetData({ ...cardSetData, fieldTemplateId: fieldTemplateId });
   };
 
-  // 處理第一步提交
   const handleFirstStepSubmit = (event) => {
     event.preventDefault();
     let newInvalidFields = [];
@@ -331,22 +310,19 @@ function CardSetCreate() {
 
     setInvalidFields(newInvalidFields);
     if (newInvalidFields.length === 0) {
-      setStep(1); // 若沒有錯誤，進入第二步
+      setStep(1);
     }
   };
 
-  // 處理卡片內容提交
   const handleFinalSubmit = async (event) => {
     event.preventDefault();
     if (isSaving) return;
 
-    // 檢查卡片內容的有效性
     if (cardContent.length < 1) {
       messageApi.warning("字卡至少需要一張！");
       return;
     }
 
-    // 檢查每張卡片的必填欄位
     for (let i = 0; i < selectedTemplate.frontFields.length; i++) {
       if (selectedTemplate.frontFields[i].required === true) {
         for (let y = 0; y < cardContent.length; y++) {
@@ -378,7 +354,7 @@ function CardSetCreate() {
     try {
       messageApi.loading({
         content: "提交中，請稍候...",
-        duration: 0, // 持續顯示，直到手動關閉
+        duration: 0,
       });
       const newCardSetId = await uploadCardSetWithCards(
         cardSetData,
@@ -386,13 +362,13 @@ function CardSetCreate() {
         user.userId
       );
       setNewCardSetId(newCardSetId);
-      // 成功，顯示成功訊息並進入 step 3
-      messageApi.destroy(); // 隱藏 loading
+
+      messageApi.destroy();
       messageApi.success("卡牌組提交成功！");
-      setStep(2); // 移動到第 3 步顯示結果
+      setStep(2);
       setIsSaving(false);
     } catch (error) {
-      messageApi.destroy(); // 隱藏 loading
+      messageApi.destroy();
       messageApi.error("儲存失敗，請重試。");
       console.error("儲存過程出現錯誤：", error);
       setIsSaving(false);
@@ -404,9 +380,9 @@ function CardSetCreate() {
       <SkeletonWrapper>
         <Skeleton
           active
-          title={{ width: 200 }} // 明確設置 title 寬度
-          paragraph={{ rows: 3, width: [200, 250, 180] }} // 設置每個段落寬度
-          style={{ width: "100%" }} // 設置骨架寬度撐滿
+          title={{ width: 200 }}
+          paragraph={{ rows: 3, width: [200, 250, 180] }}
+          style={{ width: "100%" }}
         />
         <SkeletonButtonWrapper>
           <Skeleton.Button style={{ width: 120, height: 50 }} active />
@@ -424,7 +400,7 @@ function CardSetCreate() {
             <>
               <HeadingContainer>
                 <Heading>
-                  <EditIcon />
+                  <CardSetCreateEditIcon />
                   <p>新增卡牌組</p>
                 </Heading>
                 <NextStepButton
@@ -626,7 +602,7 @@ function CardSetCreate() {
                           : [],
                       });
                     }}
-                    onCreateOption={handleCreateLabel} // 當創建新標籤時調用的處理程序
+                    onCreateOption={handleCreateLabel}
                     placeholder="請輸入或選擇標籤"
                   />
                   <InputLabel>
@@ -674,7 +650,7 @@ function CardSetCreate() {
             <>
               <HeadingContainer>
                 <Heading>
-                  <EditIcon />
+                  <CardSetCreateEditIcon />
                   <p>新增卡牌組</p>
                 </Heading>
                 <UpperButtonGroup>
@@ -738,7 +714,7 @@ function CardSetCreate() {
             <>
               <HeadingContainer>
                 <Heading>
-                  <EditIcon />
+                  <CardSetCreateEditIcon />
                   <p>新增卡牌組</p>
                 </Heading>
               </HeadingContainer>
@@ -793,6 +769,29 @@ function CardSetCreate() {
     </ConfigProvider>
   );
 }
+
+const languageOptions = [
+  { value: "en", label: "英語" },
+  { value: "zh-TW", label: "繁體中文" },
+  { value: "ko", label: "韓語" },
+  { value: "ja", label: "日語" },
+  { value: "fr", label: "法語" },
+  { value: "de", label: "德語" },
+  { value: "es", label: "西班牙語" },
+  { value: "th", label: "泰語" },
+  { value: "it", label: "義大利語" },
+  { value: "pt", label: "葡萄牙語" },
+  { value: "others", label: "其他" },
+];
+
+const customTheme = {
+  token: {
+    colorPrimary: "#3d5a80",
+    borderRadius: 8,
+    fontFamily: "'TaiwanPearl-Regular', 'Noto Sans TC', sans-serif;",
+    fontSize: 16,
+  },
+};
 
 export default CardSetCreate;
 
@@ -1094,21 +1093,3 @@ const SkeletonButtonWrapper = styled.div`
   gap: 30px;
   width: 100%;
 `;
-
-const EditIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    width="32"
-    height="32"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-    />
-  </svg>
-);

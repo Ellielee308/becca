@@ -204,7 +204,7 @@ const CreateButton = styled.input`
   padding: 12px 24px;
   font-size: 16px;
   color: white;
-  background-color: #3d5a80; /* 按鈕背景顏色 */
+  background-color: #3d5a80;
   border: none;
   border-radius: 8px;
   margin-top: auto;
@@ -213,16 +213,16 @@ const CreateButton = styled.input`
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
 
   &:hover {
-    background-color: #4a88c6; /* 滑過時的顏色 */
+    background-color: #4a88c6;
   }
 
   &:active {
-    transform: scale(0.95); /* 點擊時輕微縮小 */
+    transform: scale(0.95);
   }
 
   &:disabled {
-    background-color: #bfbfbf; /* 禁用時的背景顏色 */
-    cursor: not-allowed; /* 禁用時的鼠標樣式 */
+    background-color: #bfbfbf;
+    cursor: not-allowed;
   }
 `;
 
