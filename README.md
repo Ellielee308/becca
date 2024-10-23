@@ -2,6 +2,8 @@
 
 Becca is a web application designed to help users create, customize, and study flashcards in an interactive and collaborative way. The platform allows users to customize card layouts, test themselves with quizzes, and even engage in multiplayer quiz games. The goal is to facilitate learning through an engaging flashcard creation and study process.
 
+[Website](https://becca-24.web.app/)
+
 ## Features
 
 - Create, edit, and organize flashcards
