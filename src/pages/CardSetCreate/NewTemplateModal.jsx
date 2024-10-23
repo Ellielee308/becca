@@ -10,8 +10,8 @@ import {
   CardSetCreateTextAlignCenterIcon,
   CardSetCreateTextAlignLeftIcon,
   CardSetCreateTextAlignRightIcon,
-  CardSetCreateTrashIcon,
   EditIcon,
+  CardContentTrashIcon as TrashIcon,
 } from "../../assets/icons";
 import { useUser } from "../../context/UserContext";
 import { saveCardTemplate } from "../../utils/api";
@@ -312,7 +312,7 @@ const NewTemplateModal = ({
                       <TrashIconContainer
                         onClick={() => handleDeleteField("frontFields", index)}
                       >
-                        <CardSetCreateTrashIcon />
+                        <TrashIcon />
                       </TrashIconContainer>
                     </React.Fragment>
                   ))}
@@ -347,7 +347,7 @@ const NewTemplateModal = ({
                       <TrashIconContainer
                         onClick={() => handleDeleteField("backFields", index)}
                       >
-                        <CardSetCreateTrashIcon />
+                        <TrashIcon />
                       </TrashIconContainer>
                     </React.Fragment>
                   ))}

@@ -2,8 +2,8 @@ import { Input } from "antd";
 import PropTypes from "prop-types";
 import { useState } from "react";
 import styled from "styled-components";
+import { CardContentPlusIcon, CardContentTrashIcon } from "../../assets/icons";
 import { translateText, uploadImageToStorage } from "../../utils/api";
-import { PlusIcon, TrashIcon } from "./icon";
 const { TextArea } = Input;
 
 export default function CardContent({
@@ -100,7 +100,7 @@ export default function CardContent({
             <Heading>{cardIndex + 1}</Heading>
             <ButtonGroupWrapper>
               <ButtonIconContainer onClick={() => handleDeleteCard(cardIndex)}>
-                <TrashIcon />
+                <CardContentTrashIcon />
               </ButtonIconContainer>
             </ButtonGroupWrapper>
           </TitleBar>
@@ -255,7 +255,7 @@ export default function CardContent({
       <NewCardWrapper onClick={handleAddNewCard}>
         <NewCardHeading>
           <PlusButton>
-            <PlusIcon />
+            <CardContentPlusIcon />
           </PlusButton>
           <PlusLabel>新增新卡片</PlusLabel>
         </NewCardHeading>

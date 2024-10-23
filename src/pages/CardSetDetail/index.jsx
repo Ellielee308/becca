@@ -7,11 +7,11 @@ import {
   ArrowDown,
   ArrowUp,
   CardSetDetailEditIcon,
-  CardSetDetailLabelIcon,
   CardSetDetailMoreIcon,
   CardSetDetailShareIcon,
-  CardSetetailTrashIcon,
+  CardSetDetailTrashIcon,
   FilledStarIcon,
+  LabelIcon,
   LeftArrowIcon,
   ListIcon,
   MultiplePlayersIcon,
@@ -396,7 +396,7 @@ function CardSetDetail() {
               <ActionWrapper>
                 <LabelWrapper>
                   <LabelIconContainer>
-                    <CardSetDetailLabelIcon />
+                    <LabelIcon />
                   </LabelIconContainer>
                   <LabelNameContainer>
                     {cardSetData.labels.length > 0 ? (
@@ -443,7 +443,7 @@ function CardSetDetail() {
                               <SubMenuItem
                                 onClick={() => handleDeleteCardSet(cardSetId)}
                               >
-                                <CardSetetailTrashIcon />
+                                <CardSetDetailTrashIcon />
                                 <SubMenuItemText $isDelete>
                                   刪除
                                 </SubMenuItemText>

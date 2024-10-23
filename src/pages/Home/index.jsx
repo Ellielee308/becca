@@ -2,6 +2,11 @@ import { Skeleton } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import {
+  HomeLeftArrowIcon,
+  HomeRightArrowIcon,
+  LabelIcon,
+} from "../../assets/icons/index.jsx";
 import LoginModal from "../../components/LoginModal";
 import { useUser } from "../../context/UserContext.jsx";
 import { getCardSet, getStyle } from "../../utils/api";
@@ -257,7 +262,7 @@ function Home() {
         </CarouselButtonGroup>
         <CarouselWrapper>
           <ScrollButton onClick={() => handleScroll("left")}>
-            <LeftArrowIcon />
+            <HomeLeftArrowIcon />
           </ScrollButton>
           <CardSetWrapper ref={carouselRef}>
             {cardSetData &&
@@ -300,7 +305,7 @@ function Home() {
               )}
           </CardSetWrapper>
           <ScrollButton onClick={() => handleScroll("right")}>
-            <RightArrowIcon />
+            <HomeRightArrowIcon />
           </ScrollButton>
         </CarouselWrapper>
       </ExploreSection>
@@ -725,58 +730,6 @@ const NoLabelName = styled.span`
   color: gray;
   font-size: 14px;
 `;
-
-const LabelIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    width="18"
-    height="18"
-  >
-    <path
-      fillRule="evenodd"
-      d="M5.25 2.25a3 3 0 0 0-3 3v4.318a3 3 0 0 0 .879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 0 0 5.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 0 0-2.122-.879H5.25ZM6.375 7.5a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
-
-const LeftArrowIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="#3d5a80"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.75 19.5 8.25 12l7.5-7.5"
-    />
-  </svg>
-);
-
-const RightArrowIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="#3d5a80"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m8.25 4.5 7.5 7.5-7.5 7.5"
-    />
-  </svg>
-);
 
 const SkeletonWrapper = styled.div`
   display: flex;
