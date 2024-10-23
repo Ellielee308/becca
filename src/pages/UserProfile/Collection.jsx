@@ -47,21 +47,15 @@ function Collection() {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // 如果點擊發生在選單或按鈕內部，則不關閉
       if (
         event.target.closest(".more-actions-container") ||
         event.target.closest(".sub-menu")
       ) {
         return;
       }
-      // 如果點擊發生在外部，關閉選單
       setVisibleMenuCardSetId(null);
     };
-
-    // 監聽 mousedown 事件來捕捉點擊
     document.addEventListener("mousedown", handleClickOutside);
-
-    // 清除監聽器
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -75,7 +69,6 @@ function Collection() {
     const copyText = `https://becca-24.web.app/cardset/${cardSetId}`;
 
     if (navigator.clipboard && window.isSecureContext) {
-      // 使用 Clipboard API
       navigator.clipboard
         .writeText(copyText)
         .then(() => {
@@ -83,7 +76,7 @@ function Collection() {
         })
         .catch((error) => {
           console.error("無法複製分享連結：", error);
-          message.error("複製失敗，請重試"); // 顯示錯誤信息
+          message.error("複製失敗，請重試");
         });
     } else {
       console.error("無法複製分享連結：沒有clipboard API");
@@ -100,20 +93,20 @@ function Collection() {
       centered: true,
       okButtonProps: {
         style: {
-          backgroundColor: "#3d5a80", // 自定義確定按鈕顏色
+          backgroundColor: "#3d5a80",
           color: "white",
-          outline: "none", // 移除 outline
-          border: "none", // 移除按鈕邊框
-          boxShadow: "none", // 禁用按鈕陰影
+          outline: "none",
+          border: "none",
+          boxShadow: "none",
         },
       },
       cancelButtonProps: {
         style: {
-          backgroundColor: "#c9c5c5", // 自定義取消按鈕顏色
+          backgroundColor: "#c9c5c5",
           color: "white",
-          outline: "none", // 移除 outline
-          border: "none", // 移除按鈕邊框
-          boxShadow: "none", // 禁用按鈕陰影
+          outline: "none",
+          border: "none",
+          boxShadow: "none",
         },
       },
       onOk: async () => {
@@ -320,11 +313,11 @@ const LabelName = styled.span`
   white-space: pre;
   color: gray;
   font-size: 14px;
-  cursor: pointer; // 指針變成手型
-  transition: color 0.3s ease; // 增加過渡效果
+  cursor: pointer;
+  transition: color 0.3s ease;
 
   &:hover {
-    color: #3d5a80; // 修改為更顯眼的顏色，與網站主題一致
+    color: #3d5a80;
   }
 `;
 const NoLabelName = styled.span`

@@ -181,13 +181,9 @@ function Game() {
           gameHasStarted &&
           gameData.status !== "completed"
         ) {
-          updateGameStatus(gameId, "completed")
-            .then(() => {
-              console.log("所有玩家已完成遊戲，遊戲狀態已更新為 completed");
-            })
-            .catch((error) => {
-              console.error("更新遊戲狀態為 completed 失敗：", error);
-            });
+          updateGameStatus(gameId, "completed").catch((error) => {
+            console.error("更新遊戲狀態為 completed 失敗：", error);
+          });
         }
 
         setPlayers(participants);
@@ -381,7 +377,6 @@ const Wrapper = styled.div`
   margin: 80px auto 60px auto;
   padding: 10px 30px 40px 30px;
   max-width: 960px;
-  /* box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); */
   border-radius: 16px;
   background: linear-gradient(to bottom right, #f5f7fa, #cdddf3);
   display: flex;

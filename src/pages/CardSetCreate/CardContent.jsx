@@ -299,7 +299,6 @@ const ButtonGroupWrapper = styled.div`
 
 const SideWrapper = styled.div`
   margin-top: 20px;
-  /* padding: 35px 30px; */
   display: flex;
   flex-direction: row;
   @media only screen and (max-width: 559px) {
@@ -409,7 +408,6 @@ const SuggestionWrapper = styled.div`
   display: flex;
   flex-direction: column;
   padding: 10px 0px 10px 0px;
-  /* border: 1px solid black; */
 `;
 
 const SuggestionNotice = styled.p`

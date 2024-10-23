@@ -32,7 +32,7 @@ function MultipleChoices({
       newCorrectAttempt += 1;
       setCorrectAttempt(newCorrectAttempt);
     }
-    // 更新 Firestore 中的參賽者文檔
+
     try {
       await updateParticipantDoc(participantId, {
         currentScore: newCorrectAttempt,
@@ -41,7 +41,6 @@ function MultipleChoices({
       console.error("更新玩家分數失敗：", error);
     }
 
-    // 延遲進入下一個問題，並重置選擇狀態
     setTimeout(() => {
       if (currentQuestionNumber + 1 < gameData.questionQty) {
         setCurrentQuestionNumber(currentQuestionNumber + 1);
@@ -131,7 +130,7 @@ function MultipleChoices({
                         );
                       }
                     }
-                    return null; // 確保沒有返回 undefined
+                    return null;
                   })}
                 </ChoiceCard>
               )
@@ -261,16 +260,14 @@ const ChoiceCard = styled.div`
   outline: ${(props) => props.$outlineColor} 2px solid;
   transition: box-shadow 0.3s ease, transform 0.3s ease, outline 0.3s ease;
 
-  /* 懸停效果 */
   &:hover {
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-    transform: translateY(-3px); /* 微微上升 */
+    transform: translateY(-3px);
   }
 
-  /* 點擊效果 */
   &:active {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    transform: scale(0.98); /* 輕微縮放效果 */
+    transform: scale(0.98);
   }
   @media only screen and (max-width: 639px) {
     min-height: 100px;
@@ -348,7 +345,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
       sizes = { small: "28px", medium: "30px", large: "42px" };
       break;
     default:
-      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+      sizes = { small: "16px", medium: "20px", large: "24px" };
   }
 
   return css`
@@ -401,7 +398,6 @@ const GameEndModal = ({
   const [currentUserTimeUsed, setCurrentUserTimeUsed] = useState(null);
   const navigate = useNavigate();
 
-  // 當遊戲完成後，獲取所有玩家的成績並排序
   useEffect(() => {
     if (gameStatus === "completed" && gameData?.players.length > 0) {
       const fetchPlayerRankings = async () => {
@@ -415,12 +411,10 @@ const GameEndModal = ({
 
               let timeUsed = null;
               if (participantData?.gameEndedAt && gameData?.startedAt) {
-                // 確保使用的都是正確的時間戳記
                 const startedAtMillis = gameData.startedAt.toMillis();
                 const gameEndedAtMillis =
                   participantData.gameEndedAt.toMillis();
 
-                // 確保 endedAt 比 startedAt 晚
                 if (gameEndedAtMillis >= startedAtMillis) {
                   timeUsed = gameEndedAtMillis - startedAtMillis;
                 } else {
@@ -437,7 +431,7 @@ const GameEndModal = ({
               };
             })
           );
-          // 排序邏輯：根據分數（由高到低）和時間（由少到多）
+
           playerDetails.sort((a, b) => {
             if (b.currentScore === a.currentScore) {
               return a.timeUsed - b.timeUsed;
@@ -457,7 +451,6 @@ const GameEndModal = ({
     }
   }, [gameStatus, gameData]);
 
-  // 獲取當前玩家的 timeUsed
   useEffect(() => {
     if (isGameOver && participantId && gameData?.startedAt) {
       const fetchCurrentUserTime = async () => {
@@ -466,7 +459,6 @@ const GameEndModal = ({
 
           let timeUsed = null;
           if (participantData?.gameEndedAt && gameData?.startedAt) {
-            // 確保使用的都是正確的時間戳記
             const startedAtMillis = gameData.startedAt.toMillis
               ? gameData.startedAt.toMillis()
               : gameData.startedAt;
@@ -474,7 +466,6 @@ const GameEndModal = ({
               ? participantData.gameEndedAt.toMillis()
               : participantData.gameEndedAt;
 
-            // 確保 endedAt 比 startedAt 晚
             if (gameEndedAtMillis >= startedAtMillis) {
               timeUsed = gameEndedAtMillis - startedAtMillis;
             } else {
@@ -494,14 +485,14 @@ const GameEndModal = ({
   }, [isGameOver, gameData.startedAt, participantId]);
 
   const formatTime = (time) => {
-    const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
-    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
+    const minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");
     return `${minutes} 分 ${seconds} 秒`;
   };
 
   const formatTimeLimit = (timeLimitInSeconds) => {
-    const minutes = Math.floor(timeLimitInSeconds / 60); // 計算分鐘
-    const seconds = timeLimitInSeconds % 60; // 計算剩餘的秒數
+    const minutes = Math.floor(timeLimitInSeconds / 60);
+    const seconds = timeLimitInSeconds % 60;
     return `${minutes} 分 ${seconds} 秒`;
   };
 
@@ -619,7 +610,6 @@ const RankingTitle = styled.h1`
     height: 100%;
     background-color: #d99514;
 
-    /* position ribbon ends behind and slightly lower */
     position: absolute;
     top: 16px;
     z-index: -1;
@@ -637,7 +627,7 @@ const RankingTitle = styled.h1`
 
   &::after {
     right: -60px;
-    transform: scaleX(-1); /* flip horizontally */
+    transform: scaleX(-1);
   }
 `;
 

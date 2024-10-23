@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import { updateQuiz } from "../../utils/api";
 
 function Matching({ quizData, cardsData, template, style }) {
@@ -18,15 +18,11 @@ function Matching({ quizData, cardsData, template, style }) {
       const pairNumbers = quizData.questionQty;
       const shuffledCards = [...cardsData].sort(() => 0.5 - Math.random());
       const selectedPairs = shuffledCards.slice(0, pairNumbers);
-      //把一組卡牌拆分成兩組
       const cardPairs = selectedPairs.flatMap((card) => [
         { ...card, side: "front" },
         { ...card, side: "back" },
       ]);
-
-      // 打亂正反面後的卡牌對
       const randomizedCardPairs = cardPairs.sort(() => 0.5 - Math.random());
-
       setRandomCardPairs(randomizedCardPairs);
     }
   }, [quizData, cardsData]);
@@ -49,7 +45,6 @@ function Matching({ quizData, cardsData, template, style }) {
     if (
       matchedPairs.length === randomCardPairs.length &&
       randomCardPairs.length > 0
-      //避免在初始化的時候就成立
     ) {
       setIsGameOver(true);
       const timeUsed = timer;
@@ -69,8 +64,6 @@ function Matching({ quizData, cardsData, template, style }) {
     if (selectedPairs.length === 2) {
       const [firstCard, secondCard] = selectedPairs;
       setAttempts((prev) => prev + 1);
-
-      // 延遲取消選取狀態
       setTimeout(() => {
         if (firstCard.cardId === secondCard.cardId) {
           setMatchedPairs((prevMatchedPairs) => [
@@ -87,23 +80,20 @@ function Matching({ quizData, cardsData, template, style }) {
           setSelectedPairs([]);
           setPairStatus(null);
         }, 500);
-      }, 500); // 500ms 延遲，確保選中動畫能顯示
+      }, 500);
     }
   }, [selectedPairs]);
 
   const formatTime = (time) => {
-    const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
-    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
+    const minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");
     const milliseconds = String(Math.floor((time % 1000) / 100));
     return `${minutes}:${seconds}.${milliseconds}`;
   };
 
   const handleSelect = (card) => {
     const newSelection = [...selectedPairs];
-
-    // 檢查是否已經選中了這張卡片
     if (isCardSelected(card)) {
-      // 如果點選重複的第一張卡片，取消選擇
       setSelectedPairs([]);
     } else {
       if (newSelection.length < 2) {
@@ -261,45 +251,6 @@ const FieldContainer = styled.div`
   user-select: none;
 `;
 
-const getResponsiveFontSize = (fontSizeValue) => {
-  let sizes;
-
-  switch (fontSizeValue) {
-    case "xs":
-      sizes = { small: "8px", medium: "10px", large: "12px" };
-      break;
-    case "s":
-      sizes = { small: "12px", medium: "14px", large: "18px" };
-      break;
-    case "m":
-      sizes = { small: "16px", medium: "18px", large: "24px" };
-      break;
-    case "l":
-      sizes = { small: "20px", medium: "22px", large: "30px" };
-      break;
-    case "xl":
-      sizes = { small: "24px", medium: "26px", large: "36px" };
-      break;
-    case "2xl":
-      sizes = { small: "28px", medium: "30px", large: "42px" };
-      break;
-    default:
-      sizes = { small: "16px", medium: "20px", large: "24px" };
-  }
-
-  return css`
-    font-size: ${sizes.small};
-
-    @media (min-width: 640px) {
-      font-size: ${sizes.medium};
-    }
-
-    @media (min-width: 1024px) {
-      font-size: ${sizes.large};
-    }
-  `;
-};
-
 const Image = styled.img`
   width: 100%;
   height: 100%;
@@ -379,8 +330,8 @@ Matching.propTypes = {
 
 const QuizResultModal = ({ timer, accuracy, cardSetId }) => {
   const formatTime = (time) => {
-    const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
-    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
+    const minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");
     const milliseconds = String(Math.floor((time % 1000) / 100));
     return `${minutes}:${seconds}.${milliseconds}`;
   };
@@ -471,14 +422,14 @@ const ReviewButton = styled.div`
   background-color: #adbce5;
   cursor: pointer;
   user-select: none;
-  color: white; // 文字顏色設為白色
+  color: white;
   font-size: 16px;
   font-weight: 500;
-  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   &:hover {
-    background-color: #889ccd; // 當懸停時，改變背景顏色
-    color: #ffffff; // 保持白色字體
+    background-color: #889ccd;
+    color: #ffffff;
   }
 `;
 

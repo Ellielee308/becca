@@ -32,7 +32,6 @@ function UserCardSets() {
   useEffect(() => {
     const fetchCardSets = async () => {
       if (currentUserId) {
-        // 獲取卡牌組和樣式資料
         const cardSets = await getUserAllCardSets(currentUserId);
         const sortedCardSets = cardSets.sort((a, b) => {
           if (a.createdAt && b.createdAt) {
@@ -68,21 +67,15 @@ function UserCardSets() {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // 如果點擊發生在選單或按鈕內部，則不關閉
       if (
         event.target.closest(".more-actions-container") ||
         event.target.closest(".sub-menu")
       ) {
         return;
       }
-      // 如果點擊發生在外部，關閉選單
       setVisibleMenuCardSetId(null);
     };
-
-    // 監聽 mousedown 事件來捕捉點擊
     document.addEventListener("mousedown", handleClickOutside);
-
-    // 清除監聽器
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -92,7 +85,6 @@ function UserCardSets() {
     const copyText = `https://becca-24.web.app/cardset/${cardSetId}`;
 
     if (navigator.clipboard && window.isSecureContext) {
-      // 使用 Clipboard API
       navigator.clipboard
         .writeText(copyText)
         .then(() => {
@@ -100,7 +92,7 @@ function UserCardSets() {
         })
         .catch((error) => {
           console.error("無法複製分享連結：", error);
-          message.error("複製失敗，請重試"); // 顯示錯誤信息
+          message.error("複製失敗，請重試");
         });
     } else {
       console.error("無法複製分享連結：沒有clipboard API");
@@ -119,20 +111,20 @@ function UserCardSets() {
       centered: true,
       okButtonProps: {
         style: {
-          backgroundColor: "#3d5a80", // 自定義確定按鈕顏色
+          backgroundColor: "#3d5a80",
           color: "white",
-          outline: "none", // 移除 outline
-          border: "none", // 移除按鈕邊框
-          boxShadow: "none", // 禁用按鈕陰影
+          outline: "none",
+          border: "none",
+          boxShadow: "none",
         },
       },
       cancelButtonProps: {
         style: {
-          backgroundColor: "#c9c5c5", // 自定義取消按鈕顏色
+          backgroundColor: "#c9c5c5",
           color: "white",
-          outline: "none", // 移除 outline
-          border: "none", // 移除按鈕邊框
-          boxShadow: "none", // 禁用按鈕陰影
+          outline: "none",
+          border: "none",
+          boxShadow: "none",
         },
       },
       onOk: async () => {
@@ -147,7 +139,7 @@ function UserCardSets() {
           console.error("刪除卡牌組失敗：", error);
           message.error("刪除卡牌失敗，請稍後再試！");
         } finally {
-          setIsDeleting(false); // 無論成功與否都重置刪除狀態
+          setIsDeleting(false);
         }
       },
     });
@@ -416,11 +408,11 @@ const LabelName = styled.span`
   white-space: pre;
   color: gray;
   font-size: 14px;
-  cursor: pointer; // 指針變成手型
-  transition: color 0.3s ease; // 增加過渡效果
+  cursor: pointer;
+  transition: color 0.3s ease;
 
   &:hover {
-    color: #3d5a80; // 修改為更顯眼的顏色，與網站主題一致
+    color: #3d5a80;
   }
 `;
 
@@ -559,18 +551,6 @@ const PrivateIcon = () => (
     <path d="M3.53 2.47a.75.75 0 0 0-1.06 1.06l18 18a.75.75 0 1 0 1.06-1.06l-18-18ZM22.676 12.553a11.249 11.249 0 0 1-2.631 4.31l-3.099-3.099a5.25 5.25 0 0 0-6.71-6.71L7.759 4.577a11.217 11.217 0 0 1 4.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113Z" />
     <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0 1 15.75 12ZM12.53 15.713l-4.243-4.244a3.75 3.75 0 0 0 4.244 4.243Z" />
     <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 0 0-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 0 1 6.75 12Z" />
-  </svg>
-);
-
-const BookIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    width="18"
-    height="18"
-  >
-    <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
   </svg>
 );
 

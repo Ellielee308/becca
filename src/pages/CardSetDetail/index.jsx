@@ -713,7 +713,6 @@ const Wrapper = styled.div`
   margin: 0 auto;
   padding: 20px 20px;
   max-width: 1160px;
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
   border-radius: 8px;
   display: flex;
   flex-direction: column;

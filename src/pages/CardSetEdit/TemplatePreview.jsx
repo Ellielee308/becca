@@ -134,7 +134,7 @@ const TextInput = styled.input`
 `;
 
 const TextWrapper = styled.div`
-  min-height: 30px; /* 最小高度 */
+  min-height: 30px;
   border: 1px solid #c1c0c0;
   border-radius: 4px;
   padding: 0 4px;

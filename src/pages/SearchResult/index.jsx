@@ -13,7 +13,6 @@ function SearchResult() {
   }, []);
 
   useEffect(() => {
-    // 每次開始新搜尋時，重置搜尋結果和 loading 狀態
     setSearchResults([]);
     setLoading(true);
 
@@ -21,7 +20,6 @@ function SearchResult() {
       try {
         const searchResults = await search(keyword);
         if (searchResults.length > 0) {
-          // 獲取每個 cardSet 中的 userId，並通過 getUserDocument 獲取對應的 username 和 profilePicture
           const searchResultsWithUserDetails = await Promise.all(
             searchResults.map(async (cardSet) => {
               const userDoc = await getUserDocument(cardSet.userId);
@@ -44,7 +42,7 @@ function SearchResult() {
     fetchSearchResult();
   }, [keyword]);
 
-  if (loading) return <div>Loading...</div>; // 搜尋進行中顯示 loading 畫面
+  if (loading) return <div>Loading...</div>;
   return (
     <Background>
       <Wrapper>
@@ -143,11 +141,10 @@ const CardSetWrapper = styled.div`
   background-color: rgb(250, 247, 245);
   border-radius: 8px;
   border: 1px solid #e6e3e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 柔和的陰影 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
   &:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); /* Hover 時陰影增強 */
-    /* transform: translateY(-4px); 提升視覺上的立體感 */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -204,7 +201,7 @@ const Username = styled.p`
 const Number = styled.div`
   margin-left: auto;
   background-color: #3d5a80;
-  border-radius: 50px; /* 使其更圓潤 */
+  border-radius: 50px;
   color: #ffffff;
   padding: 6px 14px;
   font-size: 14px;
@@ -222,24 +219,6 @@ const LabelIcon = () => (
       fillRule="evenodd"
       d="M5.25 2.25a3 3 0 0 0-3 3v4.318a3 3 0 0 0 .879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 0 0 5.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 0 0-2.122-.879H5.25ZM6.375 7.5a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z"
       clipRule="evenodd"
-    />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    width="20"
-    height="20"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
     />
   </svg>
 );

@@ -47,7 +47,6 @@ function Matching({
             ];
             const newScore = newMatchedPairs.length / 2;
 
-            // 在狀態更新後更新 Firestore
             setTimeout(() => {
               updateFirestore(newScore);
             }, 0);
@@ -97,9 +96,7 @@ function Matching({
   const handleSelect = (card) => {
     const newSelection = [...selectedPairs];
 
-    // 檢查是否已經選中了這張卡片
     if (isCardSelected(card)) {
-      // 如果點選重複的第一張卡片，取消選擇
       setSelectedPairs([]);
     } else {
       if (newSelection.length < 2) {
@@ -127,7 +124,7 @@ function Matching({
     if (isMatched) return "green";
     if (isSelected && pairStatus === "success") return "green";
     if (isSelected && pairStatus === "fail") return "red";
-    if (isSelected) return "#4e98dd"; // 選中狀態，藍色
+    if (isSelected) return "#4e98dd";
     return "none";
   };
 
@@ -342,15 +339,11 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
                 player.participantId
               );
 
-              // 計算 timeUsed，如果玩家未完成遊戲 (gameEndedAt 為 null)，則 timeUsed 為 null
               let timeUsed = null;
               if (participantData?.gameEndedAt && gameData?.startedAt) {
-                // 確保使用的都是正確的時間戳記
                 const startedAtMillis = gameData.startedAt.toMillis();
                 const gameEndedAtMillis =
                   participantData.gameEndedAt.toMillis();
-
-                // 確保 endedAt 比 startedAt 晚
                 if (gameEndedAtMillis >= startedAtMillis) {
                   timeUsed = gameEndedAtMillis - startedAtMillis;
                 } else {
@@ -368,22 +361,14 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
             })
           );
 
-          // 排名邏輯
           participantsData.sort((a, b) => {
-            // 排序已完成遊戲的玩家，timeUsed 小的排在前面
             if (a.timeUsed !== null && b.timeUsed !== null) {
               return a.timeUsed - b.timeUsed;
-            }
-            // 如果 a 已完成，b 未完成，a 優先
-            else if (a.timeUsed !== null) {
+            } else if (a.timeUsed !== null) {
               return -1;
-            }
-            // 如果 b 已完成，a 未完成，b 優先
-            else if (b.timeUsed !== null) {
+            } else if (b.timeUsed !== null) {
               return 1;
-            }
-            // 兩者均未完成，按 currentScore 降序排序
-            else {
+            } else {
               return b.currentScore - a.currentScore;
             }
           });
@@ -407,7 +392,6 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
 
           let timeUsed = null;
           if (participantData?.gameEndedAt && gameData.startedAt) {
-            // 確保使用的都是正確的時間戳記
             const startedAtMillis = gameData.startedAt.toMillis
               ? gameData.startedAt.toMillis()
               : gameData.startedAt;
@@ -415,7 +399,6 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
               ? participantData.gameEndedAt.toMillis()
               : participantData.gameEndedAt;
 
-            // 確保 endedAt 比 startedAt 晚
             if (gameEndedAtMillis >= startedAtMillis) {
               timeUsed = gameEndedAtMillis - startedAtMillis;
             } else {
@@ -435,14 +418,14 @@ const GameEndModal = ({ gameStatus, gameData, participantId, isGameOver }) => {
   }, [isGameOver, gameData, participantId]);
 
   const formatTime = (time) => {
-    const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
-    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
+    const minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");
     return `${minutes} 分 ${seconds} 秒`;
   };
 
   const formatTimeLimit = (timeLimitInSeconds) => {
-    const minutes = Math.floor(timeLimitInSeconds / 60); // 計算分鐘
-    const seconds = timeLimitInSeconds % 60; // 計算剩餘的秒數
+    const minutes = Math.floor(timeLimitInSeconds / 60);
+    const seconds = timeLimitInSeconds % 60;
     return `${minutes} 分 ${seconds} 秒`;
   };
 
@@ -559,12 +542,9 @@ const RankingTitle = styled.h1`
     width: 80px;
     height: 100%;
     background-color: #d99514;
-
-    /* position ribbon ends behind and slightly lower */
     position: absolute;
     top: 16px;
     z-index: -1;
-
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 25% 50%);
     background-image: linear-gradient(45deg, transparent 50%, #b87b0e 50%);
     background-size: 20px 20px;
@@ -578,17 +558,9 @@ const RankingTitle = styled.h1`
 
   &::after {
     right: -60px;
-    transform: scaleX(-1); /* flip horizontally */
+    transform: scaleX(-1);
   }
 `;
-// const RankingTitle = styled.h2`
-//   font-size: 20px;
-//   font-family: "Noto Sans TC", sans-serif;
-//   border-bottom: 2px solid #e0e0e0;
-//   padding-bottom: 10px;
-//   font-weight: 500;
-//   color: #3d5a80;
-// `;
 
 const RankingList = styled.ul`
   margin-top: 16px;

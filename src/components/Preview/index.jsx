@@ -250,7 +250,7 @@ const BackCard = styled.div`
         return "rotateY(180deg)";
       case "fade":
         return "none";
-      default: // "vertical"
+      default:
         return "rotateX(180deg)";
     }
   }};

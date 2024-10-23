@@ -50,14 +50,12 @@ function Home() {
 
   const handleScroll = (direction) => {
     if (carouselRef.current) {
-      const scrollAmount = 300; // 每次滾動的距離
+      const scrollAmount = 300;
       const container = carouselRef.current;
 
-      // 無限滾動的實現，判斷滾動後的位置並重複內容
       if (direction === "left") {
         container.scrollLeft -= scrollAmount;
         if (container.scrollLeft <= 0) {
-          // 當到達最左邊時，滾動到最右邊
           container.scrollLeft = container.scrollWidth;
         }
       } else {
@@ -66,7 +64,6 @@ function Home() {
           container.scrollLeft + container.offsetWidth >=
           container.scrollWidth
         ) {
-          // 當到達最右邊時，滾動到最左邊
           container.scrollLeft = 0;
         }
       }
@@ -79,7 +76,6 @@ function Home() {
         const cardSetPromises = [];
         const languageKeys = Object.keys(exploreData);
 
-        // 加載所有語言的卡牌組
         languageKeys.forEach((language) => {
           const ids = exploreData[language];
           cardSetPromises.push(
@@ -89,7 +85,6 @@ function Home() {
 
         const cardSetsByLanguage = await Promise.all(cardSetPromises);
 
-        // 構建卡牌組和樣式的對應關係
         const allCardSets = {};
         const allStyles = {};
 
@@ -98,7 +93,6 @@ function Home() {
           const cardSets = cardSetsByLanguage[i];
           allCardSets[language] = cardSets;
 
-          // 加載對應樣式
           const styles = await Promise.all(
             cardSets.map((cardSet) => getStyle(cardSet.styleId))
           );
@@ -113,8 +107,6 @@ function Home() {
 
         setAllCardSets(allCardSets);
         setAllStyles(allStyles);
-
-        // 預設顯示英語的卡牌組和樣式
         setCardSetData(allCardSets["english"]);
         setStyleData(allStyles["english"]);
       } catch (error) {
@@ -178,9 +170,9 @@ function Home() {
             <CallToActionButton
               onClick={() => {
                 if (user) {
-                  navigate("/cardset/new"); // 如果已登入，導航到創建卡牌組的頁面
+                  navigate("/cardset/new");
                 } else {
-                  setShowLoginModal(true); // 如果未登入，顯示登入 Modal
+                  setShowLoginModal(true);
                 }
               }}
             >
@@ -270,45 +262,41 @@ function Home() {
           <CardSetWrapper ref={carouselRef}>
             {cardSetData &&
               styleData &&
-              [...Array(3)].map(
-                (
-                  _,
-                  i // 複製三次數據以實現無縫滾動
-                ) =>
-                  cardSetData.map((cardSet) => {
-                    return (
-                      <CardContainer
-                        key={`${cardSet.cardSetId}-${i}`}
-                        to={`/cardset/${cardSet.cardSetId}`}
-                      >
-                        <CardWrapper $cardSetStyle={styleData[cardSet.styleId]}>
-                          {cardSet.title}
-                        </CardWrapper>
-                        <CardSetDetailsContainer>
-                          <CardSetDescription>
-                            {cardSet.description}
-                          </CardSetDescription>
-                          <LabelWrapper>
-                            <LabelIconContainer>
-                              <LabelIcon />
-                            </LabelIconContainer>
-                            <LabelNameContainer>
-                              {cardSet.labels.length > 0 ? (
-                                cardSet.labels.map((label, index) => (
-                                  <LabelName key={label.labelId}>
-                                    {label.name}
-                                    {index < cardSet.labels.length - 1 && ", "}
-                                  </LabelName>
-                                ))
-                              ) : (
-                                <NoLabelName>無標籤</NoLabelName>
-                              )}
-                            </LabelNameContainer>
-                          </LabelWrapper>
-                        </CardSetDetailsContainer>
-                      </CardContainer>
-                    );
-                  })
+              [...Array(3)].map((_, i) =>
+                cardSetData.map((cardSet) => {
+                  return (
+                    <CardContainer
+                      key={`${cardSet.cardSetId}-${i}`}
+                      to={`/cardset/${cardSet.cardSetId}`}
+                    >
+                      <CardWrapper $cardSetStyle={styleData[cardSet.styleId]}>
+                        {cardSet.title}
+                      </CardWrapper>
+                      <CardSetDetailsContainer>
+                        <CardSetDescription>
+                          {cardSet.description}
+                        </CardSetDescription>
+                        <LabelWrapper>
+                          <LabelIconContainer>
+                            <LabelIcon />
+                          </LabelIconContainer>
+                          <LabelNameContainer>
+                            {cardSet.labels.length > 0 ? (
+                              cardSet.labels.map((label, index) => (
+                                <LabelName key={label.labelId}>
+                                  {label.name}
+                                  {index < cardSet.labels.length - 1 && ", "}
+                                </LabelName>
+                              ))
+                            ) : (
+                              <NoLabelName>無標籤</NoLabelName>
+                            )}
+                          </LabelNameContainer>
+                        </LabelWrapper>
+                      </CardSetDetailsContainer>
+                    </CardContainer>
+                  );
+                })
               )}
           </CardSetWrapper>
           <ScrollButton onClick={() => handleScroll("right")}>
@@ -538,30 +526,9 @@ const FeatureDescription = styled.p`
   padding: 16px 24px 16px 24px;
   color: #22254c;
   text-align: justify;
-  line-height: 1.7; /* 增加行距 */
-  letter-spacing: 0.04em; /* 增加字距 */
+  line-height: 1.7;
+  letter-spacing: 0.04em;
 `;
-
-// const ExploreTitle = styled.div`
-//   position: relative;
-//   font-size: 18px;
-//   font-family: "Noto Sans TC", sans-serif;
-//   font-weight: 400;
-//   color: #22254c;
-//   margin-left: 20px;
-//   margin-top: 16px;
-//   &::before {
-//     content: "";
-//     position: absolute;
-//     left: -20px; /* 控制垂直線距離文本的水平距離 */
-//     top: 50%;
-//     transform: translateY(-50%);
-//     width: 4px; /* 控制垂直線的寬度 */
-//     height: 28px; /* 控制垂直線的高度 */
-//     background-color: #3d5a80;
-//     border-radius: 2px;
-//   }
-// `;
 
 const CarouselButtonGroup = styled.div`
   position: relative;
@@ -571,11 +538,11 @@ const CarouselButtonGroup = styled.div`
   &::before {
     content: "";
     position: absolute;
-    left: -20px; /* 控制垂直線距離文本的水平距離 */
+    left: -20px;
     top: 50%;
     transform: translateY(-50%);
-    width: 4px; /* 控制垂直線的寬度 */
-    height: 28px; /* 控制垂直線的高度 */
+    width: 4px;
+    height: 28px;
     background-color: #3d5a80;
     border-radius: 2px;
   }
@@ -632,7 +599,7 @@ const ScrollButton = styled.button`
   font-size: 20px;
   cursor: pointer;
   z-index: 2;
-  position: absolute; /* 設置按鈕為絕對定位 */
+  position: absolute;
   top: 50%;
   transform: translateY(-50%);
   transition: background-color 0.3s ease;
@@ -663,8 +630,8 @@ const CardSetWrapper = styled.div`
   scroll-behavior: smooth;
   margin: 20px 60px;
   padding: 20px 16px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 
   &::-webkit-scrollbar {
     display: none;
@@ -746,11 +713,11 @@ const LabelName = styled.span`
   white-space: pre;
   color: gray;
   font-size: 14px;
-  cursor: pointer; // 指針變成手型
-  transition: color 0.3s ease; // 增加過渡效果
+  cursor: pointer;
+  transition: color 0.3s ease;
 
   &:hover {
-    color: #3d5a80; // 修改為更顯眼的顏色，與網站主題一致
+    color: #3d5a80;
   }
 `;
 const NoLabelName = styled.span`
@@ -824,5 +791,5 @@ const SkeletonButtonWrapper = styled.div`
   display: flex;
   flex-direction: row;
   gap: 30px;
-  width: 100%; // 確保寬度被撐開
+  width: 100%;
 `;

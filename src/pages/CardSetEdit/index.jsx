@@ -39,7 +39,7 @@ function CardSetEdit() {
   const [selectedStyle, setSelectedStyle] = useState({});
   const [template, setTemplate] = useState({});
   const [cardContent, setCardContent] = useState([]);
-  const [deletedCards, setDeletedCards] = useState([]); // 存儲要刪除的卡片 ID
+  const [deletedCards, setDeletedCards] = useState([]);
   const [showNewStyleModal, setShowNewStyleModal] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
@@ -100,9 +100,8 @@ function CardSetEdit() {
             value: userCardStyle.styleId,
             label: userCardStyle.styleName,
           }));
-          // 將預設樣式排在第一個
           cardStyleOptions.sort((a, b) => {
-            if (a.value === defaultStyleId) return -1; // 預設樣式排在第一
+            if (a.value === defaultStyleId) return -1;
             if (b.value === defaultStyleId) return 1;
             return 0;
           });
@@ -137,7 +136,7 @@ function CardSetEdit() {
 
   const handleStyleChange = (selectedOption) => {
     if (selectedOption.value === "newStyle") {
-      setShowNewStyleModal(true); // 當選擇「新增樣式…」時顯示 Modal
+      setShowNewStyleModal(true);
     } else {
       setSelectedStyleOption(selectedOption);
       const selectedStyleObject = allStyles.find(
@@ -169,7 +168,6 @@ function CardSetEdit() {
       return;
     }
 
-    // 檢查是否含有特殊字元（允許字母、數字、空格，以及其他語言字符）
     const specialCharRegex = /^[\p{L}\p{N}\s]+$/u;
     if (!specialCharRegex.test(newLabel)) {
       messageApi.error("標籤名稱含有不允許的特殊字元，創建失敗");
@@ -194,7 +192,6 @@ function CardSetEdit() {
     }
   };
 
-  // 處理第一步提交
   const handleFirstStepSubmit = (event) => {
     event.preventDefault();
     let newInvalidFields = [];
@@ -223,21 +220,18 @@ function CardSetEdit() {
 
     setInvalidFields(newInvalidFields);
     if (newInvalidFields.length === 0) {
-      setStep(1); // 若沒有錯誤，進入第二步
+      setStep(1);
     }
   };
 
-  // 處理第二步（卡片內容）提交
   const handleFinalSubmit = async (event) => {
     event.preventDefault();
 
-    // 檢查卡片內容的有效性
     if (cardContent.length < 1) {
       messageApi.warning("字卡至少需要一張！");
       return;
     }
 
-    // 檢查每張卡片的必填欄位
     for (let i = 0; i < template.frontFields.length; i++) {
       if (template.frontFields[i].required === true) {
         for (let y = 0; y < cardContent.length; y++) {
@@ -266,11 +260,10 @@ function CardSetEdit() {
       }
     }
 
-    // 最終提交邏輯
     try {
       messageApi.loading({
         content: "提交中，請稍候...",
-        duration: 0, // 持續顯示，直到手動關閉
+        duration: 0,
       });
       await updateCardSetWithNewCards(
         cardSetData,
@@ -278,12 +271,12 @@ function CardSetEdit() {
         user.userId,
         deletedCards
       );
-      messageApi.destroy(); // 隱藏 loading
+      messageApi.destroy();
       messageApi.success("卡牌組編輯成功！");
-      setStep(2); // 移動到第 3 步顯示結果
+      setStep(2);
     } catch (error) {
       console.error("更新過程出現錯誤：", error);
-      messageApi.destroy(); // 隱藏 loading
+      messageApi.destroy();
       messageApi.error("編輯失敗，請重試。");
     }
   };
@@ -655,7 +648,6 @@ const Wrapper = styled.div`
   margin: 0 auto;
   padding: 30px 20px;
   max-width: 1160px;
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
   border: 1px solid #e6e3e1;
   border-radius: 8px;
   background-color: white;
@@ -755,21 +747,11 @@ const Submit = styled.input`
   line-height: 16px;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
   color: white;
-  /* background: linear-gradient(to right, #63b3ed, #4299e1); 漸層的天藍色 */
   background-color: #3d5a80;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-
-  /* &:hover {
-    background-color: #3182ce;
-  } */
-
-  /* &:active {
-    background: linear-gradient(to right, #3182ce, #2b6cb0); 
-    transform: translateY(2px); 
-  } */
 `;
 
 const selectionStyle = (isInvalid) => ({

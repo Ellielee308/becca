@@ -17,7 +17,7 @@ function UserProfile() {
   const [cardSetCount, setCardSetCount] = useState(null);
   const [completedQuizCount, setCompletedQuizCount] = useState(null);
   const [activeDays, setActiveDays] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // 控制 Modal 的狀態
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProfilePicture, setNewProfilePicture] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [isEditingName, setIsEditingName] = useState(false);
@@ -64,21 +64,20 @@ function UserProfile() {
   };
 
   const handleCancel = () => {
-    handleCloseModal(); // 取消時清空圖片並關閉 modal
+    handleCloseModal();
   };
+
   const handleSaveProfilePicture = async () => {
     if (newProfilePicture) {
       try {
-        // 上傳新頭貼並獲取下載 URL
         const updatedProfilePictureURL = await updateProfilePicture(
           user.userId,
           newProfilePicture
         );
 
-        // 更新本地的 user 狀態，使頭像立即顯示新的圖片
         setUser((prevUser) => ({
           ...prevUser,
-          profilePicture: updatedProfilePictureURL, // 更新狀態中的頭像 URL
+          profilePicture: updatedProfilePictureURL,
         }));
 
         message.success("大頭貼更新成功！");
@@ -91,20 +90,19 @@ function UserProfile() {
   };
 
   const handleEditClick = () => {
-    setIsEditingName(true); // 顯示編輯模式
+    setIsEditingName(true);
   };
 
   const handleSaveUsername = async () => {
     if (editedUsername && editedUsername !== user.username) {
       try {
-        // 假設有 updateUsername 函數來更新用戶名
         await updateUsername(user.userId, editedUsername);
         setUser((prevUser) => ({
           ...prevUser,
-          username: editedUsername, // 更新本地狀態中的用戶名
+          username: editedUsername,
         }));
         message.success("用戶名已成功更新！");
-        setIsEditingName(false); // 保存後退出編輯模式
+        setIsEditingName(false);
       } catch (error) {
         console.error("更新用戶名失敗", error);
         message.error("更新用戶名失敗，請稍後再試！");
@@ -113,8 +111,8 @@ function UserProfile() {
   };
 
   const handleCancelEdit = () => {
-    setIsEditingName(false); // 取消編輯模式
-    setEditedUsername(user.username); // 重置用戶名
+    setIsEditingName(false);
+    setEditedUsername(user.username);
   };
 
   if (!user || loading || cardSetCount === null || completedQuizCount === null)
@@ -219,7 +217,6 @@ function UserProfile() {
             </AccountInfo>
           </ProfileInfoWrapper>
         </ProfileSection>
-        {/* Modal 彈窗 */}
         {isModalOpen && (
           <ModalOverlay onClick={handleCloseModal}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -351,7 +348,7 @@ const ProfilePicture = styled.img`
   width: 160px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #d3d3d3; // 添加灰色框線
+  border: 2px solid #d3d3d3;
 `;
 
 const AccountInfo = styled.div`
@@ -448,13 +445,13 @@ const CalendarSection = styled.div`
 `;
 
 const EditProfilePictureIcon = styled.div`
-  position: absolute; /* 確保它相對於父元素（頭像容器）進行定位 */
-  bottom: 5%; /* 將圖標移動到容器的底部 */
-  right: 5%; /* 將圖標移動到容器的右側 */
-  background-color: white; /* 讓圖標背景顯示白色，讓其不被頭像的背景顏色覆蓋 */
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  background-color: white;
   padding: 6px;
   border-radius: 50%;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15); /* 添加陰影讓按鈕更明顯 */
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15);
   cursor: pointer;
 `;
 const EditIcon = () => (
@@ -469,7 +466,6 @@ const EditIcon = () => (
   </svg>
 );
 
-/* Modal 相關樣式 */
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -631,7 +627,6 @@ const CalendarWrapper = styled.div`
     height: 360px;
     background-color: #f9f9f9;
     border-radius: 12px;
-    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
     padding: 20px;
     border: none;
     display: flex;
@@ -663,17 +658,15 @@ const CalendarWrapper = styled.div`
     font-size: 18px;
     color: #3d5a80;
     cursor: default !important;
-    pointer-events: none; /* 添加這行來禁用所有點擊事件 */
-    user-select: none; /* 防止文字被選中 */
+    pointer-events: none;
+    user-select: none;
   }
 
-  /* 確保標題按鈕也完全禁用 */
   .react-calendar__navigation__label > button {
     cursor: default !important;
     pointer-events: none;
   }
 
-  /* 禁用月份視圖的點擊 */
   .react-calendar__year-view__months__month {
     pointer-events: none !important;
     cursor: default !important;
@@ -689,21 +682,19 @@ const CalendarWrapper = styled.div`
 
   .react-calendar__tile {
     max-width: 100% !important;
-    aspect-ratio: 1; /* 保持 1:1 比例，確保日期格子為正方形 */
+    aspect-ratio: 1;
     background: none;
     text-align: center;
     display: flex;
-    justify-content: center; /* 水平居中 */
-    align-items: center; /* 垂直居中 */
+    justify-content: center;
+    align-items: center;
     padding: 0;
-    font-size: 14px; /* 日期字體大小 */
-    /* border-radius: 50%; */
+    font-size: 14px;
     border: 1px solid transparent;
     pointer-events: none;
     font-family: "Noto Sans TC", sans-serif;
   }
 
-  /* 禁用 hover 和選中效果 */
   .react-calendar__tile:enabled:hover,
   .react-calendar__tile:enabled:focus {
     cursor: default;
@@ -714,7 +705,7 @@ const CalendarWrapper = styled.div`
     background-color: transparent;
     outline: none;
   }
-  /* 活躍日期 */
+
   .highlight {
     background-color: #00b4d8;
     color: white !important;
@@ -741,7 +732,6 @@ const CalendarWrapper = styled.div`
     font-family: "Noto Sans TC", sans-serif;
   }
 
-  /* 改進月份切換按鈕的樣式 */
   .react-calendar__navigation button {
     background-color: none;
     padding: 10px;
@@ -759,7 +749,7 @@ const CalendarWrapper = styled.div`
   .react-calendar__navigation button {
     background: transparent;
   }
-  /* 月份標題樣式 */
+
   .react-calendar__navigation__label {
     font-weight: bold;
     font-size: 18px;
@@ -767,14 +757,13 @@ const CalendarWrapper = styled.div`
     cursor: not-allowed;
   }
 
-  /* 週數和日期保持一致 */
   .react-calendar__month-view__weekdays {
     display: none !important;
   }
 
   .react-calendar__month-view__days {
     display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 保持 7 列的日期結構 */
+    grid-template-columns: repeat(7, 1fr);
   }
   .react-calendar__navigation__next2-button {
     display: none;
@@ -789,7 +778,6 @@ const CalendarWrapper = styled.div`
   .highlight {
     background-color: #00b4d8;
     color: white !important;
-    /* border-radius: 50%; */
   }
 
   .highlight:hover {
@@ -799,10 +787,8 @@ const CalendarWrapper = styled.div`
   .inactive {
     background-color: #e0e0e0 !important;
     color: black !important;
-    /* border-radius: 50%; */
   }
 
-  /* 非當前月份的日期樣式 */
   .other-month {
     color: #ccc !important;
     background: none !important;
@@ -814,22 +800,22 @@ const CalendarWrapper = styled.div`
   }
 
   .react-calendar__tile--now {
-    background: none !important; /* 移除背景色 */
-    color: #000 !important; /* 設置日期文字顏色 */
-    position: relative; /* 讓偽元素相對於父元素定位 */
+    background: none !important;
+    color: #000 !important;
+    position: relative;
   }
 
   .react-calendar__tile--now::after {
     content: "";
     position: absolute;
-    bottom: 3px; /* 控制點的位置，讓它靠近數字的下方 */
+    bottom: 3px;
     left: 50%;
     transform: translateX(-50%);
     width: 6px;
     height: 6px;
     background-color: #ff8a5b;
     border-radius: 50%;
-    z-index: 1; /* 確保偽元素在日期數字的後面 */
+    z-index: 1;
   }
 
   .react-calendar__navigation__label__labelText,

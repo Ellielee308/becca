@@ -5,8 +5,8 @@ import styled, { css } from "styled-components";
 import { updateQuiz } from "../../utils/api";
 
 const formatTime = (time) => {
-  const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
-  const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
+  const minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+  const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");
   const milliseconds = String(Math.floor((time % 1000) / 100));
   return `${minutes}:${seconds}.${milliseconds}`;
 };
@@ -21,7 +21,6 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
   const [correctAttempt, setCorrectAttempt] = useState(0);
   const [wrongCards, setWrongCards] = useState([]);
 
-  //Initialize questions
   useEffect(() => {
     if (quizData && cardsData.length > 0) {
       const questionNumber = quizData.questionQty;
@@ -61,7 +60,7 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
     } else {
       setWrongCards((prev) => [...prev, correctAnswer]);
     }
-    // 延遲進入下一個問題，並重置選擇狀態
+
     setTimeout(() => {
       if (currentQuestionNumber + 1 < quizQuestions.length) {
         setCurrentQuestionNumber(currentQuestionNumber + 1);
@@ -170,7 +169,7 @@ function MultipleChoices({ quizData, cardsData, template, style }) {
                       );
                     }
                   }
-                  return null; // 確保沒有返回 undefined
+                  return null;
                 })}
               </ChoiceCard>
             ))}
@@ -306,16 +305,14 @@ const ChoiceCard = styled.div`
   transition: box-shadow 0.3s ease, transform 0.3s ease, outline 0.3s ease;
   background-color: #fff;
 
-  /* 懸停效果 */
   &:hover {
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-    transform: translateY(-3px); /* 微微上升 */
+    transform: translateY(-3px);
   }
 
-  /* 點擊效果 */
   &:active {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    transform: scale(0.98); /* 輕微縮放效果 */
+    transform: scale(0.98);
   }
 `;
 
@@ -350,7 +347,7 @@ const getResponsiveFontSize = (fontSizeValue) => {
       sizes = { small: "28px", medium: "30px", large: "42px" };
       break;
     default:
-      sizes = { small: "16px", medium: "20px", large: "24px" }; // 默認大小
+      sizes = { small: "16px", medium: "20px", large: "24px" };
   }
 
   return css`
@@ -435,8 +432,8 @@ const QuizResultModal = ({
   template,
 }) => {
   const formatTime = (time) => {
-    const minutes = String(Math.floor(time / 60000)).padStart(2, "0"); // 分鐘
-    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0"); // 秒
+    const minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");
     const milliseconds = String(Math.floor((time % 1000) / 100));
     return `${minutes}:${seconds}.${milliseconds}`;
   };
@@ -587,14 +584,14 @@ const ReviewButton = styled.div`
   background-color: #adbce5;
   cursor: pointer;
   user-select: none;
-  color: white; // 文字顏色設為白色
+  color: white;
   font-size: 16px;
   font-weight: 500;
-  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   &:hover {
-    background-color: #889ccd; // 當懸停時，改變背景顏色
-    color: #ffffff; // 保持白色字體
+    background-color: #889ccd;
+    color: #ffffff;
   }
 `;
 
@@ -608,14 +605,14 @@ const LeaveButton = styled.div`
   background-color: #f59873;
   cursor: pointer;
   user-select: none;
-  color: #ffffff; // 文字顏色設為白色
+  color: #ffffff;
   font-size: 16px;
   font-weight: 500;
-  transition: background-color 0.3s ease, color 0.3s ease; // 平滑的過渡效果
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   &:hover {
-    background-color: #f57d51; // 當懸停時，改變背景顏色
-    color: #ffffff; // 保持白色字體
+    background-color: #f57d51;
+    color: #ffffff;
   }
 `;
 
@@ -677,15 +674,3 @@ const SideHeading = styled.p`
   margin-bottom: 12px;
   color: #696767;
 `;
-
-// const TextWrapper = styled.div`
-//   font-size: 16px;
-//   line-height: 30px;
-//   border-bottom: 1px solid #c0c5c5;
-// `;
-
-// const ImagePreview = styled.img`
-//   height: 80px;
-//   width: auto;
-//   margin: 0 auto;
-// `;
