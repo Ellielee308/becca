@@ -434,7 +434,7 @@ function CardSetDetail() {
                             <CardSetDetailShareIcon />
                             <SubMenuItemText>分享</SubMenuItemText>
                           </SubMenuItem>
-                          {user.userId === ownerData.userId && (
+                          {user && user.userId === ownerData.userId && (
                             <>
                               <SubMenuItem onClick={handleNavigateToEdit}>
                                 <CardSetDetailEditIcon />
