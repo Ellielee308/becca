@@ -1427,11 +1427,7 @@ function CardContent({ currentStyle, currentTemplate, currentCard }) {
   return (
     <CardViewWrapper onClick={handleFlip}>
       <FlipCard $isFlipped={isFlipped} $currentStyle={currentStyle}>
-        <FrontCard
-          $isFlipped={isFlipped}
-          $currentStyle={currentStyle}
-          currentCard={currentCard}
-        >
+        <FrontCard $isFlipped={isFlipped} $currentStyle={currentStyle}>
           {currentCard &&
             currentTemplate.frontFields.map((field, index) => {
               const currentFrontField = currentCard.frontFields[index];
