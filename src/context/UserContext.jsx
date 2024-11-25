@@ -1,4 +1,5 @@
 import { onAuthStateChanged } from "firebase/auth";
+import PropTypes from "prop-types";
 import { createContext, useContext, useEffect, useState } from "react";
 import { getUserDocument, updateActiveDays } from "../utils/api";
 import { auth } from "../utils/firebaseConfig";
@@ -11,18 +12,20 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        try {
+      try {
+        if (currentUser) {
           const userData = await getUserDocument(currentUser.uid);
           setUser(userData);
           await updateActiveDays(currentUser.uid);
-        } catch (error) {
-          console.error("獲取用戶資料失敗：", error);
+        } else {
+          setUser(null);
         }
-      } else {
+      } catch (error) {
+        console.error("獲取用戶資料失敗：", error);
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -32,6 +35,10 @@ export const UserProvider = ({ children }) => {
       {children}
     </UserContext.Provider>
   );
+};
+
+UserProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export const useUser = () => useContext(UserContext);
