@@ -27,7 +27,7 @@ function Home() {
   const carouselRef = useRef(null);
   const navigate = useNavigate();
 
-  const exploreData = {
+  const exploreCardSetsId = {
     english: [
       "jBnaIDOx7uYv9AsE2YVy",
       "9oOSuClpNFqbWrujEHle",
@@ -79,10 +79,10 @@ function Home() {
     const fetchAllCardSets = async () => {
       try {
         const cardSetPromises = [];
-        const languageKeys = Object.keys(exploreData);
+        const languageKeys = Object.keys(exploreCardSetsId);
 
         languageKeys.forEach((language) => {
-          const ids = exploreData[language];
+          const ids = exploreCardSetsId[language];
           cardSetPromises.push(
             Promise.all(ids.map((cardSetId) => getCardSet(cardSetId)))
           );
