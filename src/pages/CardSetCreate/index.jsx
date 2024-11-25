@@ -580,7 +580,7 @@ function CardSetCreate() {
                             },
                           })
                         }
-                        styles={selectStyles(
+                        styles={selectionStyle(
                           state.invalidFields.includes("learningLanguage")
                         )}
                         placeholder="請選擇語言"
@@ -603,7 +603,7 @@ function CardSetCreate() {
                             },
                           })
                         }
-                        styles={selectStyles(
+                        styles={selectionStyle(
                           state.invalidFields.includes("interfaceLanguage")
                         )}
                         placeholder="請選擇語言"
@@ -699,7 +699,7 @@ function CardSetCreate() {
                     ]}
                     value={state.selectedStyleOption}
                     onChange={handleStyleChange}
-                    styles={selectStyles(
+                    styles={selectionStyle(
                       state.invalidFields.includes("styleId")
                     )}
                   />
@@ -713,7 +713,7 @@ function CardSetCreate() {
                     ]}
                     value={state.selectedTemplateOption}
                     onChange={handleTemplateChange}
-                    styles={selectStyles(
+                    styles={selectionStyle(
                       state.invalidFields.includes("fieldTemplateId")
                     )}
                   />
@@ -1002,7 +1002,7 @@ const Submit = styled.input`
   transition: all 0.3s ease-in-out;
 `;
 
-const selectStyles = (isInvalid) => ({
+const selectionStyle = (isInvalid) => ({
   control: (provided, state) => ({
     ...provided,
     borderColor: isInvalid ? "red" : provided.borderColor,
