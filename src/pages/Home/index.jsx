@@ -19,7 +19,7 @@ import searchSVG from "./images/search.svg";
 function Home() {
   const { user, loading } = useUser();
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("english");
+  const [selectedLanguage, setSelectedLanguage] = useState("ENGLISH");
   const [allCardSets, setAllCardSets] = useState({});
   const [allStyles, setAllStyles] = useState({});
   const [cardSetData, setCardSetData] = useState([]);
@@ -27,62 +27,40 @@ function Home() {
   const carouselRef = useRef(null);
   const navigate = useNavigate();
 
-  const exploreCardSetsId = {
-    english: [
-      "jBnaIDOx7uYv9AsE2YVy",
-      "9oOSuClpNFqbWrujEHle",
-      "OZF0I6vBBYrak511I8J8",
-      "RPPGIb5gbGMg4WzxBSEE",
-      "jH4kPradOCKZM8SMH7to",
-    ],
-    japanese: [
-      "RF4PwG15orgdw6uu9Dxt",
-      "jT9sT4jV1j6j78SVjtPZ",
-      "hwA45Ctnr8iapSlwhrjy",
-      "HbVwvihKfneXonAI7Wkx",
-      "GD41WWkFbWwhV8UEoq0w",
-    ],
-    korean: [
-      "Xs29nvPJA8TqGL8RkZmL",
-      "bt3Ovd9XJEy5orhb0nb2",
-      "yC58RWlXDvG8oEQtzAp9",
-      "lUdoYfQAvZH9sfR1vLf4",
-      "v4yO156v7OFG43aVNroX",
-      "Dro5LM2tQcAZlwyl9e9I",
-      "PswtaA6E4eQXZy99e0KG",
-    ],
-  };
-
-  const handleScroll = (direction) => {
-    if (carouselRef.current) {
-      const scrollAmount = 300;
-      const container = carouselRef.current;
-
-      if (direction === "left") {
-        container.scrollLeft -= scrollAmount;
-        if (container.scrollLeft <= 0) {
-          container.scrollLeft = container.scrollWidth;
-        }
-      } else {
-        container.scrollLeft += scrollAmount;
-        if (
-          container.scrollLeft + container.offsetWidth >=
-          container.scrollWidth
-        ) {
-          container.scrollLeft = 0;
-        }
-      }
-    }
-  };
-
   useEffect(() => {
+    const CARD_SET_IDS = {
+      ENGLISH: [
+        "jBnaIDOx7uYv9AsE2YVy",
+        "9oOSuClpNFqbWrujEHle",
+        "OZF0I6vBBYrak511I8J8",
+        "RPPGIb5gbGMg4WzxBSEE",
+        "jH4kPradOCKZM8SMH7to",
+      ],
+      JAPANESE: [
+        "RF4PwG15orgdw6uu9Dxt",
+        "jT9sT4jV1j6j78SVjtPZ",
+        "hwA45Ctnr8iapSlwhrjy",
+        "HbVwvihKfneXonAI7Wkx",
+        "GD41WWkFbWwhV8UEoq0w",
+      ],
+      KOREAN: [
+        "Xs29nvPJA8TqGL8RkZmL",
+        "bt3Ovd9XJEy5orhb0nb2",
+        "yC58RWlXDvG8oEQtzAp9",
+        "lUdoYfQAvZH9sfR1vLf4",
+        "v4yO156v7OFG43aVNroX",
+        "Dro5LM2tQcAZlwyl9e9I",
+        "PswtaA6E4eQXZy99e0KG",
+      ],
+    };
+
     const fetchAllCardSets = async () => {
       try {
         const cardSetPromises = [];
-        const languageKeys = Object.keys(exploreCardSetsId);
+        const languageKeys = Object.keys(CARD_SET_IDS);
 
         languageKeys.forEach((language) => {
-          const ids = exploreCardSetsId[language];
+          const ids = CARD_SET_IDS[language];
           cardSetPromises.push(
             Promise.all(ids.map((cardSetId) => getCardSet(cardSetId)))
           );
@@ -112,8 +90,8 @@ function Home() {
 
         setAllCardSets(allCardSets);
         setAllStyles(allStyles);
-        setCardSetData(allCardSets["english"]);
-        setStyleData(allStyles["english"]);
+        setCardSetData(allCardSets["ENGLISH"]);
+        setStyleData(allStyles["ENGLISH"]);
       } catch (error) {
         console.error("獲取卡牌組或樣式失敗：", error);
       }
@@ -132,6 +110,28 @@ function Home() {
       setStyleData(allStyles[selectedLanguage]);
     }
   }, [selectedLanguage, allCardSets, allStyles]);
+
+  const handleScroll = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = 300;
+      const container = carouselRef.current;
+
+      if (direction === "left") {
+        container.scrollLeft -= scrollAmount;
+        if (container.scrollLeft <= 0) {
+          container.scrollLeft = container.scrollWidth;
+        }
+      } else {
+        container.scrollLeft += scrollAmount;
+        if (
+          container.scrollLeft + container.offsetWidth >=
+          container.scrollWidth
+        ) {
+          container.scrollLeft = 0;
+        }
+      }
+    }
+  };
 
   if (!cardSetData || !styleData || loading) {
     return (
@@ -242,20 +242,20 @@ function Home() {
         </SectionTitle>
         <CarouselButtonGroup>
           <LanguageButton
-            $active={selectedLanguage === "english"}
-            onClick={() => setSelectedLanguage("english")}
+            $active={selectedLanguage === "ENGLISH"}
+            onClick={() => setSelectedLanguage("ENGLISH")}
           >
             英語
           </LanguageButton>
           <LanguageButton
-            $active={selectedLanguage === "japanese"}
-            onClick={() => setSelectedLanguage("japanese")}
+            $active={selectedLanguage === "JAPANESE"}
+            onClick={() => setSelectedLanguage("JAPANESE")}
           >
             日語
           </LanguageButton>
           <LanguageButton
-            $active={selectedLanguage === "korean"}
-            onClick={() => setSelectedLanguage("korean")}
+            $active={selectedLanguage === "KOREAN"}
+            onClick={() => setSelectedLanguage("KOREAN")}
           >
             韓文
           </LanguageButton>
