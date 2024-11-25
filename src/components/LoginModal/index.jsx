@@ -46,6 +46,7 @@ const LoginModal = ({ onClose, isLoginMode }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     setInvalidField([]);
     setLoading(true);
     setError("");
@@ -152,7 +153,7 @@ const LoginModal = ({ onClose, isLoginMode }) => {
             </InfoWrapper>
           )}
           {error && <ErrorText>{error}</ErrorText>}
-          <SubmitButton>
+          <SubmitButton $isLoading={loading}>
             {loading ? "處理中..." : isLogin ? "登入" : "註冊"}
           </SubmitButton>
         </Form>
@@ -257,7 +258,7 @@ const SubmitButton = styled.button`
   font-size: 16px;
   border-radius: 5px;
   font-family: "TaiwanPearl-Regular", "Noto Sans TC", sans-serif;
-  cursor: pointer;
+  cursor: ${(props) => (props.$isLoading ? "not-allowed" : "pointer")};
   transition: background-color 0.3s ease;
   &:hover {
     background: #4a88c6;
