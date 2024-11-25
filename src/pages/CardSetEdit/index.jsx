@@ -1,5 +1,5 @@
 import { ConfigProvider, message, Result, Steps } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { Link, useParams } from "react-router-dom";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
@@ -18,43 +18,13 @@ import {
 } from "../../utils/api";
 import CardContent from "../CardSetEdit/CardContent.jsx";
 import TemplatePreview from "../CardSetEdit/TemplatePreview.jsx";
-
-const customTheme = {
-  token: {
-    colorPrimary: "#3d5a80",
-    borderRadius: 8,
-    fontFamily: "'TaiwanPearl-Regular', 'Noto Sans TC', sans-serif;",
-    fontSize: 16,
-  },
-};
+import { editCardSetReducer, initialState } from "./editCardSetReducer.jsx";
 
 function CardSetEdit() {
   const { cardSetId } = useParams();
+  const [state, dispatch] = useReducer(editCardSetReducer, initialState);
   const { user, loading } = useUser();
-  const [labelOptions, setLabelOptions] = useState([]);
-  const [allStyles, setAllStyles] = useState([]);
-  const [styleOptions, setStyleOptions] = useState([]);
-  const [selectedStyleOption, setSelectedStyleOption] = useState(null);
-  const [selectedStyle, setSelectedStyle] = useState({});
-  const [template, setTemplate] = useState({});
-  const [cardContent, setCardContent] = useState([]);
-  const [deletedCards, setDeletedCards] = useState([]);
-  const [showNewStyleModal, setShowNewStyleModal] = useState(false);
-  const [invalidFields, setInvalidFields] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
-  const [step, setStep] = useState(0);
-  const [cardSetData, setCardSetData] = useState({
-    cardSetId: "",
-    title: "",
-    description: "",
-    purpose: "",
-    visibility: "",
-    labels: [],
-    styleId: "",
-    cardOrder: [],
-    labelNames: [],
-    lastEditedAt: "",
-  });
 
   useEffect(() => {
     const fetchCardSetData = async () => {
@@ -71,29 +41,14 @@ function CardSetEdit() {
             )
             .filter(Boolean);
 
-          setCardSetData((prev) => ({
-            ...prev,
-            cardSetId: cardSet.cardSetId,
-            title: cardSet.title,
-            description: cardSet.description,
-            purpose: cardSet.purpose,
-            interfaceLanguage: cardSet.interfaceLanguage,
-            learningLanguage: cardSet.learningLanguage,
-            visibility: cardSet.visibility,
-            labels: cardSet.labels,
-            styleId: cardSet.styleId,
-            cardOrder: cardSet.cardOrder,
-            labelNames: cardSet.labelNames,
+          dispatch({ type: "UPDATE_CARD_SET_DATA", payload: cardSet });
+          dispatch({ type: "SET_ALL_STYLES", payload: userCardStyles });
+          const labelOptions = userLabels.map((label) => ({
+            value: label.labelId,
+            label: label.name,
           }));
+          dispatch({ type: "SET_LABEL_OPTIONS", payload: labelOptions });
 
-          setLabelOptions(
-            userLabels.map((label) => ({
-              value: label.labelId,
-              label: label.name,
-            }))
-          );
-
-          setAllStyles(userCardStyles);
           const defaultStyleId = "rvM8Fc1efHo7Ho7kf1gT";
           const cardStyleOptions = userCardStyles.map((userCardStyle) => ({
             value: userCardStyle.styleId,
@@ -105,22 +60,25 @@ function CardSetEdit() {
             return 0;
           });
 
-          setStyleOptions(cardStyleOptions);
-
+          dispatch({ type: "SET_STYLE_OPTIONS", payload: cardStyleOptions });
           const selectedStyle = userCardStyles.find(
             (style) => style.styleId === cardSet.styleId
           );
-          setSelectedStyleOption(
-            selectedStyle
+          dispatch({
+            type: "SET_SELECTED_STYLE_OPTION",
+            payload: selectedStyle
               ? {
                   value: selectedStyle.styleId,
                   label: selectedStyle.styleName,
                 }
-              : null
-          );
-          setSelectedStyle(selectedStyle || {});
-          setTemplate(cardSetTemplate);
-          setCardContent(orderedCards);
+              : null,
+          });
+          dispatch({
+            type: "SET_SELECTED_STYLE",
+            payload: selectedStyle || {},
+          });
+          dispatch({ type: "SET_TEMPLATE", payload: cardSetTemplate });
+          dispatch({ type: "SET_CARD_CONTENT", payload: orderedCards });
         } catch (error) {
           console.error("獲取卡牌資料失敗：", error);
         }
@@ -131,34 +89,56 @@ function CardSetEdit() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [step]);
+  }, [state.step]);
 
   const handleStyleChange = (selectedOption) => {
     if (selectedOption.value === "newStyle") {
-      setShowNewStyleModal(true);
+      dispatch({ type: "SET_SHOW_NEW_STYLE_MODAL", payload: true });
     } else {
-      setSelectedStyleOption(selectedOption);
-      const selectedStyleObject = allStyles.find(
+      dispatch({ type: "SET_SELECTED_STYLE_OPTION", payload: selectedOption });
+      const selectedStyleObject = state.allStyles.find(
         (style) => style.styleName === selectedOption.label
       );
-      setSelectedStyle(selectedStyleObject);
-      setCardSetData({ ...cardSetData, styleId: selectedOption.value });
+      dispatch({ type: "SET_SELECTED_STYLE", payload: selectedStyleObject });
+      dispatch({
+        type: "UPDATE_CARD_SET_DATA",
+        payload: { styleId: selectedOption.value },
+      });
     }
   };
 
   const handleStyleAdded = (newStyle, styleId) => {
-    setAllStyles((prevStyles) => [...prevStyles, newStyle]);
-    setStyleOptions((prevOptions) => [
-      ...prevOptions,
-      { value: styleId, label: newStyle.styleName },
-    ]);
-    setSelectedStyleOption({ value: styleId, label: newStyle.styleName });
-    setSelectedStyle(newStyle);
-    setCardSetData({ ...cardSetData, styleId: styleId });
+    dispatch({
+      type: "SET_ALL_STYLES",
+      payload: [...state.allStyles, newStyle],
+    });
+
+    dispatch({
+      type: "SET_STYLE_OPTIONS",
+      payload: [
+        ...state.styleOptions,
+        { value: styleId, label: newStyle.styleName },
+      ],
+    });
+
+    dispatch({
+      type: "SET_SELECTED_STYLE_OPTION",
+      payload: { value: styleId, label: newStyle.styleName },
+    });
+
+    dispatch({
+      type: "SET_SELECTED_STYLE",
+      payload: newStyle,
+    });
+
+    dispatch({
+      type: "UPDATE_CARD_SET_DATA",
+      payload: { styleId: styleId },
+    });
   };
 
   const handleCreateLabel = async (newLabel) => {
-    const isLabelExist = labelOptions.some(
+    const isLabelExist = state.labelOptions.some(
       (option) => option.label.toLowerCase() === newLabel.toLowerCase()
     );
 
@@ -177,15 +157,22 @@ function CardSetEdit() {
         name: newLabel,
         createdBy: user.userId,
       });
-
       const newOption = { value: newLabelId, label: newLabel };
-      setLabelOptions((prevOptions) => [...prevOptions, newOption]);
+      dispatch({
+        type: "SET_LABEL_OPTIONS",
+        payload: [...state.labelOptions, newOption],
+      });
 
-      setCardSetData((prevInfo) => ({
-        ...prevInfo,
-        labels: [...prevInfo.labels, { labelId: newLabelId, name: newLabel }],
-        labelNames: [...prevInfo.labelNames, newLabel],
-      }));
+      dispatch({
+        type: "UPDATE_CARD_SET_DATA",
+        payload: {
+          labels: [
+            ...state.cardSetData.labels,
+            { labelId: newLabelId, name: newLabel },
+          ],
+          labelNames: [...state.cardSetData.labelNames, newLabel],
+        },
+      });
     } catch (error) {
       console.error("新增標籤失敗：", error);
     }
@@ -195,48 +182,62 @@ function CardSetEdit() {
     event.preventDefault();
     let newInvalidFields = [];
 
-    if (cardSetData.title === "") {
+    if (state.cardSetData.title === "") {
       newInvalidFields.push("title");
     }
-    if (cardSetData.purpose === "") {
+    if (state.cardSetData.purpose === "") {
       newInvalidFields.push("purpose");
     }
-    if (cardSetData.visibility === "") {
+    if (state.cardSetData.visibility === "") {
       newInvalidFields.push("visibility");
     }
-    if (cardSetData.styleId === "") {
+    if (state.cardSetData.styleId === "") {
       newInvalidFields.push("styleId");
     }
-    if (cardSetData.fieldTemplateId === "") {
+    if (state.cardSetData.fieldTemplateId === "") {
       newInvalidFields.push("fieldTemplateId");
     }
-    if (cardSetData.purpose === "languageLearning") {
-      if (!cardSetData.learningLanguage)
+    if (state.cardSetData.purpose === "languageLearning") {
+      if (!state.cardSetData.learningLanguage)
         newInvalidFields.push("learningLanguage");
-      if (!cardSetData.interfaceLanguage)
+      if (!state.cardSetData.interfaceLanguage)
         newInvalidFields.push("interfaceLanguage");
     }
-
-    setInvalidFields(newInvalidFields);
+    dispatch({ type: "SET_INVALID_FIELDS", payload: newInvalidFields });
     if (newInvalidFields.length === 0) {
-      setStep(1);
+      dispatch({ type: "SET_STEP", payload: 1 });
     }
+  };
+
+  const handleCardContentChange = (newContent) => {
+    dispatch({
+      type: "SET_CARD_CONTENT",
+      payload: newContent,
+    });
+  };
+
+  const handleDeletedCardsChange = (newDeletedCards) => {
+    dispatch({
+      type: "SET_DELETED_CARDS",
+      payload: newDeletedCards,
+    });
   };
 
   const handleFinalSubmit = async (event) => {
     event.preventDefault();
+    if (state.isSaving) return;
 
-    if (cardContent.length < 1) {
+    if (state.cardContent.length < 1) {
       messageApi.warning("字卡至少需要一張！");
       return;
     }
 
-    for (let i = 0; i < template.frontFields.length; i++) {
-      if (template.frontFields[i].required === true) {
-        for (let y = 0; y < cardContent.length; y++) {
+    for (let i = 0; i < state.template.frontFields.length; i++) {
+      if (state.template.frontFields[i].required === true) {
+        for (let y = 0; y < state.cardContent.length; y++) {
           if (
-            !cardContent[y].frontFields[i] ||
-            cardContent[y].frontFields[i].value.trim() === ""
+            !state.cardContent[y].frontFields[i] ||
+            state.cardContent[y].frontFields[i].value.trim() === ""
           ) {
             messageApi.error("卡片有必填項未填！");
             return;
@@ -245,12 +246,12 @@ function CardSetEdit() {
       }
     }
 
-    for (let i = 0; i < template.backFields.length; i++) {
-      if (template.backFields[i].required === true) {
-        for (let y = 0; y < cardContent.length; y++) {
+    for (let i = 0; i < state.template.backFields.length; i++) {
+      if (state.template.backFields[i].required === true) {
+        for (let y = 0; y < state.cardContent.length; y++) {
           if (
-            !cardContent[y].backFields[i] ||
-            cardContent[y].backFields[i].value.trim() === ""
+            !state.cardContent[y].backFields[i] ||
+            state.cardContent[y].backFields[i].value.trim() === ""
           ) {
             messageApi.error("卡片有必填項未填！");
             return;
@@ -258,29 +259,31 @@ function CardSetEdit() {
         }
       }
     }
-
+    dispatch({ type: "SET_SAVING", payload: true });
     try {
       messageApi.loading({
         content: "提交中，請稍候...",
         duration: 0,
       });
       await updateCardSetWithNewCards(
-        cardSetData,
-        cardContent,
+        state.cardSetData,
+        state.cardContent,
         user.userId,
-        deletedCards
+        state.deletedCards
       );
       messageApi.destroy();
       messageApi.success("卡牌組編輯成功！");
-      setStep(2);
+      dispatch({ type: "SET_STEP", payload: 2 });
+      dispatch({ type: "SET_SAVING", payload: false });
     } catch (error) {
       console.error("更新過程出現錯誤：", error);
       messageApi.destroy();
       messageApi.error("編輯失敗，請重試。");
+      dispatch({ type: "SET_SAVING", payload: false });
     }
   };
 
-  if (!user || loading || !labelOptions || !allStyles)
+  if (!user || loading || !state.labelOptions || !state.allStyles)
     return <div>Loading...</div>;
 
   return (
@@ -288,7 +291,7 @@ function CardSetEdit() {
       {contextHolder}
       <Background>
         <Wrapper>
-          {step === 0 && (
+          {state.step === 0 && (
             <>
               <HeadingContainer>
                 <Heading>
@@ -302,7 +305,7 @@ function CardSetEdit() {
                 />
               </HeadingContainer>
               <Steps
-                current={step}
+                current={state.step}
                 items={[
                   {
                     title: "基本資料",
@@ -323,29 +326,34 @@ function CardSetEdit() {
                   <Input
                     type="text"
                     onChange={(e) =>
-                      setCardSetData({ ...cardSetData, title: e.target.value })
+                      dispatch({
+                        type: "UPDATE_CARD_SET_DATA",
+                        payload: { title: e.target.value },
+                      })
                     }
-                    value={cardSetData.title}
-                    $isInvalid={invalidFields.includes("title")}
+                    value={state.cardSetData.title}
+                    $isInvalid={state.invalidFields.includes("title")}
                     id="title"
                     placeholder="請輸入標題"
                   />
                   <InputLabel htmlFor="description">簡介</InputLabel>
                   <Textarea
                     onChange={(e) =>
-                      setCardSetData({
-                        ...cardSetData,
-                        description: e.target.value,
+                      dispatch({
+                        type: "UPDATE_CARD_SET_DATA",
+                        payload: { description: e.target.value },
                       })
                     }
-                    value={cardSetData.description}
+                    value={state.cardSetData.description}
                     id="description"
                     placeholder="請輸入簡介"
                   />
                   <InputLabel>
                     目的
                     <RequiredNotice>
-                      {invalidFields.includes("purpose") ? " 必選項" : ""}
+                      {`*${
+                        state.invalidFields.includes("purpose") ? " 必選項" : ""
+                      }`}
                     </RequiredNotice>
                   </InputLabel>
                   <RadioWrapper>
@@ -355,13 +363,14 @@ function CardSetEdit() {
                       name="purpose"
                       value="languageLearning"
                       onChange={(e) => {
-                        if (e.target.checked)
-                          setCardSetData({
-                            ...cardSetData,
-                            purpose: "languageLearning",
+                        if (e.target.checked) {
+                          dispatch({
+                            type: "UPDATE_CARD_SET_DATA",
+                            payload: { purpose: "languageLearning" },
                           });
+                        }
                       }}
-                      checked={cardSetData.purpose === "languageLearning"}
+                      checked={state.cardSetData.purpose === "languageLearning"}
                     />
                     <InputLabel htmlFor="languageLearning">語言學習</InputLabel>
                     <InputRadio
@@ -370,19 +379,22 @@ function CardSetEdit() {
                       name="purpose"
                       value="others"
                       onChange={(e) => {
-                        if (e.target.checked)
-                          setCardSetData({
-                            ...cardSetData,
-                            purpose: "others",
-                            learningLanguage: null,
-                            interfaceLanguage: null,
+                        if (e.target.checked) {
+                          dispatch({
+                            type: "UPDATE_CARD_SET_DATA",
+                            payload: {
+                              purpose: "others",
+                              learningLanguage: null,
+                              interfaceLanguage: null,
+                            },
                           });
+                        }
                       }}
-                      checked={cardSetData.purpose === "others"}
+                      checked={state.cardSetData.purpose === "others"}
                     />
                     <InputLabel htmlFor="others">其他</InputLabel>
                   </RadioWrapper>
-                  {cardSetData.purpose === "languageLearning" && (
+                  {state.cardSetData.purpose === "languageLearning" && (
                     <>
                       <InputLabel>
                         正面字卡顯示的語言
@@ -391,17 +403,19 @@ function CardSetEdit() {
                       <Select
                         options={languageOptions}
                         onChange={(selectedOption) =>
-                          setCardSetData({
-                            ...cardSetData,
-                            learningLanguage: selectedOption.value,
+                          dispatch({
+                            type: "UPDATE_CARD_SET_DATA",
+                            payload: {
+                              learningLanguage: selectedOption.value,
+                            },
                           })
                         }
                         value={languageOptions.find(
                           (option) =>
-                            option.value === cardSetData.learningLanguage
+                            option.value === state.cardSetData.learningLanguage
                         )}
                         styles={selectionStyle(
-                          invalidFields.includes("learningLanguage")
+                          state.invalidFields.includes("learningLanguage")
                         )}
                         placeholder="請選擇語言"
                       />
@@ -412,17 +426,19 @@ function CardSetEdit() {
                       <Select
                         options={languageOptions}
                         onChange={(selectedOption) =>
-                          setCardSetData({
-                            ...cardSetData,
-                            interfaceLanguage: selectedOption.value,
+                          dispatch({
+                            type: "UPDATE_CARD_SET_DATA",
+                            payload: {
+                              interfaceLanguage: selectedOption.value,
+                            },
                           })
                         }
                         value={languageOptions.find(
                           (option) =>
-                            option.value === cardSetData.interfaceLanguage
+                            option.value === state.cardSetData.interfaceLanguage
                         )}
                         styles={selectionStyle(
-                          invalidFields.includes("learningLanguage")
+                          state.invalidFields.includes("learningLanguage")
                         )}
                         placeholder="請選擇語言"
                       />
@@ -432,7 +448,9 @@ function CardSetEdit() {
                     隱私
                     <RequiredNotice>
                       {`*${
-                        invalidFields.includes("visibility") ? " 必選項" : ""
+                        state.invalidFields.includes("visibility")
+                          ? " 必選項"
+                          : ""
                       }`}
                     </RequiredNotice>
                   </InputLabel>
@@ -443,13 +461,14 @@ function CardSetEdit() {
                       name="visibility"
                       value="public"
                       onChange={(e) => {
-                        if (e.target.checked)
-                          setCardSetData({
-                            ...cardSetData,
-                            visibility: "public",
+                        if (e.target.checked) {
+                          dispatch({
+                            type: "UPDATE_CARD_SET_DATA",
+                            payload: { visibility: "public" },
                           });
+                        }
                       }}
-                      checked={cardSetData.visibility === "public"}
+                      checked={state.cardSetData.visibility === "public"}
                     />
                     <InputLabel htmlFor="public">公開</InputLabel>
                     <InputRadio
@@ -458,13 +477,14 @@ function CardSetEdit() {
                       name="visibility"
                       value="private"
                       onChange={(e) => {
-                        if (e.target.checked)
-                          setCardSetData({
-                            ...cardSetData,
-                            visibility: "private",
+                        if (e.target.checked) {
+                          dispatch({
+                            type: "UPDATE_CARD_SET_DATA",
+                            payload: { visibility: "private" },
                           });
+                        }
                       }}
-                      checked={cardSetData.visibility === "private"}
+                      checked={state.cardSetData.visibility === "private"}
                     />
                     <InputLabel htmlFor="private">私人</InputLabel>
                   </RadioWrapper>
@@ -472,24 +492,26 @@ function CardSetEdit() {
                   <CreatableSelect
                     id="label"
                     isMulti
-                    options={labelOptions}
-                    value={labelOptions.filter((option) =>
-                      cardSetData.labels.some(
+                    options={state.labelOptions}
+                    value={state.labelOptions.filter((option) =>
+                      state.cardSetData.labels.some(
                         (label) => label.labelId === option.value
                       )
                     )}
                     onChange={(selectedOptions) => {
-                      setCardSetData({
-                        ...cardSetData,
-                        labels: selectedOptions
-                          ? selectedOptions.map((opt) => ({
-                              labelId: opt.value,
-                              name: opt.label,
-                            }))
-                          : [],
-                        labelNames: selectedOptions
-                          ? selectedOptions.map((opt) => opt.label)
-                          : [],
+                      dispatch({
+                        type: "UPDATE_CARD_SET_DATA",
+                        payload: {
+                          labels: selectedOptions
+                            ? selectedOptions.map((opt) => ({
+                                labelId: opt.value,
+                                name: opt.label,
+                              }))
+                            : [],
+                          labelNames: selectedOptions
+                            ? selectedOptions.map((opt) => opt.label)
+                            : [],
+                        },
                       });
                     }}
                     onCreateOption={handleCreateLabel}
@@ -500,28 +522,29 @@ function CardSetEdit() {
                   </InputLabel>
                   <Select
                     options={[
-                      ...styleOptions,
+                      ...state.styleOptions,
                       { value: "newStyle", label: "新增樣式..." },
                     ]}
-                    value={selectedStyleOption}
+                    value={state.selectedStyleOption}
                     onChange={handleStyleChange}
                   />
                 </CardSetInfo>
                 <InputLabel>預覽</InputLabel>
-                {selectedStyle.styleName && template.templateName && (
-                  <Preview
-                    currentStyle={selectedStyle}
-                    currentTemplate={template}
-                  />
-                )}
-                {template.templateName && (
-                  <TemplatePreview currentTemplate={template} />
+                {state.selectedStyle.styleName &&
+                  state.template.templateName && (
+                    <Preview
+                      currentStyle={state.selectedStyle}
+                      currentTemplate={state.template}
+                    />
+                  )}
+                {state.template.templateName && (
+                  <TemplatePreview currentTemplate={state.template} />
                 )}
                 <Submit type="submit" value="下一步修改字卡內容" />
               </Form>
             </>
           )}
-          {step === 1 && (
+          {state.step === 1 && (
             <>
               <HeadingContainer>
                 <Heading>
@@ -531,7 +554,7 @@ function CardSetEdit() {
                 <UpperButtonGroup>
                   <UpperPreviousStepButton
                     onClick={() => {
-                      setStep(0);
+                      dispatch({ type: "SET_STEP", payload: 0 });
                     }}
                   >
                     上一步
@@ -544,7 +567,7 @@ function CardSetEdit() {
                 </UpperButtonGroup>
               </HeadingContainer>
               <Steps
-                current={step}
+                current={state.step}
                 items={[
                   {
                     title: "基本資料",
@@ -562,20 +585,20 @@ function CardSetEdit() {
                   字卡內容 (至少需要一張字卡)<RequiredNotice>*</RequiredNotice>
                 </InputLabel>
                 <CardContent
-                  currentTemplate={template}
-                  cardContent={cardContent}
-                  setCardContent={setCardContent}
+                  currentTemplate={state.template}
+                  cardContent={state.cardContent}
+                  setCardContent={handleCardContentChange}
                   isPurposeLanguageLearning={
-                    cardSetData.purpose === "languageLearning"
+                    state.cardSetData.purpose === "languageLearning"
                   }
-                  interfaceLanguage={cardSetData.interfaceLanguage}
-                  deletedCards={deletedCards}
-                  setDeletedCards={setDeletedCards}
+                  interfaceLanguage={state.cardSetData.interfaceLanguage}
+                  deletedCards={state.deletedCards}
+                  setDeletedCards={handleDeletedCardsChange}
                 />
                 <ButtonGroup>
                   <PreviousStepButton
                     onClick={() => {
-                      setStep(0);
+                      dispatch({ type: "SET_STEP", payload: 0 });
                     }}
                   >
                     上一步
@@ -585,7 +608,7 @@ function CardSetEdit() {
               </Form>
             </>
           )}
-          {step === 2 && (
+          {state.step === 2 && (
             <>
               <HeadingContainer>
                 <Heading>
@@ -594,7 +617,7 @@ function CardSetEdit() {
                 </Heading>
               </HeadingContainer>
               <Steps
-                current={step}
+                current={state.step}
                 items={[
                   {
                     title: "基本資料",
@@ -620,13 +643,16 @@ function CardSetEdit() {
               </ResultWrapper>
             </>
           )}
-          {showNewStyleModal && styleOptions && (
+          {state.showNewStyleModal && state.styleOptions && (
             <NewStyleModal
               onClose={() => {
-                setShowNewStyleModal(false);
+                dispatch({
+                  type: "SET_SHOW_NEW_STYLE_MODAL",
+                  payload: false,
+                });
               }}
               onStyleAdded={handleStyleAdded}
-              styleNames={styleOptions.map((option) => option.label)}
+              styleNames={state.styleOptions.map((option) => option.label)}
             />
           )}
         </Wrapper>
@@ -636,6 +662,15 @@ function CardSetEdit() {
 }
 
 export default CardSetEdit;
+
+const customTheme = {
+  token: {
+    colorPrimary: "#3d5a80",
+    borderRadius: 8,
+    fontFamily: "'TaiwanPearl-Regular', 'Noto Sans TC', sans-serif;",
+    fontSize: 16,
+  },
+};
 
 const languageOptions = [
   { value: "en", label: "英語" },
